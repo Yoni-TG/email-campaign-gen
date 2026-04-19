@@ -15,52 +15,67 @@ const MAX_TOKENS = 2048;
 const COPY_TOOL: Anthropic.Tool = {
   name: "generate_campaign_copy",
   description:
-    "Generate structured email campaign copy matching the GeneratedCopy schema.",
+    "Return the Theo Grace email campaign copy matching the §11 Output Contract " +
+    "(free_top_text, body_blocks, subject_variants, sms).",
   input_schema: {
     type: "object",
     properties: {
-      subjectLines: {
+      free_top_text: {
+        type: ["string", "null"],
+        description:
+          "Optional banner text above the hero image (e.g. 'TIMELESS. ALWAYS HAS BEEN'). null when the campaign doesn't need one.",
+      },
+      body_blocks: {
         type: "array",
-        items: { type: "string" },
-        description: "Exactly 3 subject-line options (emotional, curiosity, direct-benefit)",
-      },
-      preHeader: {
-        type: "string",
-        description: "Email pre-header text",
-      },
-      hero: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          subtitle: { type: "string" },
-          paragraph: { type: "string" },
+        description:
+          "Email body sections in reading order: index 0 sits directly under the hero, index 1 below, and so on. 1-3 blocks is typical.",
+        items: {
+          type: "object",
+          properties: {
+            title: {
+              type: ["string", "null"],
+              description: "Short H1 or sub-label for the section. null if not needed.",
+            },
+            description: {
+              type: ["string", "null"],
+              description: "Body paragraph(s). null if the section is title + CTA only.",
+            },
+            cta: {
+              type: ["string", "null"],
+              description: "CTA button label for the section. null if not needed.",
+            },
+          },
+          required: ["title", "description", "cta"],
+          additionalProperties: false,
         },
-        required: ["title", "subtitle", "paragraph"],
-        additionalProperties: false,
       },
-      secondary: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          subtitle: { type: "string" },
-          ctaText: { type: "string" },
+      subject_variants: {
+        type: "array",
+        description: "1-2 subject + preheader pairs for A/B testing.",
+        items: {
+          type: "object",
+          properties: {
+            subject: {
+              type: "string",
+              description: "Email subject line. Under 50 chars preferred.",
+            },
+            preheader: {
+              type: "string",
+              description: "Preheader that extends (not repeats) the subject.",
+            },
+          },
+          required: ["subject", "preheader"],
+          additionalProperties: false,
         },
-        required: ["title", "subtitle", "ctaText"],
-        additionalProperties: false,
       },
-      primaryCtaText: { type: "string" },
-      smsCopy: {
-        type: "string",
-        description: "SMS copy — only include when the brief requests it",
+      sms: {
+        type: ["string", "null"],
+        description:
+          "SMS copy ≤130 chars (including spaces and emoji). Use {link} as the URL placeholder. null when SMS isn't requested.",
       },
     },
-    required: [
-      "subjectLines",
-      "preHeader",
-      "hero",
-      "secondary",
-      "primaryCtaText",
-    ],
+    required: ["free_top_text", "body_blocks", "subject_variants", "sms"],
+    additionalProperties: false,
   },
 };
 

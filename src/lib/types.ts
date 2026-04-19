@@ -46,41 +46,51 @@ export interface CreativeSeed {
 }
 
 // ─── Generated Copy ───
+//
+// Shape matches how Theo Grace builds real campaigns (mirrors the past-
+// campaign fixtures in src/content/few-shot-examples.json):
+//
+// - free_top_text — optional banner text above the hero image
+// - body_blocks   — ordered sections in the body, each with an optional
+//                   title / description / CTA. Block 0 sits directly
+//                   under the hero; block N sits below block N-1.
+//                   Typical count is 1-3.
+// - subject_variants — 1-2 paired (subject, preheader) candidates for
+//                      A/B testing. Review UI picks one.
+// - sms — max 130 chars, optional.
 
+export interface SubjectVariant {
+  subject: string;
+  preheader: string;
+}
+
+export interface BodyBlock {
+  title: string | null;
+  description: string | null;
+  cta: string | null;
+}
+
+// Fields intentionally use snake_case to mirror the wire format — the Claude
+// tool output, the brand-guide §11 contract, and the DB JSON column all share
+// this shape. Same convention we use on FeedProduct.
 export interface GeneratedCopy {
-  subjectLines: string[];
-  preHeader: string;
-  hero: {
-    title: string;
-    subtitle: string;
-    paragraph: string;
-  };
-  secondary: {
-    title: string;
-    subtitle: string;
-    ctaText: string;
-  };
-  primaryCtaText: string;
-  smsCopy?: string;
+  free_top_text: string | null;
+  body_blocks: BodyBlock[];
+  subject_variants: SubjectVariant[];
+  sms: string | null;
 }
 
 // ─── Approved Copy ───
+//
+// After CP1 review: the operator has picked one subject_variant, may have
+// edited the body blocks / free_top_text / sms, and is ready to hand off
+// to the wireframe + Figma stages.
 
 export interface ApprovedCopy {
-  subjectLine: string;
-  preHeader: string;
-  hero: {
-    title: string;
-    subtitle: string;
-    paragraph: string;
-  };
-  secondary: {
-    title: string;
-    subtitle: string;
-    ctaText: string;
-  };
-  primaryCtaText: string;
-  smsCopy?: string;
+  free_top_text: string | null;
+  body_blocks: BodyBlock[];
+  subject_variant: SubjectVariant;
+  sms: string | null;
 }
 
 // ─── Derived field enums ───
@@ -186,23 +196,16 @@ export interface FigmaResult {
 }
 
 export interface CampaignBlueprint {
-  campaignId: string;
-  hero: {
-    title: string;
-    subtitle: string;
-    paragraph: string;
-    imageUrl: string;
-  };
-  secondary: {
-    title: string;
-    subtitle: string;
-    ctaText: string;
-  };
-  primaryCtaText: string;
+  campaign_id: string;
+  free_top_text: string | null;
+  subject_variant: SubjectVariant;
+  hero_image_url: string;
+  body_blocks: BodyBlock[];
+  sms: string | null;
   products: Array<{
     title: string;
     price: string;
-    imageUrl: string;
+    image_url: string;
     link: string;
   }>;
 }

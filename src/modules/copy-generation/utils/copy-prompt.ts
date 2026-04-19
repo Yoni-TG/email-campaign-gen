@@ -4,12 +4,34 @@ import {
   CAMPAIGN_TYPE_LABELS,
   type CampaignType,
   type CreativeSeed,
-  type GeneratedCopy,
 } from "@/lib/types";
 
+/**
+ * Past campaign record — the shape in `src/content/few-shot-examples.json`.
+ * These are raw archived campaigns, not `{input, output}` training pairs.
+ * The fields mirror how Theo Grace builds real sends today:
+ *
+ *   body_blocks[i]     — sections in order; 0 sits under the hero banner,
+ *                        1 below it, and so on. Typical count 1-3.
+ *   subject_variants[] — 1-2 subject + preheader pairs for A/B testing.
+ *   sms                — short message copy (≤130 chars); some campaigns
+ *                        omit it.
+ *   free_top_text      — optional banner line above the hero.
+ */
 export interface FewShotExample {
-  input: Record<string, unknown>;
-  output: GeneratedCopy;
+  month: string;
+  campaign_name: string;
+  free_top_text: string | null;
+  body_blocks: Array<{
+    title: string | null;
+    description: string | null;
+    cta: string | null;
+  }>;
+  subject_variants: Array<{
+    subject: string;
+    preheader: string;
+  }>;
+  sms: string | null;
 }
 
 const BRAND_GUIDE_PATH = join("src", "content", "brand-guide.md");
@@ -40,15 +62,23 @@ const CRITICAL_RULES =
   `- NO puns, slang, or crass humor\n` +
   `- DO NOT sound like AI or a textbook — this is the most important rule\n` +
   `- Match the energy to the campaign type (a sale has different energy than an editorial)\n` +
-  `- Call the generate_campaign_copy tool; do not write prose outside the tool call`;
+  `- Call the generate_campaign_copy tool; do not write prose outside the tool call\n` +
+  `- Obey §11 Output Contract exactly — body_blocks ordered top-to-bottom, SMS ≤130 chars`;
 
 const OUTPUT_FORMAT =
   `## Output Format\n` +
-  `Generate email campaign copy as structured data using the provided tool ` +
-  `(generate_campaign_copy). Produce exactly 3 subject-line options with different ` +
-  `angles: one emotional, one curiosity-driven, one direct-benefit. Each block ` +
-  `(hero, secondary, primary CTA, SMS when requested) must be filled in full — ` +
-  `do not leave placeholders.`;
+  `Return the campaign copy through the \`generate_campaign_copy\` tool, matching ` +
+  `§11 Output Contract in the brand guide. Key reminders:\n` +
+  `- body_blocks is an ordered list of email sections — index 0 appears directly ` +
+  `under the hero banner, index 1 beneath it, and so on. 1–3 blocks is typical.\n` +
+  `- Each body block may set any of title, description, cta to null when that ` +
+  `role isn't needed, but do not return a block with all three null.\n` +
+  `- Provide 1–2 subject_variants (subject + preheader pair). Each pair should ` +
+  `read together — don't repeat the subject inside the preheader.\n` +
+  `- free_top_text is the optional banner text above the hero; null when the ` +
+  `campaign doesn't need one.\n` +
+  `- sms is optional and capped at 130 characters (including spaces and emoji). ` +
+  `Use the \`{link}\` placeholder for the CTA URL.`;
 
 let systemPromptCache: string | null = null;
 
@@ -58,13 +88,17 @@ export function buildCopySystemPrompt(): string {
   const guide = loadBrandGuide();
   const examples = loadFewShotExamples();
 
+  // Each example is a past campaign archive — the month + campaign name form
+  // the brief context, and the rest of the fields are the shape the tool
+  // must return.
   const examplesText = examples
-    .map(
-      (ex, i) =>
-        `### Example ${i + 1}\n` +
-        `Input: ${JSON.stringify(ex.input)}\n` +
-        `Output: ${JSON.stringify(ex.output, null, 2)}`,
-    )
+    .map((ex, i) => {
+      const { month, campaign_name, ...output } = ex;
+      return (
+        `### Example ${i + 1}: ${month} — ${campaign_name}\n` +
+        `Tool output:\n${JSON.stringify(output, null, 2)}`
+      );
+    })
     .join("\n\n");
 
   systemPromptCache = [

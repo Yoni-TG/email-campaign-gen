@@ -2,24 +2,30 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { CreativeSeed, GeneratedCopy } from "@/lib/types";
 
 const MOCK_COPY: GeneratedCopy = {
-  subjectLines: [
-    "Your next favorite piece is waiting",
-    "Personalized, just for you",
-    "Something special this way comes",
+  free_top_text: "NEW COLLECTION",
+  body_blocks: [
+    {
+      title: "Made for You",
+      description: "Explore pieces designed with you in mind.",
+      cta: "Shop the Collection",
+    },
+    {
+      title: "Trending Now",
+      description: "See what everyone's loving.",
+      cta: "See All",
+    },
   ],
-  preHeader: "Discover our latest collection",
-  hero: {
-    title: "Made for You",
-    subtitle: "New Collection Drop",
-    paragraph: "Explore pieces designed with you in mind.",
-  },
-  secondary: {
-    title: "Trending Now",
-    subtitle: "See what everyone's loving",
-    ctaText: "Shop the Collection",
-  },
-  primaryCtaText: "Explore Now",
-  smsCopy: "New drop just landed! Shop now: theograce.com",
+  subject_variants: [
+    {
+      subject: "Your next favorite piece is waiting",
+      preheader: "Discover our latest collection",
+    },
+    {
+      subject: "Personalized, just for you",
+      preheader: "Meaningful pieces made to order",
+    },
+  ],
+  sms: "New drop just landed! Shop now: {link}",
 };
 
 type CopyGenerationModule = typeof import("@/modules/copy-generation/services/copy-generation");
@@ -61,20 +67,21 @@ describe("generateCopy", () => {
     };
     const result = await copyGeneration.generateCopy(seed, "product_launch");
 
-    expect(result.subjectLines).toHaveLength(3);
-    expect(result.hero.title).toBeTruthy();
-    expect(result.secondary.ctaText).toBeTruthy();
-    expect(result.primaryCtaText).toBeTruthy();
+    expect(result.subject_variants.length).toBeGreaterThanOrEqual(1);
+    expect(result.body_blocks.length).toBeGreaterThan(0);
+    expect(result.body_blocks[0].title).toBeTruthy();
+    expect(result.subject_variants[0].subject).toBeTruthy();
+    expect(result.subject_variants[0].preheader).toBeTruthy();
   });
 
-  it("includes SMS copy when seed.includeSms is true", async () => {
+  it("returns sms when the seed requested it", async () => {
     const seed: CreativeSeed = {
       targetCategories: ["Necklace"],
       mainMessage: "Spring",
       includeSms: true,
     };
     const result = await copyGeneration.generateCopy(seed, "product_launch");
-    expect(result.smsCopy).toBeTruthy();
+    expect(result.sms).toBeTruthy();
   });
 
   it("calls messages.create with generate_campaign_copy tool + cache_control on system", async () => {
@@ -94,6 +101,24 @@ describe("generateCopy", () => {
     });
     expect(Array.isArray(call.system)).toBe(true);
     expect(call.system[0].cache_control).toEqual({ type: "ephemeral" });
+  });
+
+  it("tool schema requires all four top-level fields", async () => {
+    const seed: CreativeSeed = {
+      targetCategories: ["Necklace"],
+      mainMessage: "Spring",
+      includeSms: false,
+    };
+    await copyGeneration.generateCopy(seed, "product_launch");
+    const tool = messagesCreate.mock.calls[0][0].tools[0];
+    expect(tool.input_schema.required).toEqual(
+      expect.arrayContaining([
+        "free_top_text",
+        "body_blocks",
+        "subject_variants",
+        "sms",
+      ]),
+    );
   });
 
   it("throws a descriptive error when the model response has no tool_use block", async () => {

@@ -20,12 +20,15 @@ describe("loadBrandGuide", () => {
 });
 
 describe("loadFewShotExamples", () => {
-  it("returns an array of input/output pairs", () => {
+  it("returns an array of past-campaign archives", () => {
     const examples = loadFewShotExamples();
     expect(Array.isArray(examples)).toBe(true);
     expect(examples.length).toBeGreaterThan(0);
-    expect(examples[0]).toHaveProperty("input");
-    expect(examples[0]).toHaveProperty("output");
+    expect(examples[0]).toHaveProperty("campaign_name");
+    expect(examples[0]).toHaveProperty("body_blocks");
+    expect(examples[0]).toHaveProperty("subject_variants");
+    expect(Array.isArray(examples[0].body_blocks)).toBe(true);
+    expect(Array.isArray(examples[0].subject_variants)).toBe(true);
   });
 });
 
