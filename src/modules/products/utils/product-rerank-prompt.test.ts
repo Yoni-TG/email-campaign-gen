@@ -31,14 +31,22 @@ const digested: DigestedProduct = {
   personalizationSummary: "1 inscription + birthstone",
 };
 
-const seed: CreativeSeed = {
-  targetCategories: ["Necklace"],
-  mainMessage: "Valentine's Day gifts",
+function makeSeed(overrides: Partial<CreativeSeed>): CreativeSeed {
+  return {
+    targetCategories: ["Necklace"],
+    mainMessage: "Valentine's Day gifts",
+    includeSms: false,
+    leadValue: "joy",
+    leadPersonalities: ["joyfully_characterful"],
+    ...overrides,
+  };
+}
+
+const seed: CreativeSeed = makeSeed({
   secondaryMessage: "Show her how you feel",
   promoDetails: "20% off with code LOVE",
   additionalNotes: "Keep it warm and personal",
-  includeSms: false,
-};
+});
 
 describe("toProductSummary", () => {
   it("returns a compact shape the LLM can reason about", () => {
@@ -58,7 +66,10 @@ describe("toProductSummary", () => {
   });
 
   it("omits imageUrl and link and raw review counts to save tokens", () => {
-    const summary = toProductSummary(digested) as Record<string, unknown>;
+    const summary = toProductSummary(digested) as unknown as Record<
+      string,
+      unknown
+    >;
     expect(summary.imageUrl).toBeUndefined();
     expect(summary.link).toBeUndefined();
     expect(summary.reviewCount).toBeUndefined();
@@ -100,11 +111,10 @@ describe("buildRerankUserPrompt", () => {
   });
 
   it("skips optional fields when absent", () => {
-    const minimalSeed: CreativeSeed = {
+    const minimalSeed = makeSeed({
       targetCategories: ["Ring"],
       mainMessage: "Anniversary rings",
-      includeSms: false,
-    };
+    });
     const prompt = buildRerankUserPrompt(minimalSeed, "editorial", [digested], 3);
     expect(prompt).toContain("Anniversary rings");
     expect(prompt).not.toMatch(/Secondary message:/);

@@ -1,6 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { CreativeSeed, DigestedProduct } from "@/lib/types";
 
+function makeSeed(overrides: Partial<CreativeSeed>): CreativeSeed {
+  return {
+    targetCategories: ["Necklace"],
+    mainMessage: "Valentine's Day gifts",
+    includeSms: false,
+    leadValue: "joy",
+    leadPersonalities: ["joyfully_characterful"],
+    ...overrides,
+  };
+}
+
 function makeProduct(overrides: Partial<DigestedProduct>): DigestedProduct {
   return {
     sku: "SKU-000",
@@ -91,11 +102,7 @@ beforeEach(async () => {
 
 describe("selectProducts", () => {
   it("returns ProductSnapshot entries with derived fields preserved", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Valentine's Day gifts",
-      includeSms: false,
-    };
+    const seed = makeSeed({ mainMessage: "Valentine's Day gifts" });
     const result = await productSelection.selectProducts(seed, "editorial", 10);
 
     expect(result.length).toBeGreaterThan(0);
@@ -117,11 +124,7 @@ describe("selectProducts", () => {
         },
       ],
     });
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Valentine's Day gifts",
-      includeSms: false,
-    };
+    const seed = makeSeed({ mainMessage: "Valentine's Day gifts" });
     // 2 necklaces, ask for 1 → forces rerank path
     await productSelection.selectProducts(seed, "editorial", 1);
 
@@ -133,12 +136,11 @@ describe("selectProducts", () => {
   });
 
   it("prepends pinned SKUs in the requested order", async () => {
-    const seed: CreativeSeed = {
+    const seed = makeSeed({
       targetCategories: ["Necklace", "Ring"],
       mainMessage: "Valentine's Day gifts",
       pinnedSkus: ["SKU-003"],
-      includeSms: false,
-    };
+    });
     const result = await productSelection.selectProducts(seed, "editorial", 10);
 
     expect(result[0].sku).toBe("SKU-003");
@@ -148,11 +150,7 @@ describe("selectProducts", () => {
   });
 
   it("skips the LLM rerank when candidates count <= requested count", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Valentine's",
-      includeSms: false,
-    };
+    const seed = makeSeed({ mainMessage: "Valentine's" });
     // Only 2 necklaces in FEED; ask for 10 — should bypass LLM.
     const result = await productSelection.selectProducts(seed, "editorial", 10);
 
@@ -162,12 +160,11 @@ describe("selectProducts", () => {
   });
 
   it("caps output at the requested count", async () => {
-    const seed: CreativeSeed = {
+    const seed = makeSeed({
       targetCategories: ["Necklace", "Ring"],
       mainMessage: "Valentine's",
       pinnedSkus: ["SKU-003"],
-      includeSms: false,
-    };
+    });
     const result = await productSelection.selectProducts(seed, "editorial", 2);
     expect(result).toHaveLength(2);
     expect(result[0].sku).toBe("SKU-003");
@@ -177,11 +174,7 @@ describe("selectProducts", () => {
     messagesCreate.mockResolvedValueOnce({
       content: [{ type: "text", text: "no tool call" }],
     });
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Valentine's",
-      includeSms: false,
-    };
+    const seed = makeSeed({ mainMessage: "Valentine's" });
     // Force LLM path by requesting fewer than candidates and providing 3 candidates in one category
     const manyNecklaces: DigestedProduct[] = [
       HEART,
