@@ -25,8 +25,11 @@ fill → human review gates → completed campaign.
 - **LLM:** `@anthropic-ai/sdk`, default model `claude-sonnet-4-6`
   (override via `CLAUDE_MODEL` env). Plan references retired
   `claude-sonnet-4-20250514` — ignore that; use current 4.x IDs.
-- **Storage:** AWS SDK v3 for S3 (Notch product feed). Hero images land in
-  `/uploads` (gitignored, mounted volume in Docker when we containerize).
+- **Product feed:** public CDN JSON (`PRODUCT_FEED_URL`, served by
+  static.myka.com). Plain `fetch()` — no AWS SDK. Dev fallback reads
+  `data/product-feed.fixture.json` (gitignored; see `data/README.md`).
+  Hero images land in `/uploads` (gitignored, mounted volume in Docker
+  when we containerize).
 - **Drag-and-drop:** `@dnd-kit` for product reordering.
 - **Testing:** `vitest` + `@testing-library/react` + `jsdom`.
 
@@ -125,4 +128,6 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 | `claude-sonnet-4-20250514` | `claude-sonnet-4-6` | Plan model is retired |
 | shadcn `toast` | shadcn `sonner` | `toast` removed from current registry |
 | Flat `src/components/` | Feature-module layout | Maintainability |
+| Plan's TitleCase `FeedProduct` (`SKU`, `"product type"`, `"Out of Stock (Stock/OOS)"`, …) | Real shape: snake_case + singular (`sku`, `product_type`, `stock_status`, `is_active`, `image_url`, `has_perosnalization`, `num_of_inscriptions`). `image_url` read directly; no `Description` or `Shape` fields. | Inspected the real `static.myka.com/.../email-marketing.json` on 2026-04-19 — plan was written from memory |
+| Plan filters only on OOS | We also drop `is_active !== "Yes"` | Real feed has inactive-but-not-OOS rows |
 

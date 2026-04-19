@@ -22,7 +22,7 @@ Implementation plan lives in the Obsidian vault:
 - **Tailwind CSS v4** · **shadcn/ui** (base-ui variant) · **sonner** for toasts
 - **Prisma 6** + **SQLite** in dev (Postgres planned for prod)
 - **Anthropic Claude SDK** — default model `claude-sonnet-4-6`
-- **AWS S3 SDK v3** — Notch product feed
+- **Public CDN fetch** — custom `email-marketing.json` product feed (no auth)
 - **@dnd-kit** — product reordering in the review UI
 - **vitest** + **@testing-library/react** — unit and component tests
 
@@ -52,8 +52,8 @@ ANTHROPIC_API_KEY="sk-ant-…"
 CLAUDE_MODEL="claude-sonnet-4-6"
 ```
 
-AWS (Notch feed), Figma, and Postgres credentials are required for later
-phases but not for bootstrapping.
+The product feed URL is public — no credentials needed. Figma and Postgres
+credentials are required for later phases but not for bootstrapping.
 
 ### 3. Database
 
@@ -148,11 +148,9 @@ The campaign `status` column drives which view renders on `/campaigns/[id]`.
 | `DATABASE_URL` | ✅ | Prisma connection. `file:./dev.db` for SQLite dev. |
 | `ANTHROPIC_API_KEY` | ✅ (Task 6+) | Claude API. |
 | `CLAUDE_MODEL` | optional | Defaults to `claude-sonnet-4-6`. Override with `claude-opus-4-7` for higher quality. |
-| `AWS_REGION` | Task 4+ | S3 region. |
-| `AWS_ACCESS_KEY_ID` | Task 4+ | S3 access key. |
-| `AWS_SECRET_ACCESS_KEY` | Task 4+ | S3 secret. |
-| `S3_BUCKET_NAME` | Task 4+ | Notch feed bucket. |
-| `S3_FEED_KEY` | Task 4+ | Path to the feed JSON inside the bucket. |
+| `PRODUCT_FEED_URL` | Task 5+ | Public CDN URL of the custom `email-marketing.json` feed. |
+| `PRODUCT_FEED_SOURCE` | optional | `remote` or `local`. If unset, inferred from `PRODUCT_FEED_URL`: set → `remote`, unset → `local`. |
+| `PRODUCT_FEED_LOCAL_PATH` | optional | Path to the local feed JSON. Defaults to `data/product-feed.fixture.json` (gitignored — see `data/README.md`). |
 | `FIGMA_API_TOKEN` | Phase-1 spike | Figma REST API token. |
 | `FIGMA_FILE_KEY` | Phase-1 spike | Figma file containing the templates. |
 
@@ -175,17 +173,18 @@ The campaign `status` column drives which view renders on `/campaigns/[id]`.
 | 1 | Scaffolding | ✅ merged |
 | 2 | Shared types + Prisma schema | ✅ merged |
 | 3 | CDN image URL utility | ⏳ next |
-| 4 | Product feed service | ⏳ |
-| 5 | Product selection service | ⏳ |
-| 6 | Copy generation service | ⏳ |
-| 7 | Figma service stub | ⏳ |
-| 8 | Campaign API routes | ⏳ |
-| 9 | Campaign list page | ⏳ |
-| 10 | Creative seed form | ⏳ |
-| 11 | Campaign detail + polling | ⏳ |
-| 12 | CP1 review UI | ⏳ |
-| 13 | Hero upload + Figma fill + variant selection | ⏳ |
-| 14 | Completed campaign view | ⏳ |
+| 4 | Feed digestion pipeline | 🚧 in progress |
+| 5 | Product feed service (CDN fetch + cache) | 🚧 in progress |
+| 6 | Product selection service | ⏳ |
+| 7 | Copy generation service | ⏳ |
+| 8 | Figma service stub | ⏳ |
+| 9 | Campaign API routes | ⏳ |
+| 10 | Campaign list page | ⏳ |
+| 11 | Creative seed form | ⏳ |
+| 12 | Campaign detail + polling | ⏳ |
+| 13 | CP1 review UI | ⏳ |
+| 14 | Hero upload + Figma fill + variant selection | ⏳ |
+| 15 | Completed campaign view | ⏳ |
 
 ---
 

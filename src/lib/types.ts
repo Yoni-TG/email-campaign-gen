@@ -83,7 +83,19 @@ export interface ApprovedCopy {
   smsCopy?: string;
 }
 
-// ─── Product Snapshot ───
+// ─── Derived field enums ───
+
+export type PriceTier = "under_50" | "50_150" | "150_500" | "500_plus";
+
+export type ReviewTier = "highly_reviewed" | "well_reviewed" | null;
+
+export type PrimaryLanguage =
+  | "english"
+  | "arabic"
+  | "non_latin"
+  | "non_english";
+
+// ─── Product Snapshot (stored on campaign records) ───
 
 export interface ProductSnapshot {
   sku: string;
@@ -94,28 +106,70 @@ export interface ProductSnapshot {
   currency: string;
   link: string;
   productType: string[];
+  priceTier: PriceTier;
+  isOnSale: boolean;
+  reviewTier: ReviewTier;
+  personalizationSummary: string | null;
 }
 
-// ─── Feed Product (raw from Notch JSON) ───
-
+// ─── Feed Product (raw from the custom email-marketing.json CDN feed) ───
+//
+// Field names match the real feed shape (snake_case, singular). Confirmed
+// against https://static.myka.com/.../email-marketing.json on 2026-04-19.
+// The plan originally documented TitleCase / "Title Case" field names —
+// those were aspirational; the real feed uses this shape.
 export interface FeedProduct {
-  SKU: string;
-  Name: string;
-  Description: string;
-  "product type": string[];
-  "Shop for": string[];
-  Occasion: string[];
-  Collection: string[];
+  sku: string;
+  name: string;
+  product_type: string[];
+  product_type_singular?: string;
+  shop_for: string[];
+  occasion: string[];
+  collection: string[];
   material: string[];
-  "metal color": string;
-  "Out of Stock (Stock/OOS)": string;
-  Price: string;
-  "Sale Price": string;
+  metal_color: string;
+  /** Upstream feed typo — kept as-is so field access works. */
+  has_perosnalization?: string;
+  num_of_inscriptions?: string[];
+  stock_status: string;
+  is_active: string;
+  price: string;
+  sale_price: string;
   currency: string;
   link: string;
-  "Review Count": string;
-  "Review Rate": string;
+  image_url: string;
+  review_count: string;
+  review_rate: string;
+  "2y_sales"?: unknown[];
   [key: string]: unknown;
+}
+
+// ─── Digested Product (post-digestion, used by selection + search) ───
+
+export interface DigestedProduct {
+  sku: string;
+  name: string;
+  description: string;
+  productType: string[];
+  shopFor: string[];
+  occasion: string[];
+  collection: string[]; // "Clearance" removed — promoted to isClearance
+  material: string[];
+  metalColor: string;
+  price: string;
+  salePrice: string;
+  currency: string;
+  link: string;
+  imageUrl: string;
+  reviewCount: string;
+  reviewRate: string;
+
+  priceTier: PriceTier;
+  isOnSale: boolean;
+  isClearance: boolean;
+  primaryLanguage: PrimaryLanguage;
+  reviewTier: ReviewTier;
+  personalizationSummary: string | null;
 }
 
 // ─── Figma ───
