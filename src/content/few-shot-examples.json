@@ -1,0 +1,29 @@
+[
+  {
+    "input": {
+      "campaignType": "sale_promo",
+      "mainMessage": "Summer Sale — up to 30% off personalized jewelry",
+      "targetCategories": ["Necklaces", "Bracelets"]
+    },
+    "output": {
+      "subjectLines": [
+        "Your summer favorites just got sweeter",
+        "Sunshine-worthy pieces, now up to 30% off",
+        "This might be the sign you've been waiting for"
+      ],
+      "preHeader": "Personalized jewelry that's as unique as your summer plans",
+      "hero": {
+        "title": "Make It Yours",
+        "subtitle": "Summer Sale — Up to 30% Off",
+        "paragraph": "The best accessory for every summer moment? Something made just for you. Shop our personalized necklaces and bracelets at prices that'll make you smile even wider."
+      },
+      "secondary": {
+        "title": "Layer Up Your Look",
+        "subtitle": "Mix, match, and make it personal",
+        "ctaText": "Shop the Sale"
+      },
+      "primaryCtaText": "Explore the Collection",
+      "smsCopy": "Summer Sale is ON! Up to 30% off personalized jewelry. Shop now: theograce.com/sale"
+    }
+  }
+]
