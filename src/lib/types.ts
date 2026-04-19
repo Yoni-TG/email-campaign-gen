@@ -34,6 +34,25 @@ export const CAMPAIGN_TYPE_LABELS: Record<CampaignType, string> = {
 
 // ─── Creative Seed ───
 
+// Which brand value the campaign leans on (brand-guide §3).
+export const LEAD_VALUES = [
+  "family_first",
+  "meaningful_moments",
+  "joy",
+] as const;
+export type LeadValue = (typeof LEAD_VALUES)[number];
+
+// Which personalities the campaign emphasizes (brand-guide §4).
+// A single brief can mix more than one — the wireframe agent uses them to
+// modulate layout mood (see wireframe-guide §3).
+export const LEAD_PERSONALITIES = [
+  "joyfully_characterful",
+  "fun",
+  "charming",
+  "warm_hearted",
+] as const;
+export type LeadPersonality = (typeof LEAD_PERSONALITIES)[number];
+
 export interface CreativeSeed {
   targetCategories: string[];
   promoDetails?: string;
@@ -43,6 +62,11 @@ export interface CreativeSeed {
   milledInspirationUrls?: string[];
   additionalNotes?: string;
   includeSms: boolean;
+  // Brief-time decisions that shape copy voice and wireframe mood.
+  // Lead value is singular (pick one). Personalities can be 1+; the order
+  // is not meaningful.
+  leadValue: LeadValue;
+  leadPersonalities: LeadPersonality[];
 }
 
 // ─── Generated Copy ───
@@ -204,6 +228,8 @@ export interface FigmaResult {
 
 export interface CampaignBlueprint {
   campaign_id: string;
+  lead_value: LeadValue;
+  lead_personalities: LeadPersonality[];
   free_top_text: string | null;
   subject_variant: SubjectVariant;
   hero_image_url: string;

@@ -7,6 +7,17 @@ import {
 } from "@/modules/copy-generation/utils/copy-prompt";
 import type { CreativeSeed } from "@/lib/types";
 
+function makeSeed(overrides: Partial<CreativeSeed>): CreativeSeed {
+  return {
+    targetCategories: ["Necklace"],
+    mainMessage: "Test message",
+    includeSms: false,
+    leadValue: "joy",
+    leadPersonalities: ["joyfully_characterful"],
+    ...overrides,
+  };
+}
+
 describe("loadBrandGuide", () => {
   it("returns the brand-guide markdown content", () => {
     const guide = loadBrandGuide();
@@ -56,11 +67,10 @@ describe("buildCopySystemPrompt", () => {
 
 describe("buildCopyUserPrompt", () => {
   it("includes campaign type, main message, and categories", () => {
-    const seed: CreativeSeed = {
+    const seed = makeSeed({
       targetCategories: ["Necklace", "Ring"],
       mainMessage: "Spring collection launch",
-      includeSms: false,
-    };
+    });
     const prompt = buildCopyUserPrompt(seed, "product_launch");
     expect(prompt).toContain("Product Launch");
     expect(prompt).toContain("Spring collection launch");
@@ -68,30 +78,28 @@ describe("buildCopyUserPrompt", () => {
     expect(prompt).toContain("Ring");
   });
 
+  it("includes lead value and lead personalities for voice modulation", () => {
+    const seed = makeSeed({
+      leadValue: "family_first",
+      leadPersonalities: ["warm_hearted", "charming"],
+    });
+    const prompt = buildCopyUserPrompt(seed, "product_launch");
+    expect(prompt).toMatch(/Lead value: family_first/);
+    expect(prompt).toMatch(/Lead personalities: warm_hearted, charming/);
+  });
+
   it("calls out SMS when requested", () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: true,
-    };
+    const seed = makeSeed({ includeSms: true });
     expect(buildCopyUserPrompt(seed, "product_launch")).toMatch(/Include SMS/i);
   });
 
   it("marks no-SMS explicitly when not requested", () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed({ includeSms: false });
     expect(buildCopyUserPrompt(seed, "product_launch")).toMatch(/No SMS/i);
   });
 
   it("omits optional fields when absent", () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed({});
     const prompt = buildCopyUserPrompt(seed, "product_launch");
     expect(prompt).not.toMatch(/Secondary message:/);
     expect(prompt).not.toMatch(/Promo details:/);
@@ -99,14 +107,13 @@ describe("buildCopyUserPrompt", () => {
   });
 
   it("includes optional fields when supplied", () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
+    const seed = makeSeed({
       mainMessage: "Summer sale",
       secondaryMessage: "30% off",
       promoDetails: "Use code SUMMER",
       additionalNotes: "Keep it bright",
       includeSms: true,
-    };
+    });
     const prompt = buildCopyUserPrompt(seed, "sale_promo");
     expect(prompt).toMatch(/Secondary message:/);
     expect(prompt).toMatch(/Promo details:/);

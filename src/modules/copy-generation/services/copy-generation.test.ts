@@ -1,6 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { CreativeSeed } from "@/lib/types";
 
+function makeSeed(overrides: Partial<CreativeSeed> = {}): CreativeSeed {
+  return {
+    targetCategories: ["Necklace"],
+    mainMessage: "Spring",
+    includeSms: false,
+    leadValue: "joy",
+    leadPersonalities: ["joyfully_characterful"],
+    ...overrides,
+  };
+}
+
 // The LLM emits everything except campaign_id — the service attaches it.
 const MOCK_LLM_OUTPUT = {
   free_top_text: "NEW COLLECTION",
@@ -63,11 +74,10 @@ beforeEach(async () => {
 
 describe("generateCopy", () => {
   it("returns a GeneratedCopy matching the tool output", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
+    const seed = makeSeed({
       mainMessage: "Spring collection launch",
       includeSms: true,
-    };
+    });
     const result = await copyGeneration.generateCopy(
       TEST_CAMPAIGN_ID,
       seed,
@@ -82,11 +92,7 @@ describe("generateCopy", () => {
   });
 
   it("attaches the campaign_id to the returned payload", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed();
     const result = await copyGeneration.generateCopy(
       TEST_CAMPAIGN_ID,
       seed,
@@ -95,12 +101,23 @@ describe("generateCopy", () => {
     expect(result.campaign_id).toBe(TEST_CAMPAIGN_ID);
   });
 
+  it("passes lead value and lead personalities through the user prompt", async () => {
+    const seed = makeSeed({
+      leadValue: "meaningful_moments",
+      leadPersonalities: ["warm_hearted", "charming"],
+    });
+    await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
+    const userContent = messagesCreate.mock.calls[0][0].messages[0].content;
+    expect(userContent).toMatch(/Lead value: meaningful_moments/);
+    expect(userContent).toMatch(/warm_hearted.*charming|charming.*warm_hearted/);
+  });
+
   it("returns sms when the seed requested it", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: true,
-    };
+    const seed = makeSeed({ includeSms: true });
     const result = await copyGeneration.generateCopy(
       TEST_CAMPAIGN_ID,
       seed,
@@ -110,11 +127,7 @@ describe("generateCopy", () => {
   });
 
   it("calls messages.create with generate_campaign_copy tool + cache_control on system", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed();
     await copyGeneration.generateCopy(
       TEST_CAMPAIGN_ID,
       seed,
@@ -133,11 +146,7 @@ describe("generateCopy", () => {
   });
 
   it("tool schema requires the four LLM-owned top-level fields (not campaign_id)", async () => {
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed();
     await copyGeneration.generateCopy(
       TEST_CAMPAIGN_ID,
       seed,
@@ -162,11 +171,7 @@ describe("generateCopy", () => {
     messagesCreate.mockResolvedValueOnce({
       content: [{ type: "text", text: "no tool call here" }],
     });
-    const seed: CreativeSeed = {
-      targetCategories: ["Necklace"],
-      mainMessage: "Spring",
-      includeSms: false,
-    };
+    const seed = makeSeed();
     await expect(
       copyGeneration.generateCopy(TEST_CAMPAIGN_ID, seed, "product_launch"),
     ).rejects.toThrow(/no tool use response/i);

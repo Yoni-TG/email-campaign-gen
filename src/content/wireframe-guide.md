@@ -216,6 +216,8 @@ You receive the approved campaign payload:
 {
   "campaign_id": "string",
   "market": "US | UK",
+  "lead_value": "family_first | meaningful_moments | joy",
+  "lead_personalities": ["joyfully_characterful" | "fun" | "charming" | "warm_hearted"],
   "free_top_text": "string | null",
   "subject_variant": { "subject": "string", "preheader": "string" },
   "hero_image_url": "string",
@@ -224,10 +226,12 @@ You receive the approved campaign payload:
   ],
   "sms": "string | null",
   "products": [
-    { "title": "string", "price": "string", "imageUrl": "string", "link": "string" }
+    { "title": "string", "price": "string", "image_url": "string", "link": "string" }
   ]
 }
 ```
+
+`lead_value` and `lead_personalities` come from the human-authored brief, not from the copy agent — they're brief-time decisions that shape both voice and layout. Use the §3 tables to translate them into hero imagery tendency and layout mood.
 
 Mapping to layout modules:
 - `free_top_text` → `announcement_bar` (skip when null).
@@ -235,8 +239,6 @@ Mapping to layout modules:
 - `body_blocks[1..]` → `editorial_split` or `text_block_centered` depending on whether the description reads as a single paragraph or needs image pairing. A block with only a CTA becomes a standalone `text_block_centered` with the CTA as a button.
 - `products` → `product_grid` (place after the primary body block; §9 covers recommended positions per template).
 - `subject_variant` / `sms` are not laid out — they ship with the send, not the wireframe.
-
-Pick lead value and lead personality yourself from the tone of the copy (§3 tables) — the copy agent no longer emits them.
 
 ---
 
@@ -310,7 +312,7 @@ Rules:
 2. Are all modules from the §8 library? *(If no → swap or justify.)*
 3. Is there exactly **one** H1? *(If no → collapse.)*
 4. Are there **at most two** CTAs? *(If no → cut.)*
-5. Does the hero's lead value + personality (picked from the copy tone, §3) actually show up in the imagery brief and layout mood?
+5. Does the hero reflect the brief's `lead_value` and each entry in `lead_personalities`? *(§3)*
 6. Is the output valid JSON matching §12? *(If no → fix.)*
 7. Does every non-copy asset appear in `assets_required`? *(If no → add.)*
 

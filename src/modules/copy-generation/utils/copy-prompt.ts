@@ -128,6 +128,8 @@ export function buildCopyUserPrompt(
     `Write email campaign copy for the following brief:`,
     ``,
     `- Campaign type: ${CAMPAIGN_TYPE_LABELS[campaignType]}`,
+    `- Lead value: ${seed.leadValue} (see brand-guide §3 — anchor the emotional beat here)`,
+    `- Lead personalities: ${seed.leadPersonalities.join(", ")} (see brand-guide §4 — modulate voice accordingly)`,
     `- Main message: ${seed.mainMessage}`,
     `- Target product categories: ${seed.targetCategories.join(", ")}`,
   ];
@@ -143,7 +145,7 @@ export function buildCopyUserPrompt(
   }
   lines.push(
     seed.includeSms
-      ? `- Include SMS copy (short, punchy, with link)`
+      ? `- Include SMS copy (short, punchy, with link — ≤130 chars)`
       : `- No SMS copy needed`,
   );
 
