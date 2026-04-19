@@ -41,6 +41,10 @@ yarn-error.log*
 /prisma/*.db
 /prisma/*.db-journal
 
+# local product feed fixture (supplier data — keep out of git)
+/data/*.fixture.json
+!/data/product-feed.fixture.sample.json
+
 # vercel
 .vercel
 
