@@ -1,29 +1,385 @@
 [
   {
-    "input": {
-      "campaignType": "sale_promo",
-      "mainMessage": "Summer Sale — up to 30% off personalized jewelry",
-      "targetCategories": ["Necklaces", "Bracelets"]
-    },
-    "output": {
-      "subjectLines": [
-        "Your summer favorites just got sweeter",
-        "Sunshine-worthy pieces, now up to 30% off",
-        "This might be the sign you've been waiting for"
-      ],
-      "preHeader": "Personalized jewelry that's as unique as your summer plans",
-      "hero": {
-        "title": "Make It Yours",
-        "subtitle": "Summer Sale — Up to 30% Off",
-        "paragraph": "The best accessory for every summer moment? Something made just for you. Shop our personalized necklaces and bracelets at prices that'll make you smile even wider."
+    "month": "January",
+    "campaign_name": "Top Sellers Aging Well",
+    "free_top_text": "TIMELESS. ALWAYS HAS BEEN",
+    "body_blocks": [
+      {
+        "title": "Made To Last",
+        "description": "These best-selling pieces have stood the test of time — year after year. Loved for their meaning, worn for their versatility, and designed to never feel dated.",
+        "cta": "Shop Bestsellers"
       },
-      "secondary": {
-        "title": "Layer Up Your Look",
-        "subtitle": "Mix, match, and make it personal",
-        "ctaText": "Shop the Sale"
+      {
+        "title": "Classic For a Reason",
+        "description": null,
+        "cta": "See All"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Pieces That Never Go Out of Style ✨",
+        "preheader": "Discover our most-loved pieces — year after year."
+      }
+    ],
+    "sms": "Our best sellers, for a reason.\nClassic styles customers love year after year.\nShop now: {link}"
+  },
+  {
+    "month": "January",
+    "campaign_name": "New Year New You - Up to 50% Off",
+    "free_top_text": "Happy New Year",
+    "body_blocks": [
+      {
+        "title": "UP TO 50% OFF BEST SELLERS",
+        "description": null,
+        "cta": "Shop The Sale"
       },
-      "primaryCtaText": "Explore the Collection",
-      "smsCopy": "Summer Sale is ON! Up to 30% off personalized jewelry. Shop now: theograce.com/sale"
-    }
+      {
+        "title": null,
+        "description": "A fresh year calls for pieces that reflect who you are — and who you’re becoming. \nDiscover meaningful, personalized jewelry to start the year shining.",
+        "cta": null
+      },
+      {
+        "title": "Capture your story in 2026",
+        "description": "JEWELRY WITH HIDDEN MEANING",
+        "cta": "Shop Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "New Year Sale ✨ Up to 50% Off",
+        "preheader": "Timeless designs made to shine all year long."
+      },
+      {
+        "subject": "Start the Year Shining ✨ Hello 2026",
+        "preheader": "Up to 50% off our most-loved styles — limited time."
+      }
+    ],
+    "sms": "New year. New chapter. New sparkle \nSave up to 50% off Theo Grace best sellers.\nShop now {{link}}"
+  },
+  {
+    "month": "January",
+    "campaign_name": "Valentines Day Sale UP TO 40% + 20% Coupon",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "From Us, To You",
+        "description": "UP TO 40% OFF SITEWIDE | + EXTRA 20% (Code: Valentines20)",
+        "cta": "Shop Valentine’s Gifts"
+      },
+      {
+        "title": "MAKE HEARTS FLUTTER",
+        "description": "Explore beautifully crafted personalized jewelry, designed with meaning and guaranteed to arrive on time for Valentine’s Day.",
+        "cta": "Shop Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "From Your Secret Admirer 💌",
+        "preheader": "Something personal. Something meant just for you."
+      }
+    ],
+    "sms": "From your secret admirer…\nPersonalized jewelry now 40% off PLUS an extra 20% with code XXXX\nShop now: {link}"
+  },
+  {
+    "month": "February",
+    "campaign_name": "Galetines Day - Gifts for the Girls",
+    "free_top_text": "Gifts for the Gals",
+    "body_blocks": [
+      {
+        "title": "Galentine’s Day\n\nGIF with the text changing on a card/letter \n\nTo my best friend.\nTo my sister. \nTo my ride-or-die.",
+        "description": "40% OFF SITEWIDE | + EXTRA 20%",
+        "cta": null
+      },
+      {
+        "title": null,
+        "description": "This is your reminder that love doesn’t have to be romantic to be meaningful.\n\nPersonalized jewelry makes the perfect Galentine’s gift - names, initials, dates, or quiet reminders only the two of you understand.",
+        "cta": "Shop Galentine’s Gifts"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Galentine’s Gifts for the Girls 🎀",
+        "preheader": "Personalized pieces made for best friends, sisters, and soulmates"
+      },
+      {
+        "subject": "Galentine's Gifts for the Women You Love",
+        "preheader": "Personalized pieces made for best friends, sisters, and soulmates"
+      }
+    ],
+    "sms": "Galentine’s is for the girls.\n Shop personalized jewelry 40% off + AN EXTRA 20% with code GALENTINES20 \nShop now: {link}"
+  },
+  {
+    "month": "February",
+    "campaign_name": "Love Story Collection Spotlight #7 The Big Diamond Necklace",
+    "free_top_text": "The Most Loved Piece of the Love Story Collection",
+    "body_blocks": [
+      {
+        "title": "Eternal Heart Diamond Necklace",
+        "description": "A forever kind of love.",
+        "cta": null
+      },
+      {
+        "title": "A timeless expression of love.",
+        "description": "A classic heart, reimagined. Designed to reflect the people, places, and moments that stay with us forever.",
+        "cta": "Shop Now"
+      },
+      {
+        "title": "Love Story Collection",
+        "description": "Every story begins with a heart.",
+        "cta": "Explore the Full Collection"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Some symbols say it all 💙",
+        "preheader": "Discover the Eternal Heart Diamond Necklace"
+      },
+      {
+        "subject": "The most loved piece of the Love Story Collection 💙",
+        "preheader": "Discover the Eternal Heart Diamond Necklace"
+      }
+    ],
+    "sms": "The most loved piece of the Love Story Collection.\nMeet the Eternal Heart Diamond Necklace.\nShop now: {link}"
+  },
+  {
+    "month": "February",
+    "campaign_name": "Mother's Day is coming up (UK)",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "Mother’s Day is Coming",
+        "description": "Create her piece she’ll treasure forever.",
+        "cta": "Shop Now"
+      },
+      {
+        "title": null,
+        "description": "Whether she’s the heart of your home.\nYour biggest cheerleader.\nOr the one who still texts to check you got home safe…\n\nCelebrate her with something made with meaning",
+        "cta": null
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Mother’s Day Is Coming 💙",
+        "preheader": "Personalised jewellery made just for her."
+      },
+      {
+        "subject": "For Mum. With Love.",
+        "preheader": "The most meaningful way to say thank you."
+      }
+    ],
+    "sms": "Mother’s Day is coming.\nCreate a personalised piece she’ll treasure forever.\nSay it with meaning. [link]"
+  },
+  {
+    "month": "March",
+    "campaign_name": "Mother's Day Sale UK - 20% + Free shipping",
+    "free_top_text": "Mother’s Day Is Almost Here | 20% Off + Free Expedited Shipping",
+    "body_blocks": [
+      {
+        "title": "A GIFT AS TIMELESS AS HER LOVE",
+        "description": "This Mother’s Day, enjoy  \n\n20% OFF\nSITEWIDE\n\n\nplus free expedited shipping",
+        "cta": "Shop For Mum"
+      },
+      {
+        "title": null,
+        "description": "More than an accessory, jewellery becomes part of her story. Worn daily & loved forever.\n\nThis is how we celebrate mum.",
+        "cta": "JEWELLERY FOR FAMILY TIME \n\nJEWELLERY FOR HER STORY\n\nJEWELLERY FOR EVERY DAY"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "This Is How We Celebrate Mum 💙",
+        "preheader": "Enjoy 20% off sitewide plus free expedited shipping."
+      },
+      {
+        "subject": "Mother’s Day Is Almost Here ✨ 20% Off",
+        "preheader": "Plus free expedited shipping. TODAY ONLY"
+      }
+    ],
+    "sms": "Mother’s Day is calling!\nEnjoy 20% off sitewide + FREE expedited shipping. Shop now [link]"
+  },
+  {
+    "month": "March",
+    "campaign_name": "last chance Easter giveaway - $250 giftcard",
+    "free_top_text": "DON'T MISS YOUR EARLY EASTER TREAT",
+    "body_blocks": [
+      {
+        "title": "LAST CHANCE TO WIN A $250 GIFT CARD",
+        "description": "The Easter Bunny won’t be here much longer…\n\nThis is your last chance to enter for a $250 Theo Grace gift card.\n\nEnter below before the giveaway closes.",
+        "cta": "Enter To Win"
+      },
+      {
+        "title": "Make Your Easter Wishlist",
+        "description": "Start picking your favorite",
+        "cta": "Shop Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "The Easter Bunny Is Hopping Away…🐰",
+        "preheader": "LAST CHANCE to win a $250 Theo Grace shopping spree."
+      }
+    ],
+    "sms": "Last chance!Enter now for a chance to win a $250 Theo Grace gift card before the Easter giveaway ends  [link]"
+  },
+  {
+    "month": "March",
+    "campaign_name": "March Birthstone - Aquamarine",
+    "free_top_text": "March Birthstone: Aquamarine",
+    "body_blocks": [
+      {
+        "title": "A New Season in Blue",
+        "description": "A new season begins with Aquamarine. A symbol of calm, clarity, and fresh beginnings.\nYour chance to snag the perfect gift before the rush.",
+        "cta": "Shop Aquamarine Birthstones"
+      },
+      {
+        "title": "Calm & Clarity",
+        "description": "With its ocean-blue glow, Aquamarine is all about balance, courage, and moving forward with intention.\n\nThe perfect gift for March birthdays, or your own fresh start.",
+        "cta": "Discover Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "March’s Moment to Shine 💙",
+        "preheader": "Aquamarine: the serene blue stone of fresh beginnings."
+      },
+      {
+        "subject": "A Fresh Start in Aquamarine 💙",
+        "preheader": "The perfect gift for March birthdays (or your own new chapter)"
+      }
+    ],
+    "sms": "A new season. A new stone.\n Aquamarine is here. Celebrate March with meaning [link]"
+  },
+  {
+    "month": "April",
+    "campaign_name": "Mother's Day Last Call! Free Expedited Shipping",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "Free EXPEDITED Shipping IS ON!",
+        "description": null,
+        "cta": "Shop Mother's Day Gifts"
+      },
+      {
+        "title": null,
+        "description": "Give Mom a gift she can wear everyday and get it in time for Mother's Day when you order today.",
+        "cta": "Explore Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "FREE EXPEDITED SHIPPING IS ON! ⌛",
+        "preheader": "Get it in time for Mother's Day!"
+      }
+    ],
+    "sms": "FREE EXPEDITED SHIPPING IS ON! Order today and get it in time for Mother’s Day. [link]"
+  },
+  {
+    "month": "April",
+    "campaign_name": "The BIG Mother's Day Sale: 25% off everything",
+    "free_top_text": "Mother’s Day Is Almost Here | 25% Off",
+    "body_blocks": [
+      {
+        "title": "A GIFT AS TIMELESS AS HER LOVE",
+        "description": "This Mother’s Day, enjoy  \n\n20% OFF\nSITEWIDE\n\n\nplus free expedited shipping",
+        "cta": "Shop For Mum"
+      },
+      {
+        "title": null,
+        "description": "More than an accessory, jewellery becomes part of her story. Worn daily & loved forever.\n\nThis is how we celebrate mum.",
+        "cta": "JEWELLERY FOR FAMILY TIME \n\nJEWELLERY FOR HER STORY\n\nJEWELLERY FOR EVERY DAY"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "This Is How We Celebrate Mom 💙",
+        "preheader": "Enjoy 25% off EVERYTHING"
+      },
+      {
+        "subject": "Mother’s Day Is Almost Here ✨ 25% Off",
+        "preheader": "This is how we celebrate Mom"
+      }
+    ],
+    "sms": "Mother’s Day is calling! Enjoy 25% off sitewide. Shop now [link]"
+  },
+  {
+    "month": "April",
+    "campaign_name": "Happy Easter - text based",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "HAPPY EASTER",
+        "description": "Today is a moment to celebrate new beginnings, love, and the beauty of the season.\n\nA time for fresh starts, meaningful moments, and the people who make them unforgettable.\n\nThank you for letting us be part of your stories, your milestones, your memories, and the pieces you choose to keep close.\n\nWith Love, Theo Grace",
+        "cta": null
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Wishing you a beautiful Easter ✨🌸",
+        "preheader": "Celebrating love, memories, and new beginnings"
+      }
+    ],
+    "sms": null
+  },
+  {
+    "month": "May",
+    "campaign_name": "Digital Gift Cards: The \"Instant\" Gift",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "Save 20% on Gift Cards",
+        "description": "Left it to the last minute?\n\nSome gifts take time.\nThis one doesn’t.\n\nSend a Theo Grace Gift Card in seconds, and let Mom choose something personal, made just for her.",
+        "cta": "Shop Gift Cards"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Last Day to Shop for Mother's Day",
+        "preheader": "Gift cards for everything on their wish list."
+      }
+    ],
+    "sms": "Left Mother's Day a little late? We’ve got you\nSave 20% on Theo Grace gift cards! [link]"
+  },
+  {
+    "month": "May",
+    "campaign_name": "Mother's Day Last Call - 20% off everything",
+    "free_top_text": null,
+    "body_blocks": [
+      {
+        "title": "For the woman who does it all",
+        "description": "LAST CHANCE TO SHOP THE PERFECT GIFT FOR MOM\n20% OFF EVERYTHING",
+        "cta": "Shop Now"
+      },
+      {
+        "title": "Mother's Day Gift Guide",
+        "description": "Curated gift list to spoil her, beautifully.",
+        "cta": "Explore Now"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Last Chance: 20% Off Ends TONIGHT",
+        "preheader": "The perfect gift to say thanks for everything she does"
+      }
+    ],
+    "sms": "LAST CHANCE!\n 20% off Mother’s Day gifts ends TONIGHT.\nShop now [link]"
+  },
+  {
+    "month": "May",
+    "campaign_name": "Still need a gift for mom?",
+    "free_top_text": "MOTHER’S DAY IS ALMOST HERE",
+    "body_blocks": [
+      {
+        "title": "Still need a gift for Mom?",
+        "description": "It’s not too late.\nLet mom pick the piece that feels just right.\n\nFinal call to save 20% on a Theo Grace Gift Card, and give her the gift of choice.",
+        "cta": "Shop Gift Cards"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Mother’s Day is tomorrow ⏰",
+        "preheader": "Last chance to save 20% on gift cards! Shop now"
+      }
+    ],
+    "sms": "Still need a gift for Mom? Let her choose her perfect piece. Save 20% on Theo Grace Gift Cards: [link]"
   }
 ]

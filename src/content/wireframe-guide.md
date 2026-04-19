@@ -210,20 +210,33 @@ Pick the structure closest to the campaign type. Swap or add modules as needed. 
 
 ## 11. Input Contract (from Copy Agent)
 
-You receive:
+You receive the approved campaign payload:
+
 ```json
 {
   "campaign_id": "string",
   "market": "US | UK",
-  "lead_value": "family_first | meaningful_moments | joy",
-  "lead_personality": ["joyfully_characterful" | "fun" | "charming" | "warm_hearted"],
-  "subject": "string",
-  "preheader": "string",
-  "blocks": [ /* ordered copy blocks */ ]
+  "free_top_text": "string | null",
+  "subject_variant": { "subject": "string", "preheader": "string" },
+  "hero_image_url": "string",
+  "body_blocks": [
+    { "title": "string | null", "description": "string | null", "cta": "string | null" }
+  ],
+  "sms": "string | null",
+  "products": [
+    { "title": "string", "price": "string", "imageUrl": "string", "link": "string" }
+  ]
 }
 ```
 
-Every block in `blocks` maps to a module. If a block doesn't have a direct module match, pick the closest (e.g. an unknown `quote` block → `nicky_quote_module` only if attribution is Nicky; otherwise `text_block_centered`).
+Mapping to layout modules:
+- `free_top_text` → `announcement_bar` (skip when null).
+- `hero_image_url` + `body_blocks[0]` → `hero_lifestyle` or `hero_product` (choose by §3 and §9). Use the first body block's title/description/cta as the hero's copy overlay; if all three are null, fall back to a pure-image hero.
+- `body_blocks[1..]` → `editorial_split` or `text_block_centered` depending on whether the description reads as a single paragraph or needs image pairing. A block with only a CTA becomes a standalone `text_block_centered` with the CTA as a button.
+- `products` → `product_grid` (place after the primary body block; §9 covers recommended positions per template).
+- `subject_variant` / `sms` are not laid out — they ship with the send, not the wireframe.
+
+Pick lead value and lead personality yourself from the tone of the copy (§3 tables) — the copy agent no longer emits them.
 
 ---
 
@@ -297,7 +310,7 @@ Rules:
 2. Are all modules from the §8 library? *(If no → swap or justify.)*
 3. Is there exactly **one** H1? *(If no → collapse.)*
 4. Are there **at most two** CTAs? *(If no → cut.)*
-5. Does the hero reflect `lead_value` and `lead_personality`? *(§3)*
+5. Does the hero's lead value + personality (picked from the copy tone, §3) actually show up in the imagery brief and layout mood?
 6. Is the output valid JSON matching §12? *(If no → fix.)*
 7. Does every non-copy asset appear in `assets_required`? *(If no → add.)*
 
