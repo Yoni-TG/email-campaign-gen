@@ -1,0 +1,37 @@
+// Dev: SQLite. Swap `provider` to "postgresql" for prod and change
+// String JSON columns to Json in a follow-up migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id                String   @id @default(uuid())
+  name              String
+  status            String   @default("draft")
+  campaignType      String   @map("campaign_type")
+  createdBy         String   @map("created_by")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // JSON blobs stored as stringified JSON on SQLite.
+  seed              String
+
+  generatedCopy     String?  @map("generated_copy")
+  approvedCopy      String?  @map("approved_copy")
+  generatedProducts String?  @map("generated_products")
+  approvedProducts  String?  @map("approved_products")
+
+  heroImagePath     String?  @map("hero_image_path")
+
+  figmaResult       String?  @map("figma_result")
+
+  error             String?
+
+  @@map("campaigns")
+}
