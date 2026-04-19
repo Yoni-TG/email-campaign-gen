@@ -99,7 +99,7 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 
 - **One branch per plan phase.** `phase-N-<slug>` off `main`, PR in, green
   build before merge.
-- **Verification:** run `npm run build` and `npm run test:run` before
+- **Verification:** run `npm run typecheck`, `npm run test:run`, and `npm run build` before
   opening a PR. Never claim "done" without output you've seen.
 - **Secrets:** only `.env.example` is committed; real keys live in `.env`
   (gitignored). Current state: Anthropic API key present; S3 creds +
@@ -110,7 +110,8 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 ## Commands
 
 - `npm run dev` — Next.js dev server (Turbopack)
-- `npm run build` — production build + type-check
+- `npm run build` — production build + type-check (app code only)
+- `npm run typecheck` — full `tsc --noEmit` (includes test files; `next build` does not)
 - `npm run test` — vitest watch mode
 - `npm run test:run` — vitest single run (CI-style)
 - `npx prisma migrate dev --name <name>` — create + apply a migration

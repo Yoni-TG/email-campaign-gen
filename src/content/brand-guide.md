@@ -223,32 +223,34 @@ joy, joyful, joyous, *joie de vivre*, *la vie est belle*, meaning, meaningful, c
 
 ## 11. Output Contract
 
-The wireframe agent consumes your output. Return **structured JSON** with these blocks. Omit any block not relevant to the campaign.
+The wireframe agent consumes your output. Return **structured JSON** matching the shape below. This mirrors how Theo Grace builds real campaigns — see `src/content/few-shot-examples.json` for past examples. You will always be invoked through the `generate_campaign_copy` tool; populate every field using the rules below.
 
 ```json
 {
-  "campaign_id": "string",
-  "market": "US | UK",
-  "lead_value": "family_first | meaningful_moments | joy",
-  "lead_personality": ["joyfully_characterful" | "fun" | "charming" | "warm_hearted"],
-  "subject": "string",
-  "preheader": "string",
-  "blocks": [
-    { "type": "sub_label", "text": "THE EDIT" },
-    { "type": "headline", "text": "Say it with meaning" },
-    { "type": "body", "text": "At Theo Grace, we reckon..." },
-    { "type": "cta", "label": "Shop the stack", "intent": "browse_collection" },
-    { "type": "nicky_quote", "quote": "...", "response": "Thank you Nicky!" },
-    { "type": "product_grid", "count": 4, "heading": "optional string" },
-    { "type": "signoff", "text": "love, Theo Grace x" }
-  ]
+  "free_top_text": "string | null — banner text above the hero (e.g. 'TIMELESS. ALWAYS HAS BEEN'). Use only when the campaign calls for it; otherwise return null.",
+  "body_blocks": [
+    {
+      "title": "string | null — short H1 or sub-label (§10). Block 0 sits directly under the hero; block N sits beneath block N-1.",
+      "description": "string | null — body paragraph(s) (§10). Short, human, rhythmic.",
+      "cta": "string | null — CTA button label (§10). Action + outcome."
+    }
+  ],
+  "subject_variants": [
+    {
+      "subject": "string — under 50 chars; see §10",
+      "preheader": "string — sentence case; extends or contrasts the subject; see §10"
+    }
+  ],
+  "sms": "string | null — ≤130 chars including spaces. Include {link} placeholder where the CTA URL will be injected."
 }
 ```
 
 Rules:
-- Order blocks in the intended reading sequence.
+- `body_blocks` is the email body in reading order: index 0 is the first section under the hero, index 1 is the next, and so on.
+- 1–3 body blocks is typical. Any field on a block may be `null` if the campaign doesn't need it (e.g. an image-only section can have `title: null, description: null`). Never return an entirely empty block.
+- Provide 1–2 `subject_variants` for A/B testing. Don't repeat copy between the subject and the preheader — they should extend each other.
+- SMS is capped at **130 characters** (including spaces and emoji). Use `{link}` as the URL placeholder — the send system substitutes it. Return `null` when SMS isn't needed.
 - Don't invent product names, prices, or image paths — leave those to the wireframe/asset agent.
-- `lead_value` and `lead_personality` inform the wireframe agent's layout mood. Be decisive — pick one lead value per email.
 
 ---
 
@@ -265,5 +267,7 @@ In order:
 7. Does spelling match the target market? *(§8.6)*
 8. Does the CTA say something specific? *(§10.)*
 9. Is the output valid JSON matching §11? *(If no → fix.)*
+10. Is `sms` ≤130 chars when provided? *(If no → trim.)*
+11. Are all `body_blocks` entries non-empty (at least one of title / description / cta filled)? *(If no → merge or drop.)*
 
 Revise before returning if any check fails.

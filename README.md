@@ -83,6 +83,7 @@ Open <http://localhost:3000>.
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest watch mode |
 | `npm run test:run` | Vitest single run (CI) |
+| `npm run typecheck` | Full `tsc --noEmit` (covers tests; `next build` does not) |
 | `npx prisma studio` | Browse the DB in the browser |
 | `npx prisma migrate dev --name <name>` | Create + apply a migration |
 
