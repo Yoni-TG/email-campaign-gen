@@ -73,7 +73,13 @@ export interface BodyBlock {
 // Fields intentionally use snake_case to mirror the wire format — the Claude
 // tool output, the brand-guide §11 contract, and the DB JSON column all share
 // this shape. Same convention we use on FeedProduct.
+//
+// campaign_id is attached by the service layer (not emitted by the LLM) so
+// the JSON stored in Campaign.generated_copy is self-contained: given a
+// generated_copy blob in isolation, you can still look up the parent
+// campaign row.
 export interface GeneratedCopy {
+  campaign_id: string;
   free_top_text: string | null;
   body_blocks: BodyBlock[];
   subject_variants: SubjectVariant[];
@@ -87,6 +93,7 @@ export interface GeneratedCopy {
 // to the wireframe + Figma stages.
 
 export interface ApprovedCopy {
+  campaign_id: string;
   free_top_text: string | null;
   body_blocks: BodyBlock[];
   subject_variant: SubjectVariant;

@@ -92,8 +92,13 @@ function getAnthropic(): Anthropic {
  * embeds the brand guide + few-shot examples and is marked for ephemeral
  * caching, so the large prefix is paid for once and then reused across
  * every campaign.
+ *
+ * campaign_id is attached by this layer, not emitted by the LLM, so the
+ * stored generated_copy JSON can be looked up independently of the
+ * surrounding Campaign row.
  */
 export async function generateCopy(
+  campaignId: string,
   seed: CreativeSeed,
   campaignType: CampaignType,
 ): Promise<GeneratedCopy> {
@@ -124,5 +129,6 @@ export async function generateCopy(
     );
   }
 
-  return toolUse.input as GeneratedCopy;
+  const llmOutput = toolUse.input as Omit<GeneratedCopy, "campaign_id">;
+  return { campaign_id: campaignId, ...llmOutput };
 }

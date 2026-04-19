@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { CreativeSeed, GeneratedCopy } from "@/lib/types";
+import type { CreativeSeed } from "@/lib/types";
 
-const MOCK_COPY: GeneratedCopy = {
+// The LLM emits everything except campaign_id — the service attaches it.
+const MOCK_LLM_OUTPUT = {
   free_top_text: "NEW COLLECTION",
   body_blocks: [
     {
@@ -28,6 +29,8 @@ const MOCK_COPY: GeneratedCopy = {
   sms: "New drop just landed! Shop now: {link}",
 };
 
+const TEST_CAMPAIGN_ID = "cmp_01H123ABC";
+
 type CopyGenerationModule = typeof import("@/modules/copy-generation/services/copy-generation");
 
 let copyGeneration: CopyGenerationModule;
@@ -41,7 +44,7 @@ beforeEach(async () => {
       {
         type: "tool_use",
         name: "generate_campaign_copy",
-        input: MOCK_COPY,
+        input: MOCK_LLM_OUTPUT,
       },
     ],
   });
@@ -65,7 +68,11 @@ describe("generateCopy", () => {
       mainMessage: "Spring collection launch",
       includeSms: true,
     };
-    const result = await copyGeneration.generateCopy(seed, "product_launch");
+    const result = await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
 
     expect(result.subject_variants.length).toBeGreaterThanOrEqual(1);
     expect(result.body_blocks.length).toBeGreaterThan(0);
@@ -74,13 +81,31 @@ describe("generateCopy", () => {
     expect(result.subject_variants[0].preheader).toBeTruthy();
   });
 
+  it("attaches the campaign_id to the returned payload", async () => {
+    const seed: CreativeSeed = {
+      targetCategories: ["Necklace"],
+      mainMessage: "Spring",
+      includeSms: false,
+    };
+    const result = await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
+    expect(result.campaign_id).toBe(TEST_CAMPAIGN_ID);
+  });
+
   it("returns sms when the seed requested it", async () => {
     const seed: CreativeSeed = {
       targetCategories: ["Necklace"],
       mainMessage: "Spring",
       includeSms: true,
     };
-    const result = await copyGeneration.generateCopy(seed, "product_launch");
+    const result = await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
     expect(result.sms).toBeTruthy();
   });
 
@@ -90,7 +115,11 @@ describe("generateCopy", () => {
       mainMessage: "Spring",
       includeSms: false,
     };
-    await copyGeneration.generateCopy(seed, "product_launch");
+    await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
 
     expect(messagesCreate).toHaveBeenCalledTimes(1);
     const call = messagesCreate.mock.calls[0][0];
@@ -103,13 +132,17 @@ describe("generateCopy", () => {
     expect(call.system[0].cache_control).toEqual({ type: "ephemeral" });
   });
 
-  it("tool schema requires all four top-level fields", async () => {
+  it("tool schema requires the four LLM-owned top-level fields (not campaign_id)", async () => {
     const seed: CreativeSeed = {
       targetCategories: ["Necklace"],
       mainMessage: "Spring",
       includeSms: false,
     };
-    await copyGeneration.generateCopy(seed, "product_launch");
+    await copyGeneration.generateCopy(
+      TEST_CAMPAIGN_ID,
+      seed,
+      "product_launch",
+    );
     const tool = messagesCreate.mock.calls[0][0].tools[0];
     expect(tool.input_schema.required).toEqual(
       expect.arrayContaining([
@@ -119,6 +152,10 @@ describe("generateCopy", () => {
         "sms",
       ]),
     );
+    // campaign_id is attached by the service, not the LLM — it must NOT be
+    // in the tool schema.
+    expect(tool.input_schema.required).not.toContain("campaign_id");
+    expect(tool.input_schema.properties.campaign_id).toBeUndefined();
   });
 
   it("throws a descriptive error when the model response has no tool_use block", async () => {
@@ -131,7 +168,7 @@ describe("generateCopy", () => {
       includeSms: false,
     };
     await expect(
-      copyGeneration.generateCopy(seed, "product_launch"),
+      copyGeneration.generateCopy(TEST_CAMPAIGN_ID, seed, "product_launch"),
     ).rejects.toThrow(/no tool use response/i);
   });
 });
