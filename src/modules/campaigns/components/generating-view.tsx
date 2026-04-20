@@ -12,9 +12,11 @@ interface GeneratingViewProps {
 
 export function GeneratingView({ campaignId, error }: GeneratingViewProps) {
   const router = useRouter();
-  // Stop polling once the server transitions away from `generating`.
+  // Stop polling once the server transitions away from `generating` OR the
+  // error field appears (backend set an error while keeping status stable).
   useCampaignPoll(campaignId, {
     whileStatuses: error ? [] : ["generating"],
+    initialError: error,
   });
 
   const handleRetry = async () => {

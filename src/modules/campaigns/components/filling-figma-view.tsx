@@ -10,6 +10,7 @@ export function FillingFigmaView({ campaign }: { campaign: Campaign }) {
   const router = useRouter();
   useCampaignPoll(campaign.id, {
     whileStatuses: campaign.error ? [] : ["filling_figma"],
+    initialError: campaign.error,
   });
 
   const handleRetry = async () => {
