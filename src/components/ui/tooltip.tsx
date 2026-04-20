@@ -7,11 +7,15 @@ import { cn } from "@/lib/utils";
 
 // Thin wrapper around @base-ui/react tooltip to match the shadcn API surface:
 //   <Tooltip><TooltipTrigger /><TooltipContent /></Tooltip>
-// A single <TooltipProvider> should sit near the app root (it's fine to omit —
-// base-ui creates a default one if missing).
+//
+// base-ui defaults fight the user here:
+//   - delay 600ms → feels broken, lowered to 150ms
+//   - closeOnClick true → clicking the trigger immediately dismisses
+//     the popup (focus opens → click fires → close). We flip it off so
+//     click-to-read works on touch + keyboard users.
 
 function TooltipProvider({
-  delay = 200,
+  delay = 150,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return <TooltipPrimitive.Provider delay={delay} {...props} />;
@@ -21,10 +25,18 @@ function Tooltip(props: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return <TooltipPrimitive.Root {...props} />;
 }
 
-function TooltipTrigger(
-  props: React.ComponentProps<typeof TooltipPrimitive.Trigger>,
-) {
-  return <TooltipPrimitive.Trigger {...props} />;
+function TooltipTrigger({
+  delay = 150,
+  closeOnClick = false,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+  return (
+    <TooltipPrimitive.Trigger
+      delay={delay}
+      closeOnClick={closeOnClick}
+      {...props}
+    />
+  );
 }
 
 function TooltipContent({
