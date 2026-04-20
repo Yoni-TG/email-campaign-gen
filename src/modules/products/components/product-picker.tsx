@@ -36,7 +36,7 @@ export function ProductPicker({ selected, onChange }: ProductPickerProps) {
           onChange={(e) => setQuery(e.target.value)}
         />
         {query.length >= 2 && (results.length > 0 || isSearching) && (
-          <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+          <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-popover shadow-lg">
             {isSearching && results.length === 0 && (
               <div className="p-3 text-sm text-muted-foreground">
                 Searching…
@@ -46,7 +46,7 @@ export function ProductPicker({ selected, onChange }: ProductPickerProps) {
               <button
                 key={product.sku}
                 type="button"
-                className="flex w-full items-center gap-3 p-2 text-left hover:bg-gray-50 disabled:opacity-50"
+                className="flex w-full items-center gap-3 p-2 text-left hover:bg-muted disabled:opacity-50"
                 disabled={selectedSkus.has(product.sku)}
                 onClick={() => addProduct(product)}
               >
@@ -76,7 +76,7 @@ export function ProductPicker({ selected, onChange }: ProductPickerProps) {
           {selected.map((product) => (
             <li
               key={product.sku}
-              className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm"
+              className="flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm"
             >
               <span>{product.name}</span>
               <button

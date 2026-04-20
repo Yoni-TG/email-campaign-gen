@@ -42,6 +42,26 @@ export const CAMPAIGN_TYPE_LABELS: Record<CampaignType, string> = {
   holiday_seasonal: "Holiday / Seasonal",
 };
 
+// Shown in tooltips next to the type dropdown / chips so campaign managers
+// know what each value shifts in the AI output.
+export const CAMPAIGN_TYPE_DESCRIPTIONS: Record<CampaignType, string> = {
+  product_launch: "Introducing a new SKU or capsule. Copy leans discovery + hero-forward.",
+  sale_promo: "Time-bound discount push. Urgency + clear offer terms.",
+  editorial: "Story-led or value-driven. No hard sell; mood + meaning.",
+  collection_spotlight: "Re-surface an existing collection. Curated picks.",
+  holiday_seasonal: "Tied to a calendar moment. Giftable framing.",
+};
+
+export const CAMPAIGN_STATUS_DESCRIPTIONS: Record<CampaignStatus, string> = {
+  draft: "Brief saved but generation hasn't started.",
+  generating: "Claude is writing copy and picking products (10–20 s).",
+  review: "Ready for your edits. Approve copy + products to continue.",
+  hero_upload: "Pick a hero image for the Figma templates.",
+  filling_figma: "Templates are being filled with your approved content.",
+  variant_selection: "Pick which layout variant to hand off.",
+  completed: "Ready for retention to slice into Klaviyo.",
+};
+
 // ─── Creative Seed ───
 
 // Which brand value the campaign leans on (brand-guide §3).
@@ -56,6 +76,12 @@ export const LEAD_VALUE_LABELS: Record<LeadValue, string> = {
   family_first: "Family First",
   meaningful_moments: "Meaningful Moments",
   joy: "Joy",
+};
+
+export const LEAD_VALUE_DESCRIPTIONS: Record<LeadValue, string> = {
+  family_first: "Love that endures — mother-daughter, couple, chosen family.",
+  meaningful_moments: "Pieces that mark a memory or milestone.",
+  joy: "Playful, celebratory energy. Gifting delight.",
 };
 
 // Which personalities the campaign emphasizes (brand-guide §4).
@@ -74,6 +100,13 @@ export const LEAD_PERSONALITY_LABELS: Record<LeadPersonality, string> = {
   fun: "Fun",
   charming: "Charming",
   warm_hearted: "Warm-hearted",
+};
+
+export const LEAD_PERSONALITY_DESCRIPTIONS: Record<LeadPersonality, string> = {
+  joyfully_characterful: "Unexpected moments, spark, a wink of humor.",
+  fun: "Bright, light-hearted, easy to read.",
+  charming: "Elegant and considered, quietly confident.",
+  warm_hearted: "Emotional, sincere, close-to-the-heart.",
 };
 
 export interface CreativeSeed {

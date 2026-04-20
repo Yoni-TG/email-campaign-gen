@@ -1,12 +1,17 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
+import { ExternalLink } from "lucide-react";
 import {
   CAMPAIGN_TYPE_LABELS,
   LEAD_PERSONALITY_LABELS,
   LEAD_VALUE_LABELS,
 } from "@/lib/types";
-import type { Campaign } from "@/lib/types";
+import type {
+  ApprovedCopy,
+  Campaign,
+  FigmaResult,
+  ProductSnapshot,
+} from "@/lib/types";
 import {
   formatPrice,
   isOnSale,
@@ -26,211 +31,253 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
     );
   }
 
-  const copy = campaign.approvedCopy;
-  const products = campaign.approvedProducts;
-  const figma = campaign.figmaResult;
-  const selectedVariant = figma.variants.find(
+  return (
+    <div className="space-y-6">
+      <HeroBanner campaign={campaign} figma={campaign.figmaResult} />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <BriefCard campaign={campaign} />
+        <CopyCard copy={campaign.approvedCopy} />
+      </div>
+
+      <ProductsCard products={campaign.approvedProducts} />
+      <VariantsCard figma={campaign.figmaResult} />
+    </div>
+  );
+}
+
+// Sticky top banner: hero thumbnail (if uploaded) + the chosen variant + a
+// one-click path back to the Figma file.
+function HeroBanner({
+  campaign,
+  figma,
+}: {
+  campaign: Campaign;
+  figma: FigmaResult;
+}) {
+  const selected = figma.variants.find(
     (v) => v.variantName === figma.selectedVariant,
   );
 
   return (
-    <div className="space-y-8">
-      {selectedVariant && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-          <h3 className="mb-1 font-semibold">
-            Selected Layout: {selectedVariant.variantName}
-          </h3>
-          <a
-            href={selectedVariant.figmaFrameUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-primary hover:underline"
-          >
-            Open in Figma →
-          </a>
-        </div>
-      )}
-
-      <section>
-        <h3 className="mb-2 font-semibold">Campaign Brief</h3>
-        <dl className="space-y-1 text-sm text-muted-foreground">
-          <div>
-            <dt className="inline font-medium">Type:</dt>{" "}
-            <dd className="inline">
-              {CAMPAIGN_TYPE_LABELS[campaign.campaignType]}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Lead value:</dt>{" "}
-            <dd className="inline">
-              {LEAD_VALUE_LABELS[campaign.seed.leadValue]}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Personalities:</dt>{" "}
-            <dd className="inline">
-              {campaign.seed.leadPersonalities
-                .map((p) => LEAD_PERSONALITY_LABELS[p])
-                .join(", ")}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Categories:</dt>{" "}
-            <dd className="inline">
-              {campaign.seed.targetCategories.join(", ")}
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Main message:</dt>{" "}
-            <dd className="inline">{campaign.seed.mainMessage}</dd>
-          </div>
-          {campaign.seed.promoDetails && (
-            <div>
-              <dt className="inline font-medium">Promo:</dt>{" "}
-              <dd className="inline">{campaign.seed.promoDetails}</dd>
-            </div>
-          )}
-        </dl>
-      </section>
-
+    <div className="sticky top-4 z-10 flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
       {campaign.heroImagePath && (
-        <>
-          <Separator />
-          <section>
-            <h3 className="mb-2 font-semibold">Hero Image</h3>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={campaign.heroImagePath}
-              alt="Campaign hero"
-              className="max-h-64 rounded border"
-            />
-          </section>
-        </>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={campaign.heroImagePath}
+          alt="Campaign hero"
+          className="h-24 w-full shrink-0 rounded-md object-cover sm:w-32"
+        />
       )}
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          Selected Layout
+        </p>
+        <p className="truncate text-base font-semibold">
+          {selected?.variantName ?? "—"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {CAMPAIGN_TYPE_LABELS[campaign.campaignType]} · {campaign.createdBy}
+        </p>
+      </div>
+      {selected && (
+        <a
+          href={selected.figmaFrameUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Open in Figma
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      )}
+    </div>
+  );
+}
 
-      <Separator />
+function Card({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
 
-      <section>
-        <h3 className="mb-3 font-semibold">Approved Copy</h3>
-        <div className="space-y-4 text-sm">
-          <div>
-            <p className="text-xs uppercase text-muted-foreground">Subject</p>
-            <p className="font-medium">{copy.subject_variant.subject}</p>
-            <p className="text-muted-foreground">
-              {copy.subject_variant.preheader}
-            </p>
+function BriefCard({ campaign }: { campaign: Campaign }) {
+  const rows: Array<[string, string | null]> = [
+    ["Type", CAMPAIGN_TYPE_LABELS[campaign.campaignType]],
+    ["Lead value", LEAD_VALUE_LABELS[campaign.seed.leadValue]],
+    [
+      "Personalities",
+      campaign.seed.leadPersonalities
+        .map((p) => LEAD_PERSONALITY_LABELS[p])
+        .join(", "),
+    ],
+    ["Categories", campaign.seed.targetCategories.join(", ")],
+    ["Main message", campaign.seed.mainMessage],
+    ["Promo", campaign.seed.promoDetails ?? null],
+    ["Secondary", campaign.seed.secondaryMessage ?? null],
+    ["Notes", campaign.seed.additionalNotes ?? null],
+  ];
+  const visible = rows.filter(([, v]) => v && v.length > 0);
+
+  return (
+    <Card title="Brief">
+      <dl className="space-y-3 text-sm">
+        {visible.map(([k, v]) => (
+          <div
+            key={k}
+            className="grid grid-cols-[110px_1fr] gap-3 border-t border-border/60 pt-3 first:border-t-0 first:pt-0"
+          >
+            <dt className="text-muted-foreground">{k}</dt>
+            <dd className="min-w-0 break-words">{v}</dd>
           </div>
-          {copy.free_top_text && (
-            <div>
-              <p className="text-xs uppercase text-muted-foreground">
-                Free Top Text
-              </p>
-              <p>{copy.free_top_text}</p>
-            </div>
-          )}
+        ))}
+      </dl>
+    </Card>
+  );
+}
+
+function CopyCard({ copy }: { copy: ApprovedCopy }) {
+  return (
+    <Card title="Approved Copy">
+      <div className="space-y-4 text-sm">
+        <div>
+          <p className="text-xs uppercase text-muted-foreground">Subject</p>
+          <p className="font-medium">{copy.subject_variant.subject}</p>
+          <p className="text-muted-foreground">
+            {copy.subject_variant.preheader}
+          </p>
+        </div>
+
+        {copy.free_top_text && (
           <div>
             <p className="text-xs uppercase text-muted-foreground">
-              Body Blocks
+              Free Top Text
             </p>
-            <ol className="mt-1 space-y-3">
-              {copy.body_blocks.map((block, i) => (
-                <li key={i} className="rounded border bg-gray-50 p-3">
-                  {block.title && (
-                    <p className="font-medium">{block.title}</p>
-                  )}
-                  {block.description && (
-                    <p className="mt-1 text-muted-foreground">
-                      {block.description}
-                    </p>
-                  )}
-                  {block.cta && (
-                    <p className="mt-1 text-xs font-medium uppercase">
-                      CTA: {block.cta}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
+            <p>{copy.free_top_text}</p>
           </div>
-          {copy.sms && (
-            <div>
-              <p className="text-xs uppercase text-muted-foreground">SMS</p>
-              <p>{copy.sms}</p>
-            </div>
-          )}
-        </div>
-      </section>
+        )}
 
-      <Separator />
-
-      <section>
-        <h3 className="mb-3 font-semibold">Products ({products.length})</h3>
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => {
-            const showSale = isOnSale(product);
-            return (
+        <div>
+          <p className="mb-1.5 text-xs uppercase text-muted-foreground">
+            Body Blocks
+          </p>
+          <ol className="space-y-2">
+            {copy.body_blocks.map((block, i) => (
               <li
-                key={product.sku}
-                className="overflow-hidden rounded-lg border bg-white"
+                key={i}
+                className="rounded-md border border-border/60 bg-muted/30 p-3"
               >
-                {product.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-32 w-full object-cover"
-                  />
-                )}
-                <div className="p-2">
-                  <p className="truncate text-xs font-medium">{product.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {showSale ? (
-                      <>
-                        <span className="line-through">
-                          {formatPrice(product.price, product.currency)}
-                        </span>{" "}
-                        {formatPrice(product.salePrice, product.currency)}
-                      </>
-                    ) : (
-                      formatPrice(product.price, product.currency)
-                    )}
+                {block.title && <p className="font-medium">{block.title}</p>}
+                {block.description && (
+                  <p className="mt-1 text-muted-foreground">
+                    {block.description}
                   </p>
-                </div>
+                )}
+                {block.cta && (
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wide">
+                    CTA: {block.cta}
+                  </p>
+                )}
               </li>
-            );
-          })}
-        </ul>
-      </section>
+            ))}
+          </ol>
+        </div>
 
-      <Separator />
+        {copy.sms && (
+          <div>
+            <p className="text-xs uppercase text-muted-foreground">SMS</p>
+            <p>{copy.sms}</p>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
 
-      <section>
-        <h3 className="mb-3 font-semibold">All Variants</h3>
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {figma.variants.map((variant) => {
-            const isSelected = variant.variantName === figma.selectedVariant;
-            return (
-              <li
-                key={variant.variantName}
-                className={`overflow-hidden rounded-lg border ${
-                  isSelected ? "border-2 border-primary" : ""
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+function ProductsCard({ products }: { products: ProductSnapshot[] }) {
+  return (
+    <Card title={`Products (${products.length})`}>
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {products.map((product) => {
+          const showSale = isOnSale(product);
+          return (
+            <li
+              key={product.sku}
+              className="overflow-hidden rounded-lg border border-border/60 bg-card"
+            >
+              {product.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={variant.thumbnailUrl}
-                  alt={variant.variantName}
-                  className="w-full"
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="h-32 w-full object-cover"
                 />
-                <p className="p-2 text-center text-sm">
-                  {variant.variantName}
-                  {isSelected && " (selected)"}
+              )}
+              <div className="p-2">
+                <p className="truncate text-xs font-medium">{product.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {showSale ? (
+                    <>
+                      <span className="line-through">
+                        {formatPrice(product.price, product.currency)}
+                      </span>{" "}
+                      {formatPrice(product.salePrice, product.currency)}
+                    </>
+                  ) : (
+                    formatPrice(product.price, product.currency)
+                  )}
                 </p>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+}
+
+function VariantsCard({ figma }: { figma: FigmaResult }) {
+  return (
+    <Card title="All Variants">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {figma.variants.map((variant) => {
+          const isSelected = variant.variantName === figma.selectedVariant;
+          return (
+            <li
+              key={variant.variantName}
+              className={`overflow-hidden rounded-lg border ${
+                isSelected ? "border-2 border-accent" : "border-border/60"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={variant.thumbnailUrl}
+                alt={variant.variantName}
+                className="w-full"
+              />
+              <p className="p-2 text-center text-sm">
+                {variant.variantName}
+                {isSelected && (
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    (selected)
+                  </span>
+                )}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
   );
 }

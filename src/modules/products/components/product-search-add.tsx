@@ -35,7 +35,7 @@ export function ProductSearchAdd({
         onChange={(e) => setQuery(e.target.value)}
       />
       {showDropdown && (
-        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-lg">
           {isSearching && available.length === 0 && (
             <div className="p-3 text-sm text-muted-foreground">Searching…</div>
           )}
@@ -43,7 +43,7 @@ export function ProductSearchAdd({
             <button
               key={product.sku}
               type="button"
-              className="flex w-full items-center gap-3 p-2 text-left hover:bg-gray-50"
+              className="flex w-full items-center gap-3 p-2 text-left hover:bg-muted"
               onClick={() => handleAdd(product)}
             >
               {product.imageUrl && (

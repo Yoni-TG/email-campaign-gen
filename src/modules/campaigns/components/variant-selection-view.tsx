@@ -39,7 +39,7 @@ export function VariantSelectionView({ campaign }: { campaign: Campaign }) {
               className={`relative overflow-hidden rounded-lg border-2 transition-colors ${
                 isActive
                   ? "border-primary"
-                  : "border-gray-200 hover:border-gray-300"
+                  : "border-border hover:border-muted-foreground/40"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
