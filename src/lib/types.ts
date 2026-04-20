@@ -12,6 +12,16 @@ export const CAMPAIGN_STATUSES = [
 
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
+export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
+  draft: "Draft",
+  generating: "Generating…",
+  review: "Needs Review",
+  hero_upload: "Hero Image",
+  filling_figma: "Filling Figma…",
+  variant_selection: "Pick Variant",
+  completed: "Completed",
+};
+
 // ─── Campaign Types ───
 
 export const CAMPAIGN_TYPES = [

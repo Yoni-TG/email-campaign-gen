@@ -94,6 +94,38 @@ export async function listCampaigns(): Promise<Campaign[]> {
   return rows.map(parseCampaign);
 }
 
+// Row shape for list views — skips the heavy JSON blobs (seed, generatedCopy,
+// products, figma) that the home page doesn't need to render.
+export interface CampaignSummary {
+  id: string;
+  name: string;
+  status: CampaignStatus;
+  campaignType: CampaignType;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export async function listCampaignSummaries(): Promise<CampaignSummary[]> {
+  const rows = await prisma.campaign.findMany({
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      status: true,
+      campaignType: true,
+      createdBy: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  return rows.map((row) => ({
+    ...row,
+    status: row.status as CampaignStatus,
+    campaignType: row.campaignType as CampaignType,
+  }));
+}
+
 export async function getCampaign(id: string): Promise<Campaign | null> {
   const row = await prisma.campaign.findUnique({ where: { id } });
   return row ? parseCampaign(row) : null;
