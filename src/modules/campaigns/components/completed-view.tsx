@@ -104,9 +104,7 @@ function Card({
 }) {
   return (
     <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        {title}
-      </h3>
+      <h3 className="mb-4 text-base font-semibold text-foreground">{title}</h3>
       {children}
     </section>
   );

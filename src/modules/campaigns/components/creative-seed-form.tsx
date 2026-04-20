@@ -1,7 +1,13 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { Info } from "lucide-react";
+import {
+  Info,
+  FileText,
+  MessageSquareText,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,9 +115,9 @@ export function CreativeSeedForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto max-w-3xl space-y-10 rounded-xl border border-border bg-card p-8 shadow-sm"
+      className="mx-auto max-w-3xl space-y-8 rounded-xl border border-border bg-card p-8 shadow-sm"
     >
-      <FormSection title="Basics">
+      <FormSection icon={FileText} title="Basics">
         <div className="space-y-1.5">
           <Label htmlFor="name">Campaign Name *</Label>
           <Input
@@ -140,7 +146,7 @@ export function CreativeSeedForm() {
                     onChange={(e) =>
                       setField("campaignType", e.target.value as CampaignType)
                     }
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    className="h-10 w-full rounded-lg border border-input/60 bg-muted/30 px-3.5 text-sm transition-colors hover:bg-muted/50 focus-visible:bg-card focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:outline-none"
                     required
                     {...props}
                   >
@@ -159,7 +165,7 @@ export function CreativeSeedForm() {
           </div>
 
           <div className="flex items-end">
-            <label className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors hover:bg-muted">
+            <label className="flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-input/60 bg-muted/30 px-3.5 text-sm transition-colors hover:bg-muted/50">
               <input
                 type="checkbox"
                 checked={state.includeSms}
@@ -172,7 +178,7 @@ export function CreativeSeedForm() {
         </div>
       </FormSection>
 
-      <FormSection title="Brief">
+      <FormSection icon={MessageSquareText} title="Brief">
         <div className="space-y-1.5">
           <Label htmlFor="mainMessage">Main Message *</Label>
           <Textarea
@@ -216,6 +222,7 @@ export function CreativeSeedForm() {
       </FormSection>
 
       <FormSection
+        icon={Sparkles}
         title="Voice"
         hint="Shapes the tone of the generated copy and the wireframe's layout mood."
       >
@@ -258,7 +265,7 @@ export function CreativeSeedForm() {
         </div>
       </FormSection>
 
-      <FormSection title="Audience & Products">
+      <FormSection icon={Users} title="Audience & Products">
         <div className="space-y-2">
           <Label>Target Categories *</Label>
           <div className="flex flex-wrap gap-2">

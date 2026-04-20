@@ -23,7 +23,7 @@ export function CampaignList({ campaigns }: { campaigns: CampaignSummary[] }) {
         <li key={campaign.id}>
           <Link
             href={`/campaigns/${campaign.id}`}
-            className="group flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-accent/40 hover:shadow-md"
+            className="group flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-muted/40"
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{campaign.name}</p>
@@ -35,7 +35,7 @@ export function CampaignList({ campaigns }: { campaigns: CampaignSummary[] }) {
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <StatusBadgeWithTooltip status={campaign.status} />
-              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground" />
             </div>
           </Link>
         </li>
