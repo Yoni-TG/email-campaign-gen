@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ProductSearchResult } from "@/modules/products/utils/product-api-shape";
+import type { ProductSnapshot } from "@/lib/types";
 
 interface UseProductSearchResult {
-  results: ProductSearchResult[];
+  results: ProductSnapshot[];
   isSearching: boolean;
 }
 
-// Debounced GET /api/products?q=... — returns the live results for the current
-// query. Empty query (shorter than minLength) returns [] without hitting the
-// API. Resets automatically when the query changes or the component unmounts.
+// Debounced GET /api/products?q=... — returns the live ProductSnapshots for
+// the current query. Empty query (shorter than minLength) returns [] without
+// hitting the API. Resets when the query changes or the component unmounts.
 export function useProductSearch(
   query: string,
   minLength = 2,
   debounceMs = 300,
 ): UseProductSearchResult {
-  const [results, setResults] = useState<ProductSearchResult[]>([]);
+  const [results, setResults] = useState<ProductSnapshot[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function useProductSearch(
           setResults([]);
           return;
         }
-        setResults((await res.json()) as ProductSearchResult[]);
+        setResults((await res.json()) as ProductSnapshot[]);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           setResults([]);

@@ -9,8 +9,8 @@ import type {
   CreativeSeed,
   LeadPersonality,
   LeadValue,
+  ProductSnapshot,
 } from "@/lib/types";
-import type { ProductSearchResult } from "@/modules/products/utils/product-api-shape";
 
 export interface CreativeSeedFormState {
   name: string;
@@ -23,7 +23,7 @@ export interface CreativeSeedFormState {
   includeSms: boolean;
   leadValue: LeadValue;
   leadPersonalities: LeadPersonality[];
-  pinnedProducts: ProductSearchResult[];
+  pinnedProducts: ProductSnapshot[];
 }
 
 export interface UseCreativeSeedFormResult {

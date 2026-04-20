@@ -1,22 +1,9 @@
-import type { DigestedProduct } from "@/lib/types";
+import type { DigestedProduct, ProductSnapshot } from "@/lib/types";
 
-// Lighter shape returned by the /api/products search endpoint. Picks only the
-// fields the frontend needs for autocomplete / pinning; full DigestedProduct
-// stays server-side.
-export interface ProductSearchResult {
-  sku: string;
-  name: string;
-  imageUrl: string;
-  price: string;
-  salePrice: string;
-  currency: string;
-  link: string;
-  productType: string[];
-}
-
-export function toProductSearchResult(
-  product: DigestedProduct,
-): ProductSearchResult {
+// Converts a digested feed product into the ProductSnapshot stored on campaign
+// rows. Centralized here so the API route, the review-add flow, and the
+// product-selection service all produce the same shape.
+export function toProductSnapshot(product: DigestedProduct): ProductSnapshot {
   return {
     sku: product.sku,
     name: product.name,
@@ -26,5 +13,9 @@ export function toProductSearchResult(
     currency: product.currency,
     link: product.link,
     productType: product.productType,
+    priceTier: product.priceTier,
+    isOnSale: product.isOnSale,
+    reviewTier: product.reviewTier,
+    personalizationSummary: product.personalizationSummary,
   };
 }

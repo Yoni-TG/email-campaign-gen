@@ -4,11 +4,11 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useProductSearch } from "@/modules/products/hooks/use-product-search";
-import type { ProductSearchResult } from "@/modules/products/utils/product-api-shape";
+import type { ProductSnapshot } from "@/lib/types";
 
 interface ProductPickerProps {
-  selected: ProductSearchResult[];
-  onChange: (products: ProductSearchResult[]) => void;
+  selected: ProductSnapshot[];
+  onChange: (products: ProductSnapshot[]) => void;
 }
 
 export function ProductPicker({ selected, onChange }: ProductPickerProps) {
@@ -16,7 +16,7 @@ export function ProductPicker({ selected, onChange }: ProductPickerProps) {
   const { results, isSearching } = useProductSearch(query);
   const selectedSkus = new Set(selected.map((p) => p.sku));
 
-  const addProduct = (product: ProductSearchResult) => {
+  const addProduct = (product: ProductSnapshot) => {
     if (!selectedSkus.has(product.sku)) {
       onChange([...selected, product]);
     }
