@@ -1,10 +1,28 @@
-export default function HomePage() {
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { CampaignList } from "@/modules/campaigns/components/campaign-list";
+import { listCampaignSummaries } from "@/modules/campaigns/utils/campaign-persistence";
+
+// DB-backed — must render per request so new campaigns show up immediately.
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const campaigns = await listCampaignSummaries();
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-semibold">Theo Grace — Campaign Generator</h1>
-      <p className="text-gray-600">
-        Scaffolded. Campaign list UI comes in Task 9.
-      </p>
+    <div>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Campaigns</h1>
+          <p className="text-muted-foreground">
+            Theo Grace email campaign generator
+          </p>
+        </div>
+        <Link href="/campaigns/new">
+          <Button>New Campaign</Button>
+        </Link>
+      </div>
+      <CampaignList campaigns={campaigns} />
     </div>
   );
 }

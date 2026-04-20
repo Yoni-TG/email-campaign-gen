@@ -3,7 +3,7 @@ import {
   ensureFeedLoaded,
   searchProducts,
 } from "@/modules/products/services/product-feed";
-import { toProductSearchResult } from "@/modules/products/utils/product-api-shape";
+import { toProductSnapshot } from "@/modules/products/utils/product-api-shape";
 
 const DEFAULT_LIMIT = 20;
 
@@ -20,6 +20,6 @@ export async function GET(request: NextRequest) {
 
   if (!query) return NextResponse.json([]);
 
-  const results = searchProducts(query, limit).map(toProductSearchResult);
+  const results = searchProducts(query, limit).map(toProductSnapshot);
   return NextResponse.json(results);
 }

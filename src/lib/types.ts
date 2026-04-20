@@ -12,6 +12,16 @@ export const CAMPAIGN_STATUSES = [
 
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
+export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
+  draft: "Draft",
+  generating: "Generating…",
+  review: "Needs Review",
+  hero_upload: "Hero Image",
+  filling_figma: "Filling Figma…",
+  variant_selection: "Pick Variant",
+  completed: "Completed",
+};
+
 // ─── Campaign Types ───
 
 export const CAMPAIGN_TYPES = [
@@ -42,6 +52,12 @@ export const LEAD_VALUES = [
 ] as const;
 export type LeadValue = (typeof LEAD_VALUES)[number];
 
+export const LEAD_VALUE_LABELS: Record<LeadValue, string> = {
+  family_first: "Family First",
+  meaningful_moments: "Meaningful Moments",
+  joy: "Joy",
+};
+
 // Which personalities the campaign emphasizes (brand-guide §4).
 // A single brief can mix more than one — the wireframe agent uses them to
 // modulate layout mood (see wireframe-guide §3).
@@ -52,6 +68,13 @@ export const LEAD_PERSONALITIES = [
   "warm_hearted",
 ] as const;
 export type LeadPersonality = (typeof LEAD_PERSONALITIES)[number];
+
+export const LEAD_PERSONALITY_LABELS: Record<LeadPersonality, string> = {
+  joyfully_characterful: "Joyfully Characterful",
+  fun: "Fun",
+  charming: "Charming",
+  warm_hearted: "Warm-hearted",
+};
 
 export interface CreativeSeed {
   targetCategories: string[];

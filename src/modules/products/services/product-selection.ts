@@ -11,6 +11,7 @@ import {
   getProductBySku,
 } from "@/modules/products/services/product-feed";
 import { filterProducts } from "@/modules/products/utils/product-filter";
+import { toProductSnapshot } from "@/modules/products/utils/product-api-shape";
 import {
   buildRerankSystemPrompt,
   buildRerankUserPrompt,
@@ -43,23 +44,6 @@ function getAnthropic(): Anthropic {
   if (anthropicClient) return anthropicClient;
   anthropicClient = new Anthropic();
   return anthropicClient;
-}
-
-function toSnapshot(product: DigestedProduct): ProductSnapshot {
-  return {
-    sku: product.sku,
-    name: product.name,
-    imageUrl: product.imageUrl,
-    price: product.price,
-    salePrice: product.salePrice,
-    currency: product.currency,
-    link: product.link,
-    productType: product.productType,
-    priceTier: product.priceTier,
-    isOnSale: product.isOnSale,
-    reviewTier: product.reviewTier,
-    personalizationSummary: product.personalizationSummary,
-  };
 }
 
 async function rerankWithLLM(
@@ -134,14 +118,14 @@ export async function selectProducts(
   const result: ProductSnapshot[] = [];
   for (const sku of pinnedSkus) {
     const product = getProductBySku(sku);
-    if (product) result.push(toSnapshot(product));
+    if (product) result.push(toProductSnapshot(product));
   }
 
   const candidateIndex = new Map(candidates.map((p) => [p.sku, p]));
   for (const sku of selectedSkus) {
     if (pinnedSet.has(sku)) continue;
     const product = candidateIndex.get(sku) ?? getProductBySku(sku);
-    if (product) result.push(toSnapshot(product));
+    if (product) result.push(toProductSnapshot(product));
   }
 
   return result.slice(0, count);
