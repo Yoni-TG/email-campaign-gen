@@ -17,6 +17,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 import type { ProductSnapshot } from "@/lib/types";
+import {
+  formatPrice,
+  isOnSale,
+} from "@/modules/products/utils/product-price";
 
 interface ProductGridProps {
   products: ProductSnapshot[];
@@ -38,7 +42,7 @@ function SortableProductCard({
     transition,
   };
 
-  const showSale = product.salePrice && product.salePrice !== product.price;
+  const showSale = isOnSale(product);
 
   return (
     <div
@@ -70,16 +74,14 @@ function SortableProductCard({
           {showSale ? (
             <>
               <span className="text-muted-foreground line-through">
-                {product.currency} {product.price}
+                {formatPrice(product.price, product.currency)}
               </span>{" "}
               <span className="font-medium">
-                {product.currency} {product.salePrice}
+                {formatPrice(product.salePrice, product.currency)}
               </span>
             </>
           ) : (
-            <span>
-              {product.currency} {product.price}
-            </span>
+            <span>{formatPrice(product.price, product.currency)}</span>
           )}
         </p>
       </div>

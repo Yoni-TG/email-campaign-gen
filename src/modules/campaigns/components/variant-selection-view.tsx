@@ -1,19 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useVariantSelection } from "@/modules/campaigns/hooks/use-variant-selection";
 import type { Campaign } from "@/lib/types";
 
 export function VariantSelectionView({ campaign }: { campaign: Campaign }) {
-  const router = useRouter();
-  const [selected, setSelected] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { selected, setSelected, isSubmitting, confirm } = useVariantSelection(
+    campaign.id,
+  );
 
   if (!campaign.figmaResult) {
-    // Shouldn't happen: state machine guarantees figmaResult exists here.
+    // Shouldn't happen: the state machine guarantees figmaResult exists here.
     return (
       <p className="text-sm text-destructive">
         Missing figmaResult — re-run the Figma fill.
@@ -22,31 +20,6 @@ export function VariantSelectionView({ campaign }: { campaign: Campaign }) {
   }
 
   const { variants } = campaign.figmaResult;
-
-  const handleConfirm = async () => {
-    if (!selected || isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch(
-        `/api/campaigns/${campaign.id}/select-variant`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ variantName: selected }),
-        },
-      );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error ?? "Variant selection failed");
-      }
-      router.refresh();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Variant selection failed";
-      toast.error(message);
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div>
@@ -90,7 +63,7 @@ export function VariantSelectionView({ campaign }: { campaign: Campaign }) {
 
       <div className="mt-8 flex justify-end">
         <Button
-          onClick={handleConfirm}
+          onClick={confirm}
           disabled={!selected || isSubmitting}
           size="lg"
         >

@@ -7,6 +7,10 @@ import {
   LEAD_VALUE_LABELS,
 } from "@/lib/types";
 import type { Campaign } from "@/lib/types";
+import {
+  formatPrice,
+  isOnSale,
+} from "@/modules/products/utils/product-price";
 
 export function CompletedView({ campaign }: { campaign: Campaign }) {
   if (
@@ -163,8 +167,7 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
         <h3 className="mb-3 font-semibold">Products ({products.length})</h3>
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => {
-            const showSale =
-              product.salePrice && product.salePrice !== product.price;
+            const showSale = isOnSale(product);
             return (
               <li
                 key={product.sku}
@@ -184,12 +187,12 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
                     {showSale ? (
                       <>
                         <span className="line-through">
-                          {product.currency} {product.price}
+                          {formatPrice(product.price, product.currency)}
                         </span>{" "}
-                        {product.currency} {product.salePrice}
+                        {formatPrice(product.salePrice, product.currency)}
                       </>
                     ) : (
-                      `${product.currency} ${product.price}`
+                      formatPrice(product.price, product.currency)
                     )}
                   </p>
                 </div>

@@ -12,10 +12,14 @@ interface GeneratingViewProps {
 
 export function GeneratingView({ campaignId, error }: GeneratingViewProps) {
   const router = useRouter();
-  // Stop polling once the server transitions away from `generating` OR the
-  // error field appears (backend set an error while keeping status stable).
+  // Stop polling once the server transitions away from `draft`/`generating`
+  // OR the error field appears (backend set an error while keeping status
+  // stable). `draft` is in the list because CampaignDetail routes that
+  // state here too — the form submits create→navigate before the
+  // fire-and-forget /generate call has flipped the row, so we can land
+  // on `draft` for a moment and must not spin-refresh while we wait.
   useCampaignPoll(campaignId, {
-    whileStatuses: error ? [] : ["generating"],
+    whileStatuses: error ? [] : ["draft", "generating"],
     initialError: error,
   });
 

@@ -3,8 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ApprovedCopy, Campaign, ProductSnapshot } from "@/lib/types";
+import type {
+  ApprovedCopy,
+  GeneratedCopy,
+  ProductSnapshot,
+} from "@/lib/types";
 import { initApprovedCopy } from "@/modules/campaigns/utils/copy-init";
+
+export interface UseReviewFormInput {
+  campaignId: string;
+  generatedCopy: GeneratedCopy;
+  generatedProducts: ProductSnapshot[];
+}
 
 export interface UseReviewFormResult {
   approvedCopy: ApprovedCopy;
@@ -17,24 +27,24 @@ export interface UseReviewFormResult {
   approve: () => Promise<void>;
 }
 
-// Drives the review-view state: initial copy + products seeded from the
-// generation output, editable in place, and a submit that hits /approve and
-// refreshes the server component so the next stage takes over.
-export function useReviewForm(campaign: Campaign): UseReviewFormResult {
+// Drives the review-view state: seeds ApprovedCopy + product list from the
+// generation output, edits them in place, and submits /approve followed by
+// router.refresh so the next stage takes over.
+//
+// Input is narrowed to non-nullable fields — the caller is responsible for
+// the "has generation data" precondition, so hook calls here are
+// unconditional and never re-order across renders.
+export function useReviewForm({
+  campaignId,
+  generatedCopy,
+  generatedProducts,
+}: UseReviewFormInput): UseReviewFormResult {
   const router = useRouter();
-
-  if (!campaign.generatedCopy || !campaign.generatedProducts) {
-    throw new Error(
-      `Campaign ${campaign.id} reached review without generatedCopy/generatedProducts.`,
-    );
-  }
-
   const [approvedCopy, setApprovedCopy] = useState<ApprovedCopy>(() =>
-    initApprovedCopy(campaign.generatedCopy!),
+    initApprovedCopy(generatedCopy),
   );
-  const [products, setProducts] = useState<ProductSnapshot[]>(
-    campaign.generatedProducts,
-  );
+  const [products, setProducts] =
+    useState<ProductSnapshot[]>(generatedProducts);
   const [isApproving, setIsApproving] = useState(false);
 
   const addProduct = (product: ProductSnapshot) => {
@@ -51,7 +61,7 @@ export function useReviewForm(campaign: Campaign): UseReviewFormResult {
     if (isApproving) return;
     setIsApproving(true);
     try {
-      const res = await fetch(`/api/campaigns/${campaign.id}/approve`, {
+      const res = await fetch(`/api/campaigns/${campaignId}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,6 +77,7 @@ export function useReviewForm(campaign: Campaign): UseReviewFormResult {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Approval failed";
       toast.error(message);
+    } finally {
       setIsApproving(false);
     }
   };

@@ -8,6 +8,36 @@ import { useReviewForm } from "@/modules/campaigns/hooks/use-review-form";
 import type { Campaign } from "@/lib/types";
 
 export function ReviewView({ campaign }: { campaign: Campaign }) {
+  if (!campaign.generatedCopy || !campaign.generatedProducts) {
+    // State machine should prevent this, but render a safe fallback so we
+    // never mount useReviewForm without its required data.
+    return (
+      <p className="text-sm text-destructive">
+        Campaign is missing generated copy or products — re-run generation.
+      </p>
+    );
+  }
+
+  return (
+    <ReviewBody
+      campaign={campaign}
+      generatedCopy={campaign.generatedCopy}
+      generatedProducts={campaign.generatedProducts}
+    />
+  );
+}
+
+// Split so useReviewForm only mounts when the preconditions are satisfied.
+// Keeps hook order stable across renders (no throw between hook calls).
+function ReviewBody({
+  campaign,
+  generatedCopy,
+  generatedProducts,
+}: {
+  campaign: Campaign;
+  generatedCopy: NonNullable<Campaign["generatedCopy"]>;
+  generatedProducts: NonNullable<Campaign["generatedProducts"]>;
+}) {
   const {
     approvedCopy,
     setApprovedCopy,
@@ -16,7 +46,11 @@ export function ReviewView({ campaign }: { campaign: Campaign }) {
     addProduct,
     isApproving,
     approve,
-  } = useReviewForm(campaign);
+  } = useReviewForm({
+    campaignId: campaign.id,
+    generatedCopy,
+    generatedProducts,
+  });
 
   const existingSkus = new Set(products.map((p) => p.sku));
 
@@ -26,7 +60,7 @@ export function ReviewView({ campaign }: { campaign: Campaign }) {
         <section>
           <h2 className="mb-4 text-lg font-semibold">Campaign Copy</h2>
           <CopyEditor
-            generatedCopy={campaign.generatedCopy!}
+            generatedCopy={generatedCopy}
             value={approvedCopy}
             onChange={setApprovedCopy}
           />
