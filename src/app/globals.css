@@ -65,15 +65,15 @@
   --secondary-foreground: oklch(0.24 0.005 60);
   --muted: oklch(0.955 0.005 60);
   --muted-foreground: oklch(0.52 0.008 60);  /* stone-500 */
-  --accent: oklch(0.72 0.155 60);            /* amber-600 */
+  --accent: oklch(0.5 0.07 200);             /* desaturated teal — brand accent */
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.91 0.005 60);            /* stone-200 */
   --input: oklch(0.91 0.005 60);
-  --ring: oklch(0.72 0.155 60);              /* amber-600 focus */
-  --chart-1: oklch(0.72 0.155 60);
+  --ring: oklch(0.5 0.07 200);               /* matches accent */
+  --chart-1: oklch(0.5 0.07 200);
   --chart-2: oklch(0.6 0.14 260);
-  --chart-3: oklch(0.55 0.16 160);
+  --chart-3: oklch(0.55 0.16 140);
   --chart-4: oklch(0.6 0.18 20);
   --chart-5: oklch(0.55 0.15 310);
   --radius: 0.625rem;
@@ -84,7 +84,7 @@
   --sidebar-accent: oklch(0.955 0.005 60);
   --sidebar-accent-foreground: oklch(0.215 0.005 60);
   --sidebar-border: oklch(0.91 0.005 60);
-  --sidebar-ring: oklch(0.72 0.155 60);
+  --sidebar-ring: oklch(0.5 0.07 200);
 }
 
 .dark {

@@ -12,8 +12,9 @@ interface FormSectionProps {
   children: ReactNode;
 }
 
-// Icon-tile + title + optional hint. Sections are delineated by spacing,
-// not borders — the tile carries enough visual weight to anchor the section.
+// Icon-tile + title + optional hint. Title sits center-aligned with the
+// tile so the header reads as a single unit. Sections are delineated by
+// spacing alone — no dividers.
 export function FormSection({
   title,
   hint,
@@ -22,15 +23,15 @@ export function FormSection({
 }: FormSectionProps) {
   return (
     <section className="space-y-4">
-      <header className="flex items-start gap-3">
+      <header className="flex items-center gap-3">
         <span
-          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent ring-1 ring-inset ring-accent/15"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent ring-1 ring-inset ring-accent/20"
           aria-hidden
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold leading-tight text-foreground">
+          <h2 className="text-lg font-semibold leading-tight text-foreground">
             {title}
           </h2>
           {hint && (
@@ -38,7 +39,7 @@ export function FormSection({
           )}
         </div>
       </header>
-      <div className="space-y-4 pl-0 sm:pl-11">{children}</div>
+      <div className="space-y-4 pl-0 sm:pl-[52px]">{children}</div>
     </section>
   );
 }
