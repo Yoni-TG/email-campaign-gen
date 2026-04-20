@@ -46,7 +46,7 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
   );
 }
 
-// Sticky top banner: hero thumbnail (if uploaded) + the chosen variant + a
+// Top banner: hero thumbnail (if uploaded) + the chosen variant + a
 // one-click path back to the Figma file.
 function HeroBanner({
   campaign,
@@ -60,7 +60,7 @@ function HeroBanner({
   );
 
   return (
-    <div className="sticky top-4 z-10 flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
       {campaign.heroImagePath && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
