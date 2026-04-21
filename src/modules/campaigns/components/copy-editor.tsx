@@ -55,7 +55,7 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
                 className={`w-full rounded border p-2 text-left text-sm transition-colors ${
                   sameVariant(value.subject_variant, variant)
                     ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:bg-gray-50"
+                    : "border-border hover:bg-muted"
                 }`}
               >
                 <p className="font-medium">{variant.subject}</p>
@@ -113,7 +113,7 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
         {value.body_blocks.map((block, i) => (
           <div
             key={i}
-            className="space-y-3 rounded-md border bg-gray-50 p-3"
+            className="space-y-3 rounded-md border border-border/60 bg-muted/40 p-3"
           >
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Block {i + 1}

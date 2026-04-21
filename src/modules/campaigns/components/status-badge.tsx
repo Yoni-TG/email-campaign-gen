@@ -1,25 +1,85 @@
-import { Badge } from "@/components/ui/badge";
 import type { CampaignStatus } from "@/lib/types";
 import { CAMPAIGN_STATUS_LABELS } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+interface StatusStyle {
+  bg: string;
+  text: string;
+  ring: string;
+  dot: string;
+  /** Whether the dot should pulse — reserve for "AI is working" states. */
+  pulse?: boolean;
+}
 
-// Variant is purely visual — the label itself lives on CAMPAIGN_STATUS_LABELS
-// so the detail/review pages can reuse it without importing the badge.
-const STATUS_VARIANTS: Record<CampaignStatus, BadgeVariant> = {
-  draft: "outline",
-  generating: "secondary",
-  review: "default",
-  hero_upload: "default",
-  filling_figma: "secondary",
-  variant_selection: "default",
-  completed: "outline",
+// Bookends neutral/green. Automated-in-progress cool (sky/violet). User-
+// action warm (amber/rose/indigo). All pairs are ≥4.5:1 on white.
+const STATUS_STYLES: Record<CampaignStatus, StatusStyle> = {
+  draft: {
+    bg: "bg-stone-100",
+    text: "text-stone-700",
+    ring: "ring-stone-200",
+    dot: "bg-stone-400",
+  },
+  generating: {
+    bg: "bg-sky-50",
+    text: "text-sky-800",
+    ring: "ring-sky-200",
+    dot: "bg-sky-500",
+    pulse: true,
+  },
+  review: {
+    bg: "bg-amber-50",
+    text: "text-amber-900",
+    ring: "ring-amber-200",
+    dot: "bg-amber-500",
+  },
+  hero_upload: {
+    bg: "bg-rose-50",
+    text: "text-rose-800",
+    ring: "ring-rose-200",
+    dot: "bg-rose-500",
+  },
+  filling_figma: {
+    bg: "bg-violet-50",
+    text: "text-violet-800",
+    ring: "ring-violet-200",
+    dot: "bg-violet-500",
+    pulse: true,
+  },
+  variant_selection: {
+    bg: "bg-indigo-50",
+    text: "text-indigo-800",
+    ring: "ring-indigo-200",
+    dot: "bg-indigo-500",
+  },
+  completed: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-800",
+    ring: "ring-emerald-200",
+    dot: "bg-emerald-500",
+  },
 };
 
 export function StatusBadge({ status }: { status: CampaignStatus }) {
+  const s = STATUS_STYLES[status];
   return (
-    <Badge variant={STATUS_VARIANTS[status]}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap",
+        s.bg,
+        s.text,
+        s.ring,
+      )}
+    >
+      <span
+        className={cn(
+          "h-1.5 w-1.5 rounded-full",
+          s.dot,
+          s.pulse && "animate-pulse",
+        )}
+        aria-hidden
+      />
       {CAMPAIGN_STATUS_LABELS[status]}
-    </Badge>
+    </span>
   );
 }

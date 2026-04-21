@@ -9,12 +9,12 @@ import type { Campaign } from "@/lib/types";
 
 export function ReviewView({ campaign }: { campaign: Campaign }) {
   if (!campaign.generatedCopy || !campaign.generatedProducts) {
-    // State machine should prevent this, but render a safe fallback so we
-    // never mount useReviewForm without its required data.
     return (
-      <p className="text-sm text-destructive">
-        Campaign is missing generated copy or products — re-run generation.
-      </p>
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <p className="text-sm text-destructive">
+          Campaign is missing generated copy or products — re-run generation.
+        </p>
+      </div>
     );
   }
 
@@ -55,10 +55,12 @@ function ReviewBody({
   const existingSkus = new Set(products.map((p) => p.sku));
 
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <section>
-          <h2 className="mb-4 text-lg font-semibold">Campaign Copy</h2>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-foreground">
+            Campaign Copy
+          </h2>
           <CopyEditor
             generatedCopy={generatedCopy}
             value={approvedCopy}
@@ -66,10 +68,13 @@ function ReviewBody({
           />
         </section>
 
-        <section>
-          <h2 className="mb-4 text-lg font-semibold">
-            Products ({products.length})
-          </h2>
+        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-foreground">Products</h2>
+            <span className="text-sm text-muted-foreground">
+              {products.length} selected
+            </span>
+          </div>
           <div className="mb-4">
             <ProductSearchAdd existingSkus={existingSkus} onAdd={addProduct} />
           </div>
@@ -77,7 +82,7 @@ function ReviewBody({
         </section>
       </div>
 
-      <div className="mt-8 flex justify-end border-t pt-6">
+      <div className="flex justify-end">
         <Button onClick={approve} disabled={isApproving} size="lg">
           {isApproving ? "Approving…" : "Approve & Continue"}
         </Button>

@@ -48,7 +48,7 @@ function SortableProductCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-3 rounded-lg border bg-white p-3"
+      className="flex items-start gap-3 rounded-lg border bg-card p-3"
     >
       <button
         type="button"
