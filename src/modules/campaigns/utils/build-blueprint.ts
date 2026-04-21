@@ -25,11 +25,13 @@ export function buildBlueprint({
     campaign_id: campaignId,
     lead_value: seed.leadValue,
     lead_personalities: seed.leadPersonalities,
+    market: seed.market ?? "us",
     free_top_text: approvedCopy.free_top_text,
     subject_variant: approvedCopy.subject_variant,
     hero_image_url: heroImagePath ?? "",
     body_blocks: approvedCopy.body_blocks,
     sms: approvedCopy.sms,
+    nicky_quote: approvedCopy.nicky_quote,
     products: approvedProducts.map((p) => ({
       title: p.name,
       price: p.salePrice || p.price,

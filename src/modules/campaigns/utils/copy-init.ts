@@ -1,8 +1,8 @@
 import type { ApprovedCopy, GeneratedCopy } from "@/lib/types";
 
 // Seeds the ApprovedCopy editor state from the LLM output. Picks the first
-// subject variant and deep-clones body blocks so the editor can mutate
-// without touching generatedCopy.
+// subject variant and deep-clones body blocks + nicky_quote so the editor
+// can mutate without touching generatedCopy.
 export function initApprovedCopy(generated: GeneratedCopy): ApprovedCopy {
   if (generated.subject_variants.length === 0) {
     throw new Error(
@@ -16,5 +16,6 @@ export function initApprovedCopy(generated: GeneratedCopy): ApprovedCopy {
     body_blocks: generated.body_blocks.map((block) => ({ ...block })),
     subject_variant: { ...generated.subject_variants[0] },
     sms: generated.sms,
+    nicky_quote: generated.nicky_quote ? { ...generated.nicky_quote } : null,
   };
 }

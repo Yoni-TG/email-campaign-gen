@@ -29,8 +29,15 @@ import {
   LEAD_VALUE_DESCRIPTIONS,
   LEAD_VALUE_LABELS,
   LEAD_VALUES,
+  MARKETS,
+  MARKET_LABELS,
 } from "@/lib/types";
-import type { CampaignType, LeadPersonality, LeadValue } from "@/lib/types";
+import type {
+  CampaignType,
+  LeadPersonality,
+  LeadValue,
+  Market,
+} from "@/lib/types";
 import { useCreativeSeedForm } from "@/modules/campaigns/hooks/use-creative-seed-form";
 
 const chipClass = (active: boolean) =>
@@ -175,6 +182,28 @@ export function CreativeSeedForm() {
               <span>Include SMS copy</span>
             </label>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="market">Market *</Label>
+            <InfoHint>
+              Drives US vs UK spelling + date format (brand-guide §8.6).
+            </InfoHint>
+          </div>
+          <select
+            id="market"
+            value={state.market}
+            onChange={(e) => setField("market", e.target.value as Market)}
+            className="h-10 w-full rounded-lg border border-input/60 bg-muted/30 px-3.5 text-sm transition-colors hover:bg-muted/50 focus-visible:bg-card focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:outline-none"
+            required
+          >
+            {MARKETS.map((value) => (
+              <option key={value} value={value}>
+                {MARKET_LABELS[value]}
+              </option>
+            ))}
+          </select>
         </div>
       </FormSection>
 

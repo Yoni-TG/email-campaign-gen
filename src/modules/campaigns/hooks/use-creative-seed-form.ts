@@ -9,6 +9,7 @@ import type {
   CreativeSeed,
   LeadPersonality,
   LeadValue,
+  Market,
   ProductSnapshot,
 } from "@/lib/types";
 
@@ -24,6 +25,7 @@ export interface CreativeSeedFormState {
   leadValue: LeadValue;
   leadPersonalities: LeadPersonality[];
   pinnedProducts: ProductSnapshot[];
+  market: Market;
 }
 
 export interface UseCreativeSeedFormResult {
@@ -53,6 +55,7 @@ const EMPTY: CreativeSeedFormState = {
   leadValue: "family_first",
   leadPersonalities: [],
   pinnedProducts: [],
+  market: "us",
 };
 
 function toggle<T>(list: T[], item: T): T[] {
@@ -70,6 +73,7 @@ function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
     includeSms: state.includeSms,
     leadValue: state.leadValue,
     leadPersonalities: state.leadPersonalities,
+    market: state.market,
   };
 }
 

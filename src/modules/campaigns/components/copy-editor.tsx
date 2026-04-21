@@ -7,6 +7,7 @@ import type {
   ApprovedCopy,
   BodyBlock,
   GeneratedCopy,
+  NickyQuote,
   SubjectVariant,
 } from "@/lib/types";
 
@@ -34,6 +35,16 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
       i === index ? { ...block, ...partial } : block,
     );
     patch({ body_blocks: next });
+  };
+
+  const patchNicky = (partial: Partial<NickyQuote>) => {
+    const next: NickyQuote = {
+      quote: value.nicky_quote?.quote ?? "",
+      response: value.nicky_quote?.response ?? null,
+      ...partial,
+    };
+    // Empty quote = clear the whole slot.
+    patch({ nicky_quote: next.quote.trim().length > 0 ? next : null });
   };
 
   return (
@@ -163,6 +174,36 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
           />
         </section>
       )}
+
+      <section className="space-y-3">
+        <div>
+          <Label className="text-base font-semibold">Nicky Quote</Label>
+          <p className="text-xs text-muted-foreground">
+            Brand-guide §7 — use when a claim would sound boastful in our
+            voice. Clear the quote to omit.
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-sm">Quote</Label>
+          <Textarea
+            value={value.nicky_quote?.quote ?? ""}
+            onChange={(e) => patchNicky({ quote: e.target.value })}
+            placeholder="Short, specific, on-persona quote from Nicky."
+            rows={2}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-sm">Response (optional)</Label>
+          <Input
+            value={value.nicky_quote?.response ?? ""}
+            onChange={(e) =>
+              patchNicky({ response: emptyToNull(e.target.value) })
+            }
+            placeholder='e.g. "Thank you Nicky!"'
+            disabled={!value.nicky_quote}
+          />
+        </div>
+      </section>
     </div>
   );
 }

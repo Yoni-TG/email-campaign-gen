@@ -101,13 +101,28 @@ describe("buildRerankSystemPrompt", () => {
 describe("buildRerankUserPrompt", () => {
   it("includes the campaign brief, count, and product candidates", () => {
     const prompt = buildRerankUserPrompt(seed, "editorial", [digested], 5);
-    expect(prompt).toContain("editorial");
+    expect(prompt).toContain("Editorial");
     expect(prompt).toContain("Valentine's Day gifts");
     expect(prompt).toContain("Show her how you feel");
     expect(prompt).toContain("20% off with code LOVE");
     expect(prompt).toContain("Keep it warm and personal");
     expect(prompt).toContain("SKU-001");
     expect(prompt).toMatch(/\b5 most relevant\b/);
+  });
+
+  it("threads lead value and personalities into the brief", () => {
+    const prompt = buildRerankUserPrompt(
+      makeSeed({
+        leadValue: "family_first",
+        leadPersonalities: ["warm_hearted", "joyfully_characterful"],
+      }),
+      "editorial",
+      [digested],
+      5,
+    );
+    expect(prompt).toMatch(/Lead value: Family First/);
+    expect(prompt).toMatch(/Warm-hearted/);
+    expect(prompt).toMatch(/Joyfully Characterful/);
   });
 
   it("skips optional fields when absent", () => {

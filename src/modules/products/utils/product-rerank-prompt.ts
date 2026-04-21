@@ -1,10 +1,15 @@
-import type {
-  CampaignType,
-  CreativeSeed,
-  DigestedProduct,
-  PriceTier,
-  PrimaryLanguage,
-  ReviewTier,
+import {
+  CAMPAIGN_TYPE_LABELS,
+  LEAD_PERSONALITY_DESCRIPTIONS,
+  LEAD_PERSONALITY_LABELS,
+  LEAD_VALUE_DESCRIPTIONS,
+  LEAD_VALUE_LABELS,
+  type CampaignType,
+  type CreativeSeed,
+  type DigestedProduct,
+  type PriceTier,
+  type PrimaryLanguage,
+  type ReviewTier,
 } from "@/lib/types";
 
 const MAX_DESCRIPTION_CHARS = 200;
@@ -21,18 +26,25 @@ const SYSTEM_PROMPT =
   `Ranking criteria — in priority order:\n` +
   `1. Campaign-theme fit. Does the product match the mainMessage, secondaryMessage, ` +
   `   and promoDetails? Use name, productType, collection, and occasion to judge.\n` +
-  `2. Audience fit. Use shopFor + occasion to gauge whether the product resonates ` +
+  `2. Lead-value + personality fit. The campaign brief names one lead_value (the ` +
+  `   emotional anchor) and 1+ lead_personalities (the voice). Prefer products ` +
+  `   that carry the same emotional weight — e.g. family_first → name / initial / ` +
+  `   birthstone pieces and family-occasion items; joy → bright, playful, gifting.\n` +
+  `3. Audience fit. Use shopFor + occasion to gauge whether the product resonates ` +
   `   with the implied recipient of the campaign.\n` +
-  `3. Social proof. Prefer reviewTier = "highly_reviewed", then "well_reviewed", ` +
+  `4. Social proof. Prefer reviewTier = "highly_reviewed", then "well_reviewed", ` +
   `   and break ties in favor of reviewTier over an equally-fitting but unrated ` +
   `   product.\n` +
-  `4. Price mix. Aim for a reasonable spread across priceTier values so readers ` +
-  `   see a mix of entry-point and hero pieces. Don't stack the list with one tier.\n` +
-  `5. Personalization relevance. When the campaign leans on customization, gifting, ` +
+  `5. Price mix. Among the N selected, ensure at least 2 price tiers are ` +
+  `   represented so readers see a mix of entry-point and hero pieces. Exception: ` +
+  `   stay within one tier when the brief explicitly calls for budget or luxury.\n` +
+  `6. Personalization relevance. When the campaign leans on customization, gifting, ` +
   `   or meaning, promote products with a non-null personalizationSummary.\n\n` +
   `Filter rules:\n` +
   `- Skip anything that feels thematically wrong, even if reviews are strong.\n` +
-  `- Do not pick duplicates or near-duplicates; SKUs must be distinct.\n` +
+  `- SKUs must be distinct. Note: the feed may contain variants of the same ` +
+  `  physical design (e.g. different metals or inscription counts). Prefer one ` +
+  `  representative per design family when you can tell from name + productType.\n` +
   `- Return exactly the requested count, ordered most relevant first.\n\n` +
   `Call the rank_products tool with the chosen SKU list. Do not write prose — ` +
   `only the tool call.`;
@@ -81,9 +93,18 @@ export function buildRerankUserPrompt(
   candidates: DigestedProduct[],
   count: number,
 ): string {
+  const personalityLine = seed.leadPersonalities
+    .map(
+      (p) =>
+        `${LEAD_PERSONALITY_LABELS[p]} (${LEAD_PERSONALITY_DESCRIPTIONS[p]})`,
+    )
+    .join("; ");
+
   const lines: string[] = [
     `Campaign brief`,
-    `- Campaign type: ${campaignType}`,
+    `- Campaign type: ${CAMPAIGN_TYPE_LABELS[campaignType]}`,
+    `- Lead value: ${LEAD_VALUE_LABELS[seed.leadValue]} — ${LEAD_VALUE_DESCRIPTIONS[seed.leadValue]}`,
+    `- Lead personalities: ${personalityLine}`,
     `- Main message: ${seed.mainMessage}`,
   ];
   if (seed.secondaryMessage) {

@@ -112,8 +112,8 @@ describe("generateCopy", () => {
       "product_launch",
     );
     const userContent = messagesCreate.mock.calls[0][0].messages[0].content;
-    expect(userContent).toMatch(/Lead value: meaningful_moments/);
-    expect(userContent).toMatch(/warm_hearted.*charming|charming.*warm_hearted/);
+    expect(userContent).toMatch(/Lead value: Meaningful Moments/);
+    expect(userContent).toMatch(/Warm-hearted.*Charming|Charming.*Warm-hearted/);
   });
 
   it("returns sms when the seed requested it", async () => {

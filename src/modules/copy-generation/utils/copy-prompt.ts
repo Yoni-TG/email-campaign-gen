@@ -2,8 +2,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   CAMPAIGN_TYPE_LABELS,
+  LEAD_PERSONALITY_DESCRIPTIONS,
+  LEAD_PERSONALITY_LABELS,
+  LEAD_VALUE_DESCRIPTIONS,
+  LEAD_VALUE_LABELS,
   type CampaignType,
   type CreativeSeed,
+  type Market,
 } from "@/lib/types";
 
 /**
@@ -55,15 +60,34 @@ export function loadFewShotExamples(): FewShotExample[] {
 
 // ─── System prompt (stable → cacheable) ─────────────────────────────────────
 
+// Explicit forbidden vocabulary elevated from brand-guide §9 so Claude sees
+// the hard-no list at the top of its critical rules, not buried in §9.
+const FORBIDDEN_WORDS =
+  "timeless, essence, narrative, yearning, longing, journey, story (as brand filler), " +
+  "perfect, signature, crafted, curated, luxurious, opulent, exquisite, " +
+  "must-have, don't miss out, iconic, vibes, slay, era, main character";
+
 const CRITICAL_RULES =
   `## Critical Rules\n` +
-  `- Write like you're speaking to a friend\n` +
-  `- US English only\n` +
-  `- NO puns, slang, or crass humor\n` +
-  `- DO NOT sound like AI or a textbook — this is the most important rule\n` +
-  `- Match the energy to the campaign type (a sale has different energy than an editorial)\n` +
-  `- Call the generate_campaign_copy tool; do not write prose outside the tool call\n` +
-  `- Obey §11 Output Contract exactly — body_blocks ordered top-to-bottom, SMS ≤130 chars`;
+  `- Call the \`generate_campaign_copy\` tool; do not write prose outside the tool call.\n` +
+  `- Obey §11 Output Contract exactly — body_blocks ordered top-to-bottom, SMS ≤130 chars, subject <50 chars preferred.\n` +
+  `- NEVER use these words: ${FORBIDDEN_WORDS}. They are MYKA-relics or generic marketing filler.\n` +
+  `- Match the voice to the lead_value + lead_personalities combination supplied in the brief.\n` +
+  `- Match the energy to the campaign type (a sale has different energy than an editorial).\n` +
+  `- DO NOT sound like AI, a textbook, or a catalogue. This is the single most important rule.\n` +
+  `\n` +
+  `Before returning, run the §12 Self-Check in order. Revise until every check passes:\n` +
+  `  1. Would I say this to a friend?\n` +
+  `  2. Any sentence over 25 words? If yes, break it up.\n` +
+  `  3. Any forbidden word from §9 or the list above? If yes, swap.\n` +
+  `  4. Any claim about us boastful in our own voice? If yes, move to nicky_quote or cut.\n` +
+  `  5. Is there joy somewhere? If no, find it.\n` +
+  `  6. Does this read more like MYKA or Theo Grace? (Compare §6.)\n` +
+  `  7. Does spelling match the target market? (US vs UK — §8.6.)\n` +
+  `  8. Does every CTA say something specific?\n` +
+  `  9. Is the output valid JSON matching §11?\n` +
+  ` 10. Is \`sms\` ≤130 chars when provided?\n` +
+  ` 11. Are all body_blocks non-empty (at least one of title / description / cta filled)?`;
 
 const OUTPUT_FORMAT =
   `## Output Format\n` +
@@ -78,7 +102,11 @@ const OUTPUT_FORMAT =
   `- free_top_text is the optional banner text above the hero; null when the ` +
   `campaign doesn't need one.\n` +
   `- sms is optional and capped at 130 characters (including spaces and emoji). ` +
-  `Use the \`{link}\` placeholder for the CTA URL.`;
+  `Use the \`{link}\` placeholder for the CTA URL.\n` +
+  `- nicky_quote is optional. Use it only when a claim about Theo Grace would ` +
+  `sound boastful in our own voice (brand-guide §7). Max one per email. The ` +
+  `quote must sound like a real person (short, specific, on-persona); the ` +
+  `response field is an optional warm reply like "Thank you Nicky!".`;
 
 let systemPromptCache: string | null = null;
 
@@ -120,16 +148,32 @@ export function buildCopySystemPrompt(): string {
 
 // ─── User prompt (varies per campaign) ──────────────────────────────────────
 
+function describePersonality(p: CreativeSeed["leadPersonalities"][number]): string {
+  return `${LEAD_PERSONALITY_LABELS[p]} (${LEAD_PERSONALITY_DESCRIPTIONS[p]})`;
+}
+
+function marketLine(market: Market): string {
+  return market === "uk"
+    ? `- Market: UK — use UK spelling (jewellery, personalise, favourite, colour) and UK date format (e.g. 15th November 2025)`
+    : `- Market: US — use US spelling (jewelry, personalize, favorite, color) and US date format (e.g. November 15th 2025)`;
+}
+
 export function buildCopyUserPrompt(
   seed: CreativeSeed,
   campaignType: CampaignType,
 ): string {
+  const market: Market = seed.market ?? "us";
+  const personalityDescriptions = seed.leadPersonalities
+    .map(describePersonality)
+    .join("; ");
+
   const lines: string[] = [
     `Write email campaign copy for the following brief:`,
     ``,
     `- Campaign type: ${CAMPAIGN_TYPE_LABELS[campaignType]}`,
-    `- Lead value: ${seed.leadValue} (see brand-guide §3 — anchor the emotional beat here)`,
-    `- Lead personalities: ${seed.leadPersonalities.join(", ")} (see brand-guide §4 — modulate voice accordingly)`,
+    marketLine(market),
+    `- Lead value: ${LEAD_VALUE_LABELS[seed.leadValue]} — ${LEAD_VALUE_DESCRIPTIONS[seed.leadValue]}`,
+    `- Lead personalities: ${personalityDescriptions}`,
     `- Main message: ${seed.mainMessage}`,
     `- Target product categories: ${seed.targetCategories.join(", ")}`,
   ];
@@ -145,7 +189,7 @@ export function buildCopyUserPrompt(
   }
   lines.push(
     seed.includeSms
-      ? `- Include SMS copy (short, punchy, with link — ≤130 chars)`
+      ? `- Include SMS copy (short, punchy, with \`{link}\` placeholder — ≤130 chars)`
       : `- No SMS copy needed`,
   );
 

@@ -16,14 +16,14 @@ const COPY_TOOL: Anthropic.Tool = {
   name: "generate_campaign_copy",
   description:
     "Return the Theo Grace email campaign copy matching the §11 Output Contract " +
-    "(free_top_text, body_blocks, subject_variants, sms).",
+    "(free_top_text, body_blocks, subject_variants, sms, nicky_quote).",
   input_schema: {
     type: "object",
     properties: {
       free_top_text: {
         type: ["string", "null"],
         description:
-          "Optional banner text above the hero image (e.g. 'TIMELESS. ALWAYS HAS BEEN'). null when the campaign doesn't need one.",
+          "Optional banner text above the hero image (e.g. 'Happy New Year'). null when the campaign doesn't need one. Keep short — max ~40 chars.",
       },
       body_blocks: {
         type: "array",
@@ -34,15 +34,18 @@ const COPY_TOOL: Anthropic.Tool = {
           properties: {
             title: {
               type: ["string", "null"],
-              description: "Short H1 or sub-label for the section. null if not needed.",
+              description:
+                "Short H1 or sub-label for the section (brand-guide §10: 2-6 words; mantra, provocation, or product tag). null if not needed.",
             },
             description: {
               type: ["string", "null"],
-              description: "Body paragraph(s). null if the section is title + CTA only.",
+              description:
+                "Body paragraph(s). Paragraphs are 1-3 short sentences (brand-guide §10). null if the section is title + CTA only.",
             },
             cta: {
               type: ["string", "null"],
-              description: "CTA button label for the section. null if not needed.",
+              description:
+                "CTA button label — action + specific outcome (e.g. 'Shop the stack', 'See Nicky's picks'). Never 'Click here', 'Learn more', 'Buy now'. null if the section doesn't need a button.",
             },
           },
           required: ["title", "description", "cta"],
@@ -57,11 +60,13 @@ const COPY_TOOL: Anthropic.Tool = {
           properties: {
             subject: {
               type: "string",
-              description: "Email subject line. Under 50 chars preferred.",
+              description:
+                "Email subject line. Target <50 chars. Friend-texting you, not a brand shouting. Never ALL CAPS, 'Don't miss out!', 'Last chance!', generic 'Summer Sale'.",
             },
             preheader: {
               type: "string",
-              description: "Preheader that extends (not repeats) the subject.",
+              description:
+                "Preheader that extends or contrasts the subject — don't repeat it. Sentence case. No salesy clichés.",
             },
           },
           required: ["subject", "preheader"],
@@ -73,8 +78,33 @@ const COPY_TOOL: Anthropic.Tool = {
         description:
           "SMS copy ≤130 chars (including spaces and emoji). Use {link} as the URL placeholder. null when SMS isn't requested.",
       },
+      nicky_quote: {
+        type: ["object", "null"],
+        description:
+          "Optional Nicky Hilton quote per brand-guide §7. Use only when a claim about Theo Grace would sound boastful in our own voice. Max one per email. null when not needed.",
+        properties: {
+          quote: {
+            type: "string",
+            description:
+              "Short, specific, on-persona quote from Nicky. Must sound like a real person — not marketing copy.",
+          },
+          response: {
+            type: ["string", "null"],
+            description:
+              "Optional warm reply after the quote (e.g. 'Thank you Nicky!'). null when the quote stands alone.",
+          },
+        },
+        required: ["quote", "response"],
+        additionalProperties: false,
+      },
     },
-    required: ["free_top_text", "body_blocks", "subject_variants", "sms"],
+    required: [
+      "free_top_text",
+      "body_blocks",
+      "subject_variants",
+      "sms",
+      "nicky_quote",
+    ],
     additionalProperties: false,
   },
 };

@@ -71,6 +71,7 @@ describe("serializeForDb", () => {
       body_blocks: [{ title: "Hi", description: null, cta: null }],
       subject_variants: [{ subject: "s", preheader: "p" }],
       sms: null,
+      nicky_quote: null,
     };
     const approvedCopy: ApprovedCopy = {
       campaign_id: "c1",
@@ -78,6 +79,7 @@ describe("serializeForDb", () => {
       body_blocks: generatedCopy.body_blocks,
       subject_variant: generatedCopy.subject_variants[0],
       sms: null,
+      nicky_quote: null,
     };
     const product: ProductSnapshot = {
       sku: "SKU-1",
