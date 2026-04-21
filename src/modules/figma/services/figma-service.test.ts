@@ -10,6 +10,7 @@ function makeBlueprint(overrides: Partial<CampaignBlueprint> = {}): CampaignBlue
     campaign_id: "cmp_test",
     lead_value: "joy",
     lead_personalities: ["joyfully_characterful"],
+    market: "us",
     free_top_text: null,
     subject_variant: {
       subject: "Hello",
@@ -24,6 +25,7 @@ function makeBlueprint(overrides: Partial<CampaignBlueprint> = {}): CampaignBlue
       },
     ],
     sms: null,
+    nicky_quote: null,
     products: [],
     ...overrides,
   };

@@ -64,6 +64,17 @@ export const CAMPAIGN_STATUS_DESCRIPTIONS: Record<CampaignStatus, string> = {
 
 // ─── Creative Seed ───
 
+// Market drives spelling / date format per brand-guide §8.6. US for the US
+// site + social, UK for UK-customer emails. Default is "us" when the field
+// is missing on an older campaign row (backward compat).
+export const MARKETS = ["us", "uk"] as const;
+export type Market = (typeof MARKETS)[number];
+
+export const MARKET_LABELS: Record<Market, string> = {
+  us: "US (US spelling: jewelry, personalize)",
+  uk: "UK (UK spelling: jewellery, personalise)",
+};
+
 // Which brand value the campaign leans on (brand-guide §3).
 export const LEAD_VALUES = [
   "family_first",
@@ -123,6 +134,10 @@ export interface CreativeSeed {
   // is not meaningful.
   leadValue: LeadValue;
   leadPersonalities: LeadPersonality[];
+  // Target market — drives US vs UK spelling in the generated copy per
+  // brand-guide §8.6. Optional for backward compat with campaigns created
+  // before this field existed; undefined is treated as "us".
+  market?: Market;
 }
 
 // ─── Generated Copy ───
@@ -150,6 +165,14 @@ export interface BodyBlock {
   cta: string | null;
 }
 
+// Brand-guide §7 Nicky Hilton rule: when a claim about Theo Grace would
+// sound boastful in our own voice, put it in Nicky's mouth. Max one per
+// email. `response` is the optional warm reply (e.g. "Thank you Nicky!").
+export interface NickyQuote {
+  quote: string;
+  response: string | null;
+}
+
 // Fields intentionally use snake_case to mirror the wire format — the Claude
 // tool output, the brand-guide §11 contract, and the DB JSON column all share
 // this shape. Same convention we use on FeedProduct.
@@ -164,6 +187,10 @@ export interface GeneratedCopy {
   body_blocks: BodyBlock[];
   subject_variants: SubjectVariant[];
   sms: string | null;
+  // Optional Nicky quote per brand-guide §7. Claude returns null when the
+  // campaign doesn't warrant one (default); the editor lets the operator
+  // swap or clear it.
+  nicky_quote: NickyQuote | null;
 }
 
 // ─── Approved Copy ───
@@ -178,6 +205,7 @@ export interface ApprovedCopy {
   body_blocks: BodyBlock[];
   subject_variant: SubjectVariant;
   sms: string | null;
+  nicky_quote: NickyQuote | null;
 }
 
 // ─── Derived field enums ───
@@ -286,11 +314,13 @@ export interface CampaignBlueprint {
   campaign_id: string;
   lead_value: LeadValue;
   lead_personalities: LeadPersonality[];
+  market: Market;
   free_top_text: string | null;
   subject_variant: SubjectVariant;
   hero_image_url: string;
   body_blocks: BodyBlock[];
   sms: string | null;
+  nicky_quote: NickyQuote | null;
   products: Array<{
     title: string;
     price: string;

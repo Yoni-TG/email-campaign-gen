@@ -84,8 +84,28 @@ describe("buildCopyUserPrompt", () => {
       leadPersonalities: ["warm_hearted", "charming"],
     });
     const prompt = buildCopyUserPrompt(seed, "product_launch");
-    expect(prompt).toMatch(/Lead value: family_first/);
-    expect(prompt).toMatch(/Lead personalities: warm_hearted, charming/);
+    // Now uses labels + descriptions inline so Claude doesn't have to
+    // round-trip through the brand guide for the per-value voice cues.
+    expect(prompt).toMatch(/Lead value: Family First/);
+    expect(prompt).toMatch(/Warm-hearted/);
+    expect(prompt).toMatch(/Charming/);
+  });
+
+  it("threads US/UK market into the brief for spelling control", () => {
+    const us = buildCopyUserPrompt(makeSeed({ market: "us" }), "product_launch");
+    expect(us).toMatch(/Market: US/);
+    expect(us).toMatch(/jewelry/);
+
+    const uk = buildCopyUserPrompt(makeSeed({ market: "uk" }), "product_launch");
+    expect(uk).toMatch(/Market: UK/);
+    expect(uk).toMatch(/jewellery/);
+  });
+
+  it("defaults to US market when seed.market is unset (back-compat)", () => {
+    const seed = makeSeed({});
+    delete (seed as { market?: unknown }).market;
+    const prompt = buildCopyUserPrompt(seed, "product_launch");
+    expect(prompt).toMatch(/Market: US/);
   });
 
   it("calls out SMS when requested", () => {

@@ -166,6 +166,21 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
           </div>
         )}
 
+        {copy.nicky_quote && (
+          <div>
+            <p className="text-xs uppercase text-muted-foreground">
+              Nicky Quote
+            </p>
+            <p className="italic">“{copy.nicky_quote.quote}”</p>
+            <p className="text-muted-foreground">
+              — Nicky Hilton
+              {copy.nicky_quote.response && (
+                <span> | {copy.nicky_quote.response}</span>
+              )}
+            </p>
+          </div>
+        )}
+
         <div>
           <p className="mb-1.5 text-xs uppercase text-muted-foreground">
             Body Blocks

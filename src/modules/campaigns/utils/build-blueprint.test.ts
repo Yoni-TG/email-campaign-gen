@@ -22,6 +22,7 @@ const approvedCopy: ApprovedCopy = {
   ],
   subject_variant: { subject: "Mom deserves it", preheader: "Starts today" },
   sms: "Gifts she'll love: {link}",
+  nicky_quote: null,
 };
 
 const snapshot = (overrides: Partial<ProductSnapshot> = {}): ProductSnapshot => ({
