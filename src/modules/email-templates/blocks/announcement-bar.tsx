@@ -1,11 +1,12 @@
 import { Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import type { AnnouncementBarProps } from "./types";
 
-export function AnnouncementBar({ text }: AnnouncementBarProps) {
+export function AnnouncementBar({ text, background = "baby_blue" }: AnnouncementBarProps) {
   return (
     <Section
       style={{
+        backgroundColor: bgColor(background),
         padding: "8px 16px",
         textAlign: "center",
       }}

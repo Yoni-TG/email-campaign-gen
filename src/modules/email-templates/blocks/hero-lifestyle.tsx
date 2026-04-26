@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Img, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import { SectionLabel } from "./section-label";
 import type { HeroLifestyleProps } from "./types";
@@ -12,6 +12,7 @@ export function HeroLifestyle({
   body,
   ctaLabel,
   ctaHref,
+  background = "white",
 }: HeroLifestyleProps) {
   return (
     <>
@@ -29,7 +30,7 @@ export function HeroLifestyle({
       />
       <Section
         style={{
-          backgroundColor: COLORS.white,
+          backgroundColor: bgColor(background),
           padding: "32px 32px 24px 32px",
           textAlign: "center",
         }}

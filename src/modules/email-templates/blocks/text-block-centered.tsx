@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import { SectionLabel } from "./section-label";
 import type { TextBlockCenteredProps } from "./types";
@@ -11,11 +11,12 @@ export function TextBlockCentered({
   body,
   ctaLabel,
   ctaHref,
+  background = "white",
 }: TextBlockCenteredProps) {
   return (
     <Section
       style={{
-        backgroundColor: COLORS.white,
+        backgroundColor: bgColor(background),
         padding: "40px 32px",
         textAlign: "center",
       }}

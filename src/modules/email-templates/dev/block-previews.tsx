@@ -99,8 +99,9 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     ),
   },
   {
-    id: "hero-product",
+    id: "hero-product-pale-blue",
     label: "hero_product",
+    variant: "background: pale_blue (default)",
     height: 380,
     jsx: (
       <HeroProduct
@@ -109,6 +110,38 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
         body="Engraved with anything that matters — names, initials, dates."
         ctaLabel="Personalise yours"
         ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "hero-product-white",
+    label: "hero_product",
+    variant: "background: white",
+    height: 380,
+    jsx: (
+      <HeroProduct
+        imageUrl={SAMPLE_PRODUCTS[0].image_url}
+        headline="The Heart Pendant"
+        body="Engraved with anything that matters — names, initials, dates."
+        ctaLabel="Personalise yours"
+        ctaHref="#"
+        background="white"
+      />
+    ),
+  },
+  {
+    id: "hero-product-baby-blue",
+    label: "hero_product",
+    variant: "background: baby_blue",
+    height: 380,
+    jsx: (
+      <HeroProduct
+        imageUrl={SAMPLE_PRODUCTS[0].image_url}
+        headline="The Heart Pendant"
+        body="Engraved with anything that matters — names, initials, dates."
+        ctaLabel="Personalise yours"
+        ctaHref="#"
+        background="baby_blue"
       />
     ),
   },
@@ -160,8 +193,9 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     ),
   },
   {
-    id: "text-block-centered",
+    id: "text-block-centered-white",
     label: "text_block_centered",
+    variant: "background: white (default)",
     height: 320,
     jsx: (
       <TextBlockCentered
@@ -170,6 +204,22 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
         body="Every stone is responsibly created in a lab — same beauty, same fire, kinder to the planet."
         ctaLabel="Read more"
         ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "text-block-centered-baby-blue",
+    label: "text_block_centered",
+    variant: "background: baby_blue",
+    height: 320,
+    jsx: (
+      <TextBlockCentered
+        subLabel="DID YOU KNOW"
+        headline="Our diamonds are lab-grown"
+        body="Every stone is responsibly created in a lab — same beauty, same fire, kinder to the planet."
+        ctaLabel="Read more"
+        ctaHref="#"
+        background="baby_blue"
       />
     ),
   },
@@ -234,7 +284,7 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
   {
     id: "nicky-quote-with-portrait",
     label: "nicky_quote_module",
-    variant: "with portrait",
+    variant: "with portrait, pale_blue (default)",
     height: 240,
     jsx: (
       <NickyQuoteModule
@@ -247,19 +297,34 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
   {
     id: "nicky-quote-no-portrait",
     label: "nicky_quote_module",
-    variant: "no portrait",
+    variant: "no portrait, background: white",
     height: 220,
     jsx: (
       <NickyQuoteModule
         quote="A piece of jewellery says what words can't quite reach."
         response={null}
+        background="white"
+      />
+    ),
+  },
+  {
+    id: "nicky-quote-baby-blue",
+    label: "nicky_quote_module",
+    variant: "background: baby_blue",
+    height: 240,
+    jsx: (
+      <NickyQuoteModule
+        quote="Joy is the smallest beautiful thing — and we make a lot of those."
+        response={null}
+        portraitUrl={SAMPLE_PORTRAIT_URL}
+        background="baby_blue"
       />
     ),
   },
   {
     id: "closing-block-with-image",
     label: "closing_block",
-    variant: "with imageUrl",
+    variant: "with imageUrl, baby_blue (default)",
     height: 600,
     jsx: (
       <ClosingBlock
@@ -272,9 +337,9 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     ),
   },
   {
-    id: "closing-block-text-only",
+    id: "closing-block-text-pale-blue",
     label: "closing_block",
-    variant: "no imageUrl",
+    variant: "no image, background: pale_blue",
     height: 280,
     jsx: (
       <ClosingBlock
@@ -282,6 +347,22 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
         body="The edit is curated and limited — until it's gone."
         ctaLabel="Shop the edit"
         ctaHref="#"
+        background="pale_blue"
+      />
+    ),
+  },
+  {
+    id: "closing-block-text-white",
+    label: "closing_block",
+    variant: "no image, background: white",
+    height: 280,
+    jsx: (
+      <ClosingBlock
+        headline="One last thought"
+        body="Curated, considered, and made to last."
+        ctaLabel="Browse all"
+        ctaHref="#"
+        background="white"
       />
     ),
   },

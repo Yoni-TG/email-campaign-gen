@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Column, Row, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { HeroTileGraphicProps } from "./types";
 
@@ -14,10 +14,11 @@ export function HeroTileGraphic({
   body,
   ctaLabel,
   ctaHref,
+  background = "pale_blue",
 }: HeroTileGraphicProps) {
   const visibleTiles = tiles.slice(0, 3);
   return (
-    <Section style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px", textAlign: "center" }}>
+    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px", textAlign: "center" }}>
       {subLabel ? (
         <Text
           style={{

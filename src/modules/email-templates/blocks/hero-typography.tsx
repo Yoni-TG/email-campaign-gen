@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { HeroTypographyProps } from "./types";
 
@@ -12,14 +12,8 @@ export function HeroTypography({
   ctaHref,
   background = "white",
 }: HeroTypographyProps) {
-  const bg =
-    background === "baby_blue"
-      ? COLORS.babyBlue
-      : background === "pale_blue"
-        ? COLORS.paleBlue
-        : COLORS.white;
   return (
-    <Section style={{ backgroundColor: bg, padding: "48px 32px", textAlign: "center" }}>
+    <Section style={{ backgroundColor: bgColor(background), padding: "48px 32px", textAlign: "center" }}>
       {topline ? (
         <Text
           style={{

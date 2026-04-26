@@ -1,12 +1,19 @@
 import * as React from "react";
 import { Column, Img, Row, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { HeroProductProps } from "./types";
 
-export function HeroProduct({ imageUrl, headline, body, ctaLabel, ctaHref }: HeroProductProps) {
+export function HeroProduct({
+  imageUrl,
+  headline,
+  body,
+  ctaLabel,
+  ctaHref,
+  background = "pale_blue",
+}: HeroProductProps) {
   return (
-    <Section style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px" }}>
+    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}>
       <Row>
         <Column style={{ width: "50%", verticalAlign: "middle" }}>
           <Img

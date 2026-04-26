@@ -1,12 +1,13 @@
 import * as React from "react";
 import { Column, Img, Row, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import type { NickyQuoteModuleProps } from "./types";
 
 export function NickyQuoteModule({
   quote,
   response,
   portraitUrl,
+  background = "pale_blue",
 }: NickyQuoteModuleProps) {
   const quoteContent = (
     <>
@@ -50,7 +51,7 @@ export function NickyQuoteModule({
   );
 
   return (
-    <Section style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px" }}>
+    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}>
       {portraitUrl ? (
         <Row>
           <Column style={{ width: "30%", verticalAlign: "middle" }}>

@@ -2,6 +2,8 @@
 // component's prop shape. The renderer uses BlockPropsMap to resolve a
 // manifest's bind paths into typed props for each component.
 
+import type { BlockBackground } from "./theme";
+
 // Matches the wire format used by CampaignBlueprint.products and the LLM
 // copy/product agents — snake_case to stay consistent with the rest of the
 // blueprint payload.
@@ -13,11 +15,12 @@ export interface BlueprintProduct {
 }
 
 export interface LogoHeaderProps {
-  background?: "white" | "baby_blue";
+  background?: BlockBackground;
 }
 
 export interface AnnouncementBarProps {
   text: string;
+  background?: BlockBackground;
 }
 
 export interface HeroLifestyleProps {
@@ -27,6 +30,7 @@ export interface HeroLifestyleProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface HeroProductProps {
@@ -35,6 +39,7 @@ export interface HeroProductProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface HeroTypographyProps {
@@ -43,7 +48,7 @@ export interface HeroTypographyProps {
   subhead?: string;
   ctaLabel?: string;
   ctaHref?: string;
-  background?: "white" | "baby_blue" | "pale_blue";
+  background?: BlockBackground;
 }
 
 export interface HeroTileGraphicProps {
@@ -54,6 +59,7 @@ export interface HeroTileGraphicProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface TextBlockCenteredProps {
@@ -62,6 +68,7 @@ export interface TextBlockCenteredProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface EditorialSplitProps {
@@ -72,6 +79,7 @@ export interface EditorialSplitProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface ProductGridProps {
@@ -82,6 +90,7 @@ export interface NickyQuoteModuleProps {
   quote: string;
   response?: string | null;
   portraitUrl?: string;
+  background?: BlockBackground;
 }
 
 export interface CtaButtonProps {
@@ -101,10 +110,12 @@ export interface ClosingBlockProps {
   body?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  background?: BlockBackground;
 }
 
 export interface FooterProps {
   legalText?: string;
+  background?: BlockBackground;
 }
 
 export interface BlockPropsMap {

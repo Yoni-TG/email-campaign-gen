@@ -1,14 +1,22 @@
 import * as React from "react";
 import { Img, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { ClosingBlockProps } from "./types";
 
-export function ClosingBlock({ imageUrl, headline, body, ctaLabel, ctaHref }: ClosingBlockProps) {
+export function ClosingBlock({
+  imageUrl,
+  headline,
+  body,
+  ctaLabel,
+  ctaHref,
+  background = "baby_blue",
+}: ClosingBlockProps) {
+  const bg = bgColor(background);
   return (
     <Section
       style={{
-        backgroundColor: COLORS.babyBlue,
+        backgroundColor: bg,
         padding: imageUrl ? 0 : "40px 24px",
         textAlign: "center",
       }}
@@ -30,7 +38,7 @@ export function ClosingBlock({ imageUrl, headline, body, ctaLabel, ctaHref }: Cl
       <Section
         style={{
           padding: "32px 24px",
-          backgroundColor: COLORS.babyBlue,
+          backgroundColor: bg,
           textAlign: "center",
         }}
       >

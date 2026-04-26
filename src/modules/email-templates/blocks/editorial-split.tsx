@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Column, Img, Row, Section, Text } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, bgColor } from "./theme";
 import { CtaButton } from "./cta-button";
 import { SectionLabel } from "./section-label";
 import type { EditorialSplitProps } from "./types";
@@ -13,6 +13,7 @@ export function EditorialSplit({
   body,
   ctaLabel,
   ctaHref,
+  background = "white",
 }: EditorialSplitProps) {
   const imageColumn = (
     <Column key="image" style={{ width: "50%", verticalAlign: "middle" }}>
@@ -70,7 +71,7 @@ export function EditorialSplit({
     </Column>
   );
   return (
-    <Section style={{ backgroundColor: COLORS.white, padding: "24px 0" }}>
+    <Section style={{ backgroundColor: bgColor(background), padding: "24px 0" }}>
       <Row>{imageSide === "left" ? [imageColumn, textColumn] : [textColumn, imageColumn]}</Row>
     </Section>
   );
