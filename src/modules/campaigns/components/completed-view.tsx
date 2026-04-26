@@ -1,8 +1,7 @@
 "use client";
 
-import { Copy } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import {
   CAMPAIGN_TYPE_LABELS,
   LEAD_PERSONALITY_LABELS,
@@ -14,11 +13,15 @@ import type {
   FinalRenderResult,
   ProductSnapshot,
 } from "@/lib/types";
-import { Button } from "@/components/ui/button";
 import {
   formatPrice,
   isOnSale,
 } from "@/modules/products/utils/product-price";
+import { CopyHtmlButton } from "./copy-html-button";
+
+function variantSlug(skeletonId: string): string {
+  return skeletonId.replace(/\//g, "__");
+}
 
 export function CompletedView({ campaign }: { campaign: Campaign }) {
   if (
@@ -56,19 +59,6 @@ function PreviewBanner({
   campaign: Campaign;
   render: FinalRenderResult;
 }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(render.html);
-      setCopied(true);
-      toast.success("HTML copied — paste into Klaviyo's email editor.");
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("Copy failed — your browser blocked clipboard access.");
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
@@ -80,10 +70,14 @@ function PreviewBanner({
           {CAMPAIGN_TYPE_LABELS[campaign.campaignType]} · {campaign.createdBy}
         </p>
       </div>
-      <Button onClick={handleCopy} className="inline-flex gap-1.5">
-        <Copy className="h-3.5 w-3.5" />
-        {copied ? "Copied" : "Copy HTML"}
-      </Button>
+      <Link
+        href={`/campaigns/${campaign.id}/preview/${variantSlug(render.skeletonId)}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ExternalLink className="h-3.5 w-3.5" />
+        Sharable preview
+      </Link>
+      <CopyHtmlButton html={render.html} />
     </div>
   );
 }
