@@ -19,6 +19,7 @@ import {
 } from "@/modules/products/utils/product-price";
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
+import { RefineAssetsCard } from "./refine-assets-card";
 
 function variantSlug(skeletonId: string): string {
   return skeletonId.replace(/\//g, "__");
@@ -48,6 +49,7 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
       </div>
 
       <ProductsCard products={campaign.approvedProducts} />
+      <RefineAssetsCard campaign={campaign} />
       <FinalEmailCard render={campaign.renderResult} />
     </div>
   );
