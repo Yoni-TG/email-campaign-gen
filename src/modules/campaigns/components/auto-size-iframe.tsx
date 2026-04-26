@@ -86,11 +86,13 @@ export function AutoSizeIframe({
           ref={ref}
           title={title}
           srcDoc={srcDoc}
+          scrolling="no"
           onLoad={measure}
           style={{
             width: `${NATIVE_WIDTH}px`,
             height: `${contentHeight}px`,
             border: 0,
+            overflow: "hidden",
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
@@ -104,9 +106,11 @@ export function AutoSizeIframe({
       ref={ref}
       title={title}
       srcDoc={srcDoc}
+      scrolling="no"
       onLoad={measure}
       style={{
         height: `${contentHeight}px`,
+        overflow: "hidden",
         pointerEvents: passThroughClicks ? "none" : undefined,
       }}
       className={className}
