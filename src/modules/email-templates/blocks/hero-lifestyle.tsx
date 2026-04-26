@@ -31,6 +31,7 @@ export function HeroLifestyle({
         }}
       />
       <Section
+        data-edit-target={editTargets?.background}
         style={{
           backgroundColor: bgColor(background),
           padding: "32px 32px 24px 32px",

@@ -19,7 +19,10 @@ export function HeroTileGraphic({
 }: HeroTileGraphicProps) {
   const visibleTiles = tiles.slice(0, 3);
   return (
-    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px", textAlign: "center" }}>
+    <Section
+      data-edit-target={editTargets?.background}
+      style={{ backgroundColor: bgColor(background), padding: "32px 24px", textAlign: "center" }}
+    >
       {subLabel ? (
         <Text
           data-edit-target={editTargets?.subLabel}

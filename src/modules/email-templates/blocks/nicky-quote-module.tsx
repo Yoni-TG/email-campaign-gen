@@ -54,7 +54,10 @@ export function NickyQuoteModule({
   );
 
   return (
-    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}>
+    <Section
+      data-edit-target={editTargets?.background}
+      style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}
+    >
       {portraitUrl ? (
         <Row>
           <Column style={{ width: "30%", verticalAlign: "middle" }}>

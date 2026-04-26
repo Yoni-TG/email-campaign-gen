@@ -46,6 +46,12 @@ export function parseCampaign(row: DbCampaign): Campaign {
     assetPaths: row.assetPaths
       ? (JSON.parse(row.assetPaths) as Record<string, string>)
       : null,
+    blockOverrides: row.blockOverrides
+      ? (JSON.parse(row.blockOverrides) as Record<
+          number,
+          Record<string, unknown>
+        >)
+      : null,
     candidateVariants: row.candidateVariants
       ? (JSON.parse(row.candidateVariants) as CandidateVariant[])
       : null,

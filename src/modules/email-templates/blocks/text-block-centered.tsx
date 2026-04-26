@@ -16,6 +16,7 @@ export function TextBlockCentered({
 }: TextBlockCenteredProps) {
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bgColor(background),
         padding: "40px 32px",

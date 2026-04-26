@@ -10,9 +10,11 @@ const DEFAULT_LEGAL =
 export function Footer({
   legalText = DEFAULT_LEGAL,
   background = "pale_blue",
+  editTargets,
 }: FooterProps) {
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bgColor(background),
         padding: "32px 24px",

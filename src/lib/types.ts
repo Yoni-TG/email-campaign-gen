@@ -378,6 +378,13 @@ export interface Campaign {
   heroImagePath: string | null;
   /** Operator-uploaded asset URLs keyed by AssetSlot.key from the chosen skeleton. */
   assetPaths: Record<string, string> | null;
+  /**
+   * Per-block prop overrides applied on top of bind-resolved values at
+   * render time. Keyed by the block's index in the chosen skeleton's
+   * `blocks` array. Used today for background-colour fine-tuning; may
+   * grow as more block-level overrides are exposed.
+   */
+  blockOverrides: Record<number, Record<string, unknown>> | null;
   /** The 3 candidate variants rendered after CP1 approval. */
   candidateVariants: CandidateVariant[] | null;
   /** Skeleton id the operator picked at variant_selection. */

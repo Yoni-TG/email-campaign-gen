@@ -5,3 +5,4 @@ export type { BlockPropsMap, BlueprintProduct } from "./blocks/types";
 export { selectSkeletons, rankWithLLM } from "./selection";
 export type { SelectionInput } from "./selection";
 export { loadAllSkeletons, loadSkeletonById } from "./skeletons";
+export { maxProductsRendered } from "./utils/grid-capacity";

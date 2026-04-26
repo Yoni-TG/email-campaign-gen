@@ -27,6 +27,7 @@ export interface BlueprintProduct {
 
 export interface LogoHeaderProps {
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface AnnouncementBarProps {
@@ -152,6 +153,7 @@ export interface ClosingBlockProps {
 export interface FooterProps {
   legalText?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface BlockPropsMap {

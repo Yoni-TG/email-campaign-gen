@@ -150,22 +150,39 @@ const EDIT_CLICK_SCRIPT = `
 })();
 `;
 
+// Hover outline visible on every editable element — text, image, and
+// section bg. Outline-offset of 2px keeps the line from clipping the
+// element; box-shadow adds an inner glow so dark images don't lose the
+// affordance against the page background. The 'cursor: pointer'
+// override is !important because anchor and button defaults would
+// otherwise win.
 const EDIT_HIGHLIGHT_CSS = `
 [data-edit-target] {
   cursor: pointer !important;
   outline: 2px solid transparent;
   outline-offset: 2px;
-  transition: outline-color 120ms;
+  transition: outline-color 120ms, box-shadow 120ms;
 }
 [data-edit-target]:hover {
-  outline-color: #76A4C4;
+  outline: 3px solid #76A4C4;
+  box-shadow: 0 0 0 1px rgba(118, 164, 196, 0.25);
 }
 `;
 
 export async function renderSkeleton(
   manifest: SkeletonManifest,
   blueprint: RendererBlueprint,
-  opts: { withAssets: boolean; editable?: boolean },
+  opts: {
+    withAssets: boolean;
+    editable?: boolean;
+    /**
+     * Per-block prop overrides applied on top of bind-resolved values.
+     * Keyed by block index. Used by the fine-tune flow to swap a
+     * block's background colour at render time without touching the
+     * skeleton manifest.
+     */
+    blockOverrides?: Record<number, Record<string, unknown>> | null;
+  },
 ): Promise<RenderResult> {
   const missingAssets: string[] = [];
 
@@ -185,8 +202,20 @@ export async function renderSkeleton(
         missingAssets.push(missingAsset);
       }
     }
+    // Apply per-block overrides (e.g. background) AFTER the bind
+    // resolution so the override wins. Useful when the manifest didn't
+    // bind a prop at all — operators can still set it via fine-tune.
+    const override = opts.blockOverrides?.[index];
+    if (override) Object.assign(props, override);
     if (opts.editable) {
-      props.editTargets = computeEditTargets(entry.bind);
+      // Bind-derived edit targets for inner elements (image / text).
+      const editTargets = computeEditTargets(entry.bind);
+      // Always allow background editing on editable renders — even when
+      // the manifest doesn't bind `background`, the operator can pick a
+      // colour at fine-tune time. Block components apply this attribute
+      // to whichever Section paints their background.
+      editTargets.background = `bg:block:${index}`;
+      props.editTargets = editTargets;
     }
     return <Component key={index} {...props} />;
   });

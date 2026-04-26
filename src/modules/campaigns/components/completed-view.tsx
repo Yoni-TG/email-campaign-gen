@@ -17,6 +17,10 @@ import {
   formatPrice,
   isOnSale,
 } from "@/modules/products/utils/product-price";
+import {
+  loadSkeletonById,
+  maxProductsRendered,
+} from "@/modules/email-templates";
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 import { EditableEmailFrame } from "./editable-email-frame";
@@ -61,7 +65,10 @@ export function CompletedView({ campaign, editableHtml }: CompletedViewProps) {
         <CopyCard copy={campaign.approvedCopy} />
       </div>
 
-      <ProductsCard products={campaign.approvedProducts} />
+      <ProductsCard
+        products={campaign.approvedProducts}
+        chosenSkeletonId={campaign.chosenSkeletonId}
+      />
     </div>
   );
 }
@@ -224,11 +231,32 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
   );
 }
 
-function ProductsCard({ products }: { products: ProductSnapshot[] }) {
+function ProductsCard({
+  products,
+  chosenSkeletonId,
+}: {
+  products: ProductSnapshot[];
+  chosenSkeletonId: string | null;
+}) {
+  // The chosen skeleton's grids cap how many of approvedProducts actually
+  // render in the email — anything beyond that lives as reserve in case
+  // the operator wants to swap one in. Show only the rendered set; the
+  // reserve count is mentioned in the card title so it's not surprising.
+  const skeleton = chosenSkeletonId ? loadSkeletonById(chosenSkeletonId) : null;
+  const cap = skeleton ? maxProductsRendered(skeleton) : products.length;
+  const visible = products.slice(0, cap);
+  const reserveCount = products.length - visible.length;
+
   return (
-    <Card title={`Products (${products.length})`}>
+    <Card
+      title={
+        reserveCount > 0
+          ? `Products in email (${visible.length} · ${reserveCount} held in reserve)`
+          : `Products (${visible.length})`
+      }
+    >
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => {
+        {visible.map((product) => {
           const showSale = isOnSale(product);
           return (
             <li

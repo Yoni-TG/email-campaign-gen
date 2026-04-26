@@ -46,6 +46,12 @@ model Campaign {
   // JSON-encoded Record<string, string>.
   assetPaths        String?  @map("asset_paths")
 
+  // Per-block prop overrides applied at render time on top of the
+  // bind-resolved values. Keyed by block index in the manifest.
+  // JSON-encoded Record<string, Partial<BlockProps>>. Used today for
+  // background colour fine-tuning; may grow over time.
+  blockOverrides    String?  @map("block_overrides")
+
   error             String?
 
   @@map("campaigns")

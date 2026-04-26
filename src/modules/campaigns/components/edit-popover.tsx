@@ -100,6 +100,20 @@ export function EditPopover({ target, rect, campaign, onClose, onSaved }: Props)
         onSaved={onSaved}
       />
     );
+  } else if (target.startsWith("bg:block:")) {
+    const blockIndex = parseInt(target.slice("bg:block:".length), 10);
+    body = (
+      <BackgroundEditor
+        campaignId={campaign.id}
+        blockIndex={blockIndex}
+        currentBackground={
+          (campaign.blockOverrides?.[blockIndex]?.background as
+            | string
+            | undefined) ?? null
+        }
+        onSaved={onSaved}
+      />
+    );
   } else {
     body = (
       <p className="text-sm text-muted-foreground">
@@ -372,4 +386,88 @@ function stripCampaignId(copy: ApprovedCopy): Omit<ApprovedCopy, "campaign_id"> 
   const { campaign_id: _ignored, ...rest } = copy;
   void _ignored;
   return rest;
+}
+
+// ─── Background editor ──────────────────────────────────────────
+
+const BG_OPTIONS: Array<{ key: string; label: string; swatch: string }> = [
+  { key: "white", label: "White", swatch: "#FFFFFF" },
+  { key: "baby_blue", label: "Baby Blue", swatch: "#BEDFF7" },
+  { key: "pale_blue", label: "Pale Blue", swatch: "#E6F0F8" },
+  { key: "mid_blue", label: "Mid Blue", swatch: "#76A4C4" },
+];
+
+function BackgroundEditor({
+  campaignId,
+  blockIndex,
+  currentBackground,
+  onSaved,
+}: {
+  campaignId: string;
+  blockIndex: number;
+  currentBackground: string | null;
+  onSaved: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const save = async (background: string) => {
+    setBusy(true);
+    try {
+      const res = await fetch(
+        `/api/campaigns/${campaignId}/fine-tune/block-bg`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ blockIndex, background }),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Save failed");
+      }
+      toast.success("Background updated — re-rendered.");
+      onSaved();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Save failed";
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <p className="mb-3 pr-6 text-xs font-mono text-muted-foreground">
+        background · block {blockIndex}
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        {BG_OPTIONS.map((opt) => {
+          const active = currentBackground === opt.key;
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              disabled={busy}
+              onClick={() => save(opt.key)}
+              className={`flex items-center gap-2 rounded-md border p-2 text-left text-xs transition-colors ${
+                active
+                  ? "border-primary ring-2 ring-primary/30"
+                  : "border-border hover:border-muted-foreground/40"
+              }`}
+            >
+              <span
+                className="h-6 w-6 shrink-0 rounded border border-border/60"
+                style={{ backgroundColor: opt.swatch }}
+                aria-hidden
+              />
+              <span className="font-medium">{opt.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Click a swatch to apply and re-render.
+      </p>
+    </div>
+  );
 }

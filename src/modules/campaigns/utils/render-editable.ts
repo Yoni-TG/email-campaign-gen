@@ -34,6 +34,7 @@ export async function renderEditableForCampaign(
   const { html } = await renderSkeleton(skeleton, blueprint, {
     withAssets: true,
     editable: true,
+    blockOverrides: campaign.blockOverrides,
   });
   return html;
 }

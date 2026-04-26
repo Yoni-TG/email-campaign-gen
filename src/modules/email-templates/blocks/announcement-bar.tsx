@@ -9,6 +9,7 @@ export function AnnouncementBar({
 }: AnnouncementBarProps) {
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bgColor(background),
         padding: "8px 16px",

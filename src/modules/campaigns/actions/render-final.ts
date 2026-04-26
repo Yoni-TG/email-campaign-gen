@@ -38,6 +38,7 @@ export async function renderFinal(campaign: Campaign): Promise<RenderFinalResult
   try {
     const { html, missingAssets } = await renderSkeleton(skeleton, blueprint, {
       withAssets: true,
+      blockOverrides: campaign.blockOverrides,
     });
 
     const renderResult: FinalRenderResult = {

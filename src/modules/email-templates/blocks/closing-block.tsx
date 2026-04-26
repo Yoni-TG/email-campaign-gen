@@ -16,6 +16,7 @@ export function ClosingBlock({
   const bg = bgColor(background);
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bg,
         padding: imageUrl ? 0 : "40px 24px",

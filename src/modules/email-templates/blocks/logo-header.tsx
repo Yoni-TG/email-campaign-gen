@@ -6,10 +6,14 @@ import type { LogoHeaderProps } from "./types";
 // Brand default is baby-blue per the wireframes — the logo bar is the visual
 // anchor that signals Theo Grace before any copy. Pass `background="white"`
 // for skeletons that intentionally lead with a typography hero on white.
-export function LogoHeader({ background = "baby_blue" }: LogoHeaderProps) {
+export function LogoHeader({
+  background = "baby_blue",
+  editTargets,
+}: LogoHeaderProps) {
   const bg = bgColor(background);
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bg,
         padding: "16px 0",

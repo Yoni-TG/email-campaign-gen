@@ -14,7 +14,10 @@ export function HeroProduct({
   editTargets,
 }: HeroProductProps) {
   return (
-    <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}>
+    <Section
+      data-edit-target={editTargets?.background}
+      style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}
+    >
       <Row>
         <Column style={{ width: "50%", verticalAlign: "middle" }}>
           <Img

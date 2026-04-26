@@ -14,7 +14,10 @@ export function HeroTypography({
   editTargets,
 }: HeroTypographyProps) {
   return (
-    <Section style={{ backgroundColor: bgColor(background), padding: "48px 32px", textAlign: "center" }}>
+    <Section
+      data-edit-target={editTargets?.background}
+      style={{ backgroundColor: bgColor(background), padding: "48px 32px", textAlign: "center" }}
+    >
       {topline ? (
         <Text
           data-edit-target={editTargets?.topline}

@@ -88,7 +88,10 @@ export function EditorialSplit({
     </Column>
   );
   return (
-    <Section style={{ backgroundColor: bgColor(background), padding: "24px 0" }}>
+    <Section
+      data-edit-target={editTargets?.background}
+      style={{ backgroundColor: bgColor(background), padding: "24px 0" }}
+    >
       <Row>{imageSide === "left" ? [imageColumn, textColumn] : [textColumn, imageColumn]}</Row>
     </Section>
   );

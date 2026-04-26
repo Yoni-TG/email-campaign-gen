@@ -26,6 +26,7 @@ export function HeroFramed({
 }: HeroFramedProps) {
   return (
     <Section
+      data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bgColor(background),
         padding: "32px 36px 48px 36px",
