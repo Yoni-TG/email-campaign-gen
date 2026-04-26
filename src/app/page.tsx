@@ -18,9 +18,23 @@ export default async function HomePage() {
             Theo Grace email campaign generator
           </p>
         </div>
-        <Link href="/campaigns/new">
-          <Button>New Campaign</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/blocks"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Blocks
+          </Link>
+          <Link
+            href="/skeletons"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Skeletons
+          </Link>
+          <Link href="/campaigns/new">
+            <Button>New Campaign</Button>
+          </Link>
+        </div>
       </div>
       <CampaignList campaigns={campaigns} />
     </div>
