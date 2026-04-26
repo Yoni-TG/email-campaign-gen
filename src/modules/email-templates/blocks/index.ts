@@ -1,6 +1,7 @@
 export { LogoHeader } from "./logo-header";
 export { AnnouncementBar } from "./announcement-bar";
 export { HeroLifestyle } from "./hero-lifestyle";
+export { HeroFramed } from "./hero-framed";
 export { HeroProduct } from "./hero-product";
 export { HeroTypography } from "./hero-typography";
 export { HeroTileGraphic } from "./hero-tile-graphic";

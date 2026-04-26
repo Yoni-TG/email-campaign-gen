@@ -33,6 +33,16 @@ export interface HeroLifestyleProps {
   background?: BlockBackground;
 }
 
+export interface HeroFramedProps {
+  imageUrl: string;
+  subLabel?: string;
+  headline?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  background?: BlockBackground;
+}
+
 export interface HeroProductProps {
   imageUrl: string;
   headline?: string;
@@ -122,6 +132,7 @@ export interface BlockPropsMap {
   logo_header: LogoHeaderProps;
   announcement_bar: AnnouncementBarProps;
   hero_lifestyle: HeroLifestyleProps;
+  hero_framed: HeroFramedProps;
   hero_product: HeroProductProps;
   hero_typography: HeroTypographyProps;
   hero_tile_graphic: HeroTileGraphicProps;

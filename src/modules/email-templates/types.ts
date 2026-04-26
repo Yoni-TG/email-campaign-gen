@@ -14,6 +14,7 @@ export const BLOCK_TYPES = [
   "logo_header",
   "announcement_bar",
   "hero_lifestyle",
+  "hero_framed",
   "hero_product",
   "hero_typography",
   "hero_tile_graphic",

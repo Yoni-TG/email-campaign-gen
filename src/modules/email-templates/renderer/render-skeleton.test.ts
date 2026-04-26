@@ -91,6 +91,15 @@ const KITCHEN_SINK: SkeletonManifest = {
       },
     },
     {
+      type: "hero_framed",
+      bind: {
+        imageUrl: "assets.hero",
+        subLabel: "literal:THE STORY",
+        headline: "body_blocks[1].title",
+        body: "body_blocks[1].description",
+      },
+    },
+    {
       type: "hero_tile_graphic",
       bind: {
         subLabel: "literal:YOUR MOMENT TO SHINE",

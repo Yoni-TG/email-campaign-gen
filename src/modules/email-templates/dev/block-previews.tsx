@@ -14,6 +14,7 @@ import {
   CtaButton,
   EditorialSplit,
   Footer,
+  HeroFramed,
   HeroLifestyle,
   HeroProduct,
   HeroTileGraphic,
@@ -95,6 +96,39 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
         body="Personalised pieces ready to gift. Every initial, every birth stone, hand-finished and meant to be treasured."
         ctaLabel="Shop the edit"
         ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "hero-framed-baby-blue",
+    label: "hero_framed",
+    variant: "background: baby_blue (default)",
+    height: 700,
+    jsx: (
+      <HeroFramed
+        imageUrl={SAMPLE_HERO_URL}
+        subLabel="MADE TO TREASURE"
+        headline="A love story, pinned close"
+        body="A meaningful piece created to celebrate family, memory, and the moments that shape us."
+        ctaLabel="Shop Now"
+        ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "hero-framed-pale-blue",
+    label: "hero_framed",
+    variant: "background: pale_blue",
+    height: 700,
+    jsx: (
+      <HeroFramed
+        imageUrl={SAMPLE_HERO_URL}
+        subLabel="THE COLLECTION"
+        headline="The Sweetheart Brooch"
+        body="Hand-finished and made to be passed on."
+        ctaLabel="Discover the piece"
+        ctaHref="#"
+        background="pale_blue"
       />
     ),
   },
