@@ -101,13 +101,14 @@ function VariantCard({
       <button
         type="button"
         onClick={onExpand}
-        className="block w-full text-left"
+        className="flex w-full items-start justify-center bg-stone-50 p-3"
         aria-label={`Expand preview of ${variant.name}`}
       >
         <AutoSizeIframe
           title={`${variant.skeletonId} preview`}
           srcDoc={variant.previewHtml}
-          className="block w-full border-0 bg-white"
+          className="bg-white shadow-sm"
+          scale={0.45}
           minHeight={600}
           passThroughClicks
         />
