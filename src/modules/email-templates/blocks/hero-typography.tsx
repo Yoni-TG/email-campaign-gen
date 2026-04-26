@@ -8,7 +8,8 @@ export function HeroTypography({
   topline,
   headline,
   subhead,
-  cta,
+  ctaLabel,
+  ctaHref,
   background = "white",
 }: HeroTypographyProps) {
   const bg =
@@ -60,7 +61,7 @@ export function HeroTypography({
           {subhead}
         </Text>
       ) : null}
-      {cta ? <CtaButton label={cta.label} href={cta.href} /> : null}
+      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
     </Section>
   );
 }

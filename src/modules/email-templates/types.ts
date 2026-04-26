@@ -47,6 +47,14 @@ export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export type ContentPath = string;
 
+/**
+ * A bind value is either a ContentPath (string) the renderer resolves, or
+ * an inline literal value passed straight through to the block. Inline
+ * literals are used for non-scalar props that don't have a natural path
+ * on the blueprint — e.g. the tile labels on hero_tile_graphic.
+ */
+export type BindValue = ContentPath | unknown[] | Record<string, unknown> | number | boolean | null;
+
 // ─── Skeleton manifest shape ───
 
 export interface AssetSlot {
@@ -60,10 +68,10 @@ export interface AssetSlot {
 export interface BlockEntry {
   type: BlockType;
   /**
-   * Maps a block prop name to a ContentPath. The renderer resolves each
-   * path against the blueprint and passes the result to the component.
+   * Maps a block prop name to a BindValue. Strings are resolved as ContentPath;
+   * non-string values are passed straight through as inline literals.
    */
-  bind: Record<string, ContentPath>;
+  bind: Record<string, BindValue>;
 }
 
 export interface SkeletonManifest {

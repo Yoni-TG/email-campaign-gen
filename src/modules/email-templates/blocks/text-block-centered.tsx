@@ -9,7 +9,8 @@ export function TextBlockCentered({
   subLabel,
   headline,
   body,
-  cta,
+  ctaLabel,
+  ctaHref,
 }: TextBlockCenteredProps) {
   return (
     <Section
@@ -47,7 +48,7 @@ export function TextBlockCentered({
             {body}
           </Text>
         ) : null}
-        {cta ? <CtaButton label={cta.label} href={cta.href} /> : null}
+        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
       </Section>
     </Section>
   );

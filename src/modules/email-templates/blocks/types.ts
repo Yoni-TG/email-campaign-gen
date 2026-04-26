@@ -2,11 +2,6 @@
 // component's prop shape. The renderer uses BlockPropsMap to resolve a
 // manifest's bind paths into typed props for each component.
 
-export interface CtaProp {
-  label: string;
-  href?: string;
-}
-
 // Matches the wire format used by CampaignBlueprint.products and the LLM
 // copy/product agents — snake_case to stay consistent with the rest of the
 // blueprint payload.
@@ -30,21 +25,24 @@ export interface HeroLifestyleProps {
   subLabel?: string;
   headline?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface HeroProductProps {
   imageUrl: string;
   headline?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface HeroTypographyProps {
   topline?: string;
   headline: string;
   subhead?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
   background?: "white" | "baby_blue" | "pale_blue";
 }
 
@@ -54,14 +52,16 @@ export interface HeroTileGraphicProps {
   tiles: Array<{ label: string }>;
   urgency?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface TextBlockCenteredProps {
   subLabel?: string;
   headline?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface EditorialSplitProps {
@@ -70,7 +70,8 @@ export interface EditorialSplitProps {
   subLabel?: string;
   headline?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface ProductGridProps {
@@ -98,7 +99,8 @@ export interface ClosingBlockProps {
   imageUrl?: string;
   headline?: string;
   body?: string;
-  cta?: CtaProp;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export interface FooterProps {

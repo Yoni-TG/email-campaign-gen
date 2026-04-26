@@ -5,8 +5,9 @@ import type {
   Campaign,
   CampaignStatus,
   CampaignType,
+  CandidateVariant,
   CreativeSeed,
-  FigmaResult,
+  FinalRenderResult,
   GeneratedCopy,
   ProductSnapshot,
 } from "@/lib/types";
@@ -24,7 +25,10 @@ export interface CampaignWrite {
   generatedProducts?: ProductSnapshot[] | null;
   approvedProducts?: ProductSnapshot[] | null;
   heroImagePath?: string | null;
-  figmaResult?: FigmaResult | null;
+  assetPaths?: Record<string, string> | null;
+  candidateVariants?: CandidateVariant[] | null;
+  chosenSkeletonId?: string | null;
+  renderResult?: FinalRenderResult | null;
   error?: string | null;
 }
 
@@ -38,6 +42,8 @@ export function serializeForDb(
   if (data.campaignType !== undefined) out.campaignType = data.campaignType;
   if (data.createdBy !== undefined) out.createdBy = data.createdBy;
   if (data.heroImagePath !== undefined) out.heroImagePath = data.heroImagePath;
+  if (data.chosenSkeletonId !== undefined)
+    out.chosenSkeletonId = data.chosenSkeletonId;
   if (data.error !== undefined) out.error = data.error;
 
   if (data.seed !== undefined) out.seed = JSON.stringify(data.seed);
@@ -57,9 +63,17 @@ export function serializeForDb(
     out.approvedProducts = data.approvedProducts
       ? JSON.stringify(data.approvedProducts)
       : null;
-  if (data.figmaResult !== undefined)
-    out.figmaResult = data.figmaResult
-      ? JSON.stringify(data.figmaResult)
+  if (data.assetPaths !== undefined)
+    out.assetPaths = data.assetPaths
+      ? JSON.stringify(data.assetPaths)
+      : null;
+  if (data.candidateVariants !== undefined)
+    out.candidateVariants = data.candidateVariants
+      ? JSON.stringify(data.candidateVariants)
+      : null;
+  if (data.renderResult !== undefined)
+    out.renderResult = data.renderResult
+      ? JSON.stringify(data.renderResult)
       : null;
 
   return out;

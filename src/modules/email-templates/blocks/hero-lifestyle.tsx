@@ -10,7 +10,8 @@ export function HeroLifestyle({
   subLabel,
   headline,
   body,
-  cta,
+  ctaLabel,
+  ctaHref,
 }: HeroLifestyleProps) {
   return (
     <Section style={{ backgroundColor: COLORS.babyBlue }}>
@@ -61,7 +62,7 @@ export function HeroLifestyle({
             {body}
           </Text>
         ) : null}
-        {cta ? <CtaButton label={cta.label} href={cta.href} /> : null}
+        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
       </Section>
     </Section>
   );

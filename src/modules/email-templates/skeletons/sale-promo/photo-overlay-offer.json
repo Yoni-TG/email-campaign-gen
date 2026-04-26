@@ -1,0 +1,36 @@
+{
+  "id": "sale-promo/photo-overlay-offer",
+  "name": "Photo Hero · Offer · Grid",
+  "campaignTypes": ["sale_promo"],
+  "tags": ["image-led", "photo-overlay", "deeper-grid"],
+  "description": "Lifestyle hero carries the offer in its headline + CTA, then a 3×2 grid showcases what's discounted. Best for collection-wide sales where one image sets the seasonal mood.",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:LIMITED TIME",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

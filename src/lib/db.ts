@@ -1,13 +1,14 @@
 import { PrismaClient, Campaign as DbCampaign } from "@prisma/client";
 import type {
+  ApprovedCopy,
   Campaign,
   CampaignStatus,
   CampaignType,
+  CandidateVariant,
   CreativeSeed,
+  FinalRenderResult,
   GeneratedCopy,
-  ApprovedCopy,
   ProductSnapshot,
-  FigmaResult,
 } from "@/lib/types";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
@@ -42,8 +43,15 @@ export function parseCampaign(row: DbCampaign): Campaign {
       ? (JSON.parse(row.approvedProducts) as ProductSnapshot[])
       : null,
     heroImagePath: row.heroImagePath,
-    figmaResult: row.figmaResult
-      ? (JSON.parse(row.figmaResult) as FigmaResult)
+    assetPaths: row.assetPaths
+      ? (JSON.parse(row.assetPaths) as Record<string, string>)
+      : null,
+    candidateVariants: row.candidateVariants
+      ? (JSON.parse(row.candidateVariants) as CandidateVariant[])
+      : null,
+    chosenSkeletonId: row.chosenSkeletonId,
+    renderResult: row.renderResult
+      ? (JSON.parse(row.renderResult) as FinalRenderResult)
       : null,
     error: row.error,
   };

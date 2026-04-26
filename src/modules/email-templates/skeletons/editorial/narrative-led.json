@@ -1,0 +1,48 @@
+{
+  "id": "editorial/narrative-led",
+  "name": "Narrative · Story · Edit",
+  "campaignTypes": ["editorial"],
+  "tags": ["story-forward", "text-heavy", "editorial-arc"],
+  "description": "Long-form editorial: lifestyle hero, centered narrative body, image-paired editorial split, and a curated 2×2 selection. Best when the campaign is value-led with a clear arc.",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true },
+    { "key": "secondary", "label": "Editorial split image", "required": true }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:THE EDIT",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "subLabel": "literal:WHY IT MATTERS",
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description"
+      }
+    },
+    {
+      "type": "editorial_split",
+      "bind": {
+        "imageUrl": "assets.secondary",
+        "imageSide": "literal:left",
+        "subLabel": "literal:HOW TO STYLE",
+        "headline": "body_blocks[2].title",
+        "body": "body_blocks[2].description",
+        "ctaLabel": "body_blocks[2].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    { "type": "footer", "bind": {} }
+  ]
+}

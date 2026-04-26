@@ -11,9 +11,14 @@ export interface ApproveInput {
 }
 
 export interface ApproveResult {
-  status: "hero_upload";
+  status: "rendering_candidates";
 }
 
+// CP1 review-gate: lock approved copy + products and advance to the
+// candidate-render phase. The candidate render itself runs as a follow-up
+// action (renderCandidates) — keeping that out of approve makes this idempotent
+// and lets the UI poll the status instead of holding an HTTP request open
+// during the render.
 export async function approveCampaign(
   campaign: Campaign,
   input: ApproveInput,
@@ -21,7 +26,7 @@ export async function approveCampaign(
   await updateCampaign(campaign.id, {
     approvedCopy: input.approvedCopy,
     approvedProducts: input.approvedProducts,
-    status: "hero_upload",
+    status: "rendering_candidates",
   });
-  return { status: "hero_upload" };
+  return { status: "rendering_candidates" };
 }

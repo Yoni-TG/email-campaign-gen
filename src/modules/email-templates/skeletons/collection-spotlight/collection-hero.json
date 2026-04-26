@@ -1,0 +1,38 @@
+{
+  "id": "collection-spotlight/collection-hero",
+  "name": "Collection Hero",
+  "campaignTypes": ["collection_spotlight"],
+  "tags": ["collection-led", "typography-led", "wide-grid"],
+  "description": "Collection name in big typography sets the frame, a body block grounds the why, and a 3×2 grid surfaces the curated picks. Best for re-surfacing an existing collection with no new pieces.",
+  "requiredAssets": [
+    { "key": "closing", "label": "Closing image", "required": false }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_typography",
+      "bind": {
+        "topline": "literal:THE COLLECTION",
+        "headline": "body_blocks[0].title",
+        "subhead": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#",
+        "background": "literal:pale_blue"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:CURATED PICKS" } },
+    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "imageUrl": "assets.closing",
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

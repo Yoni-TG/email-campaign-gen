@@ -4,7 +4,7 @@ import { COLORS, FONTS } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { HeroProductProps } from "./types";
 
-export function HeroProduct({ imageUrl, headline, body, cta }: HeroProductProps) {
+export function HeroProduct({ imageUrl, headline, body, ctaLabel, ctaHref }: HeroProductProps) {
   return (
     <Section style={{ backgroundColor: COLORS.babyBlue, padding: "32px 24px" }}>
       <Row>
@@ -49,7 +49,7 @@ export function HeroProduct({ imageUrl, headline, body, cta }: HeroProductProps)
               {body}
             </Text>
           ) : null}
-          {cta ? <CtaButton label={cta.label} href={cta.href} align="left" /> : null}
+          {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} align="left" /> : null}
         </Column>
       </Row>
     </Section>

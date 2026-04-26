@@ -11,7 +11,8 @@ export function EditorialSplit({
   subLabel,
   headline,
   body,
-  cta,
+  ctaLabel,
+  ctaHref,
 }: EditorialSplitProps) {
   const imageColumn = (
     <Column key="image" style={{ width: "50%", verticalAlign: "middle" }}>
@@ -65,7 +66,7 @@ export function EditorialSplit({
           {body}
         </Text>
       ) : null}
-      {cta ? <CtaButton label={cta.label} href={cta.href} align="left" /> : null}
+      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} align="left" /> : null}
     </Column>
   );
   return (

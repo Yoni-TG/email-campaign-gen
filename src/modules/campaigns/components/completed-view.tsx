@@ -1,6 +1,8 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
+import { Copy } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   CAMPAIGN_TYPE_LABELS,
   LEAD_PERSONALITY_LABELS,
@@ -9,9 +11,10 @@ import {
 import type {
   ApprovedCopy,
   Campaign,
-  FigmaResult,
+  FinalRenderResult,
   ProductSnapshot,
 } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import {
   formatPrice,
   isOnSale,
@@ -21,19 +24,19 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
   if (
     !campaign.approvedCopy ||
     !campaign.approvedProducts ||
-    !campaign.figmaResult
+    !campaign.renderResult
   ) {
     return (
       <p className="text-sm text-destructive">
-        Campaign is missing approved data. This shouldn&apos;t happen — try
-        re-running fill-figma.
+        Campaign is missing approved data or final render. Try re-running
+        render-final.
       </p>
     );
   }
 
   return (
     <div className="space-y-6">
-      <HeroBanner campaign={campaign} figma={campaign.figmaResult} />
+      <PreviewBanner campaign={campaign} render={campaign.renderResult} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <BriefCard campaign={campaign} />
@@ -41,56 +44,46 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
       </div>
 
       <ProductsCard products={campaign.approvedProducts} />
-      <VariantsCard figma={campaign.figmaResult} />
+      <FinalEmailCard render={campaign.renderResult} />
     </div>
   );
 }
 
-// Top banner: hero thumbnail (if uploaded) + the chosen variant + a
-// one-click path back to the Figma file.
-function HeroBanner({
+function PreviewBanner({
   campaign,
-  figma,
+  render,
 }: {
   campaign: Campaign;
-  figma: FigmaResult;
+  render: FinalRenderResult;
 }) {
-  const selected = figma.variants.find(
-    (v) => v.variantName === figma.selectedVariant,
-  );
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(render.html);
+      setCopied(true);
+      toast.success("HTML copied — paste into Klaviyo's email editor.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Copy failed — your browser blocked clipboard access.");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
-      {campaign.heroImagePath && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={campaign.heroImagePath}
-          alt="Campaign hero"
-          className="h-24 w-full shrink-0 rounded-md object-cover sm:w-32"
-        />
-      )}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
           Selected Layout
         </p>
-        <p className="truncate text-base font-semibold">
-          {selected?.variantName ?? "—"}
-        </p>
+        <p className="truncate text-base font-semibold">{render.skeletonId}</p>
         <p className="text-sm text-muted-foreground">
           {CAMPAIGN_TYPE_LABELS[campaign.campaignType]} · {campaign.createdBy}
         </p>
       </div>
-      {selected && (
-        <a
-          href={selected.figmaFrameUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          Open in Figma
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      )}
+      <Button onClick={handleCopy} className="inline-flex gap-1.5">
+        <Copy className="h-3.5 w-3.5" />
+        {copied ? "Copied" : "Copy HTML"}
+      </Button>
     </div>
   );
 }
@@ -171,7 +164,7 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
             <p className="text-xs uppercase text-muted-foreground">
               Nicky Quote
             </p>
-            <p className="italic">“{copy.nicky_quote.quote}”</p>
+            <p className="italic">&ldquo;{copy.nicky_quote.quote}&rdquo;</p>
             <p className="text-muted-foreground">
               — Nicky Hilton
               {copy.nicky_quote.response && (
@@ -230,7 +223,7 @@ function ProductsCard({ products }: { products: ProductSnapshot[] }) {
               className="overflow-hidden rounded-lg border border-border/60 bg-card"
             >
               {product.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={product.imageUrl}
                   alt={product.name}
@@ -260,37 +253,18 @@ function ProductsCard({ products }: { products: ProductSnapshot[] }) {
   );
 }
 
-function VariantsCard({ figma }: { figma: FigmaResult }) {
+function FinalEmailCard({ render }: { render: FinalRenderResult }) {
   return (
-    <Card title="All Variants">
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {figma.variants.map((variant) => {
-          const isSelected = variant.variantName === figma.selectedVariant;
-          return (
-            <li
-              key={variant.variantName}
-              className={`overflow-hidden rounded-lg border ${
-                isSelected ? "border-2 border-accent" : "border-border/60"
-              }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={variant.thumbnailUrl}
-                alt={variant.variantName}
-                className="w-full"
-              />
-              <p className="p-2 text-center text-sm">
-                {variant.variantName}
-                {isSelected && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    (selected)
-                  </span>
-                )}
-              </p>
-            </li>
-          );
-        })}
-      </ul>
+    <Card title="Final Email">
+      <iframe
+        title={`final-${render.skeletonId}`}
+        srcDoc={render.html}
+        className="h-[640px] w-full rounded border border-border/60"
+      />
+      <p className="mt-3 text-xs text-muted-foreground">
+        Rendered {new Date(render.renderedAt).toLocaleString()} · skeleton:{" "}
+        {render.skeletonId}
+      </p>
     </Card>
   );
 }

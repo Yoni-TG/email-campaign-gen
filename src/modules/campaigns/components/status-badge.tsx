@@ -33,13 +33,7 @@ const STATUS_STYLES: Record<CampaignStatus, StatusStyle> = {
     ring: "ring-amber-200",
     dot: "bg-amber-500",
   },
-  hero_upload: {
-    bg: "bg-rose-50",
-    text: "text-rose-800",
-    ring: "ring-rose-200",
-    dot: "bg-rose-500",
-  },
-  filling_figma: {
+  rendering_candidates: {
     bg: "bg-violet-50",
     text: "text-violet-800",
     ring: "ring-violet-200",
@@ -51,6 +45,19 @@ const STATUS_STYLES: Record<CampaignStatus, StatusStyle> = {
     text: "text-indigo-800",
     ring: "ring-indigo-200",
     dot: "bg-indigo-500",
+  },
+  asset_upload: {
+    bg: "bg-rose-50",
+    text: "text-rose-800",
+    ring: "ring-rose-200",
+    dot: "bg-rose-500",
+  },
+  rendering_final: {
+    bg: "bg-violet-50",
+    text: "text-violet-800",
+    ring: "ring-violet-200",
+    dot: "bg-violet-500",
+    pulse: true,
   },
   completed: {
     bg: "bg-emerald-50",

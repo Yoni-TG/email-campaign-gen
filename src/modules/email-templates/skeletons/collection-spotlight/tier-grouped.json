@@ -1,0 +1,37 @@
+{
+  "id": "collection-spotlight/tier-grouped",
+  "name": "Tiered Sections",
+  "campaignTypes": ["collection_spotlight"],
+  "tags": ["multi-tier", "shop-by", "section-labels"],
+  "description": "Lifestyle hero followed by two labelled mini-grids — e.g. \"FOR HER\" + \"FOR HIM\" or \"UNDER $100\" + \"GIFT-WORTHY\". Best when the spotlight has natural sub-groups the operator wants to surface.",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:THE COLLECTION",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR EVERY DAY" } },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR YOUR STORY" } },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

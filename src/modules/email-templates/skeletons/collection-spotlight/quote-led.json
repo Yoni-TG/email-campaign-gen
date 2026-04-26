@@ -1,0 +1,36 @@
+{
+  "id": "collection-spotlight/quote-led",
+  "name": "Quote-Led Spotlight",
+  "campaignTypes": ["collection_spotlight"],
+  "tags": ["nicky-fronted", "founder-pick", "wide-grid"],
+  "description": "Lifestyle hero, a Nicky pull-quote that frames the spotlight as a personal endorsement, and a 3×2 grid of the picks. Best when the collection benefits from a celebrity voice (limited capsules, founder edits).",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true },
+    { "key": "portrait", "label": "Nicky portrait", "required": false }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:NICKY'S COLLECTION",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    {
+      "type": "nicky_quote_module",
+      "bind": {
+        "quote": "nicky_quote.quote",
+        "response": "nicky_quote.response",
+        "portraitUrl": "assets.portrait"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:HER PICKS" } },
+    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    { "type": "footer", "bind": {} }
+  ]
+}

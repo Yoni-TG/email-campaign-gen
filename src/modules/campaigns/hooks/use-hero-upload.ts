@@ -9,7 +9,9 @@ export interface UseHeroUploadResult {
   preview: string | null;
   isUploading: boolean;
   setFile: (file: File | null) => void;
-  upload: () => Promise<void>;
+  /** slotKey defaults to "hero" — pass another slot when the chosen
+   *  skeleton declares a different asset key. */
+  upload: (slotKey?: string) => Promise<void>;
 }
 
 // Holds the selected file + object-URL preview and runs the two-step submit:
@@ -44,14 +46,15 @@ export function useHeroUpload(campaignId: string): UseHeroUploadResult {
     };
   }, []);
 
-  const upload = async () => {
+  const upload = async (slotKey: string = "hero") => {
     if (!file || isUploading) return;
     setIsUploading(true);
     try {
       const body = new FormData();
-      body.append("hero", file);
+      body.append("slotKey", slotKey);
+      body.append("file", file);
 
-      const res = await fetch(`/api/campaigns/${campaignId}/hero`, {
+      const res = await fetch(`/api/campaigns/${campaignId}/asset`, {
         method: "POST",
         body,
       });
@@ -60,8 +63,13 @@ export function useHeroUpload(campaignId: string): UseHeroUploadResult {
         throw new Error(err.error ?? "Upload failed");
       }
 
-      // Fire-and-forget: the filling view polls for the transition.
-      void fetch(`/api/campaigns/${campaignId}/fill-figma`, { method: "POST" });
+      const out = (await res.json()) as { status: string };
+      if (out.status === "rendering_final") {
+        // Last required asset uploaded — kick off the final render.
+        void fetch(`/api/campaigns/${campaignId}/render-final`, {
+          method: "POST",
+        });
+      }
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";

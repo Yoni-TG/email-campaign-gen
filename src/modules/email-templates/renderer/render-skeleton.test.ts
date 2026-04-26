@@ -95,7 +95,7 @@ const KITCHEN_SINK: SkeletonManifest = {
       bind: {
         subLabel: "literal:YOUR MOMENT TO SHINE",
         headline: "body_blocks[0].title",
-        tiles: "literal:placeholder", // overridden below
+        tiles: [{ label: "$" }, { label: "?" }, { label: "%" }],
       },
     },
     {
@@ -139,33 +139,11 @@ const KITCHEN_SINK: SkeletonManifest = {
   ],
 };
 
-// Patch the hero_tile_graphic tiles binding — the resolver only handles
-// scalar bindings via paths, so for an inline-array prop we'd normally use
-// a "literal:JSON" form; for the kitchen-sink test we replace it with a
-// direct path that resolves to a real array on the blueprint.
-function withTilesFromBlueprint(manifest: SkeletonManifest): SkeletonManifest {
-  return {
-    ...manifest,
-    blocks: manifest.blocks.map((b) =>
-      b.type === "hero_tile_graphic"
-        ? { ...b, bind: { ...b.bind, tiles: "tile_payload" } }
-        : b,
-    ),
-  };
-}
-
 describe("renderSkeleton", () => {
   it("renders a manifest exercising every registered block type", async () => {
-    const manifest = withTilesFromBlueprint(KITCHEN_SINK);
-    const blueprint = makeBlueprint({
-      // tile_payload isn't on RendererBlueprint, but the path walker
-      // tolerates extra fields — cast to satisfy the test.
-      ...({
-        tile_payload: [{ label: "$" }, { label: "?" }, { label: "%" }],
-      } as Partial<RendererBlueprint>),
-    });
+    const blueprint = makeBlueprint();
 
-    const { html, missingAssets } = await renderSkeleton(manifest, blueprint, {
+    const { html, missingAssets } = await renderSkeleton(KITCHEN_SINK, blueprint, {
       withAssets: true,
     });
 

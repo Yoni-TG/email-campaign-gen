@@ -15,6 +15,7 @@ import { render } from "@react-email/render";
 import { COLORS } from "../blocks/theme";
 import type { ComponentType } from "react";
 import type {
+  BindValue,
   ContentPath,
   RenderResult,
   SkeletonManifest,
@@ -69,6 +70,17 @@ function resolveContentPath(
   return { value: walkDottedPath(path, blueprint), missingAsset: null };
 }
 
+function resolveBindValue(
+  value: BindValue,
+  blueprint: RendererBlueprint,
+  withAssets: boolean,
+): ResolveResult {
+  if (typeof value === "string") {
+    return resolveContentPath(value, blueprint, withAssets);
+  }
+  return { value, missingAsset: null };
+}
+
 export async function renderSkeleton(
   manifest: SkeletonManifest,
   blueprint: RendererBlueprint,
@@ -81,9 +93,9 @@ export async function renderSkeleton(
       Record<string, unknown>
     >;
     const props: Record<string, unknown> = {};
-    for (const [propName, path] of Object.entries(entry.bind)) {
-      const { value, missingAsset } = resolveContentPath(
-        path,
+    for (const [propName, bindValue] of Object.entries(entry.bind)) {
+      const { value, missingAsset } = resolveBindValue(
+        bindValue,
         blueprint,
         opts.withAssets,
       );

@@ -12,7 +12,8 @@ export function HeroTileGraphic({
   tiles,
   urgency,
   body,
-  cta,
+  ctaLabel,
+  ctaHref,
 }: HeroTileGraphicProps) {
   const visibleTiles = tiles.slice(0, 3);
   return (
@@ -103,7 +104,7 @@ export function HeroTileGraphic({
           {body}
         </Text>
       ) : null}
-      {cta ? <CtaButton label={cta.label} href={cta.href} /> : null}
+      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
     </Section>
   );
 }

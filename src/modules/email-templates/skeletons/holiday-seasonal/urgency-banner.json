@@ -1,0 +1,42 @@
+{
+  "id": "holiday-seasonal/urgency-banner",
+  "name": "Holiday Urgency",
+  "campaignTypes": ["holiday_seasonal"],
+  "tags": ["urgent", "deadline", "text-led", "no-image-hero"],
+  "description": "Big-typography urgency hero (\"DELIVERY BY DEC 24\", \"LAST CHANCE FOR MOM\") followed by a 2×2 of giftable picks and a closing CTA. No operator-uploaded image required — works as a fast send late in a holiday window.",
+  "requiredAssets": [],
+  "blocks": [
+    { "type": "logo_header", "bind": { "background": "baby_blue" } },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_typography",
+      "bind": {
+        "topline": "literal:DON'T WAIT",
+        "headline": "body_blocks[0].title",
+        "subhead": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#",
+        "background": "literal:white"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "subLabel": "literal:STILL TIME",
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description"
+      }
+    },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[2].title",
+        "body": "body_blocks[2].description",
+        "ctaLabel": "body_blocks[2].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

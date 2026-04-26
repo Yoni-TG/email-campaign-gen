@@ -27,9 +27,24 @@ model Campaign {
   generatedProducts String?  @map("generated_products")
   approvedProducts  String?  @map("approved_products")
 
+  // Legacy hero upload column. Step 4 drops it; new uploads write to
+  // assetPaths under the slot key declared by the chosen skeleton.
   heroImagePath     String?  @map("hero_image_path")
 
-  figmaResult       String?  @map("figma_result")
+  // Replaces figma_result. JSON-encoded FinalRenderResult — produced by
+  // the email-templates renderer after asset_upload completes.
+  renderResult      String?  @map("render_result")
+
+  // 3 candidate variants from rendering_candidates. JSON-encoded
+  // CandidateVariant[].
+  candidateVariants String?  @map("candidate_variants")
+
+  // Skeleton id the operator picked at variant_selection.
+  chosenSkeletonId  String?  @map("chosen_skeleton_id")
+
+  // Operator-uploaded asset URLs keyed by AssetSlot.key.
+  // JSON-encoded Record<string, string>.
+  assetPaths        String?  @map("asset_paths")
 
   error             String?
 

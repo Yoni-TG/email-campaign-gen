@@ -4,7 +4,7 @@ import { COLORS, FONTS } from "./theme";
 import { CtaButton } from "./cta-button";
 import type { ClosingBlockProps } from "./types";
 
-export function ClosingBlock({ imageUrl, headline, body, cta }: ClosingBlockProps) {
+export function ClosingBlock({ imageUrl, headline, body, ctaLabel, ctaHref }: ClosingBlockProps) {
   return (
     <Section
       style={{
@@ -60,7 +60,7 @@ export function ClosingBlock({ imageUrl, headline, body, cta }: ClosingBlockProp
             {body}
           </Text>
         ) : null}
-        {cta ? <CtaButton label={cta.label} href={cta.href} /> : null}
+        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
       </Section>
     </Section>
   );

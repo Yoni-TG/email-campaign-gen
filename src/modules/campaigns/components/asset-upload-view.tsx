@@ -4,13 +4,41 @@ import { useRef, type ChangeEvent, type DragEvent } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroUpload } from "@/modules/campaigns/hooks/use-hero-upload";
+import { loadSkeletonById } from "@/modules/email-templates/skeletons";
 import type { Campaign } from "@/lib/types";
 
-export function HeroUploadView({ campaign }: { campaign: Campaign }) {
+// Step 2 minimum-viable view: lets the operator upload the next required
+// asset slot declared by the chosen skeleton. Step 3 rebuilds this around
+// a per-slot dynamic form.
+export function AssetUploadView({ campaign }: { campaign: Campaign }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { file, preview, isUploading, setFile, upload } = useHeroUpload(
     campaign.id,
   );
+
+  const skeleton = campaign.chosenSkeletonId
+    ? loadSkeletonById(campaign.chosenSkeletonId)
+    : null;
+  const requiredSlots = skeleton?.requiredAssets ?? [];
+  const pendingSlot = requiredSlots.find(
+    (a) => a.required && !campaign.assetPaths?.[a.key],
+  );
+
+  if (!skeleton) {
+    return (
+      <p className="py-12 text-center text-sm text-destructive">
+        Missing chosen skeleton — pick a variant first.
+      </p>
+    );
+  }
+
+  if (!pendingSlot) {
+    return (
+      <p className="py-12 text-center text-sm text-muted-foreground">
+        All required assets uploaded. Rendering final email…
+      </p>
+    );
+  }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const next = e.target.files?.[0];
@@ -23,11 +51,16 @@ export function HeroUploadView({ campaign }: { campaign: Campaign }) {
     if (dropped && dropped.type.startsWith("image/")) setFile(dropped);
   };
 
+  const handleUpload = () => {
+    void upload(pendingSlot.key);
+  };
+
   return (
     <div className="mx-auto max-w-lg py-8">
-      <h2 className="mb-2 text-lg font-semibold">Upload Hero Image</h2>
+      <h2 className="mb-2 text-lg font-semibold">{pendingSlot.label}</h2>
       <p className="mb-6 text-sm text-muted-foreground">
-        Choose the hero/lifestyle image for this campaign.
+        Upload the {pendingSlot.label.toLowerCase()} for the chosen
+        layout: <strong>{skeleton.name}</strong>.
       </p>
 
       <div
@@ -42,10 +75,10 @@ export function HeroUploadView({ campaign }: { campaign: Campaign }) {
         className="cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors hover:border-primary"
       >
         {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={preview}
-            alt="Hero preview"
+            alt={`${pendingSlot.label} preview`}
             className="mx-auto max-h-64 rounded"
           />
         ) : (
@@ -66,8 +99,8 @@ export function HeroUploadView({ campaign }: { campaign: Campaign }) {
 
       {file && (
         <div className="mt-4 flex justify-end">
-          <Button onClick={upload} disabled={isUploading}>
-            {isUploading ? "Uploading…" : "Continue"}
+          <Button onClick={handleUpload} disabled={isUploading}>
+            {isUploading ? "Uploading…" : "Upload"}
           </Button>
         </div>
       )}

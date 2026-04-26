@@ -4,9 +4,10 @@ export const CAMPAIGN_STATUSES = [
   "draft",
   "generating",
   "review",
-  "hero_upload",
-  "filling_figma",
+  "rendering_candidates",
   "variant_selection",
+  "asset_upload",
+  "rendering_final",
   "completed",
 ] as const;
 
@@ -16,9 +17,10 @@ export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
   draft: "Draft",
   generating: "Generating…",
   review: "Needs Review",
-  hero_upload: "Hero Image",
-  filling_figma: "Filling Figma…",
+  rendering_candidates: "Rendering candidates…",
   variant_selection: "Pick Variant",
+  asset_upload: "Upload Assets",
+  rendering_final: "Rendering final…",
   completed: "Completed",
 };
 
@@ -56,10 +58,11 @@ export const CAMPAIGN_STATUS_DESCRIPTIONS: Record<CampaignStatus, string> = {
   draft: "Brief saved but generation hasn't started.",
   generating: "Claude is writing copy and picking products (10–20 s).",
   review: "Ready for your edits. Approve copy + products to continue.",
-  hero_upload: "Pick a hero image for the Figma templates.",
-  filling_figma: "Templates are being filled with your approved content.",
-  variant_selection: "Pick which layout variant to hand off.",
-  completed: "Ready for retention to slice into Klaviyo.",
+  rendering_candidates: "Building three candidate email layouts from your approved copy + products.",
+  variant_selection: "Pick the layout that best carries your message.",
+  asset_upload: "Upload the assets the chosen layout needs (hero, etc.).",
+  rendering_final: "Rendering the final email with your assets.",
+  completed: "Ready to copy into Klaviyo.",
 };
 
 // ─── Creative Seed ───
@@ -297,18 +300,15 @@ export interface DigestedProduct {
   personalizationSummary: string | null;
 }
 
-// ─── Figma ───
-
-export interface FigmaVariant {
-  variantName: string;
-  figmaFrameUrl: string;
-  thumbnailUrl: string;
-}
-
-export interface FigmaResult {
-  variants: FigmaVariant[];
-  selectedVariant?: string;
-}
+// ─── Email Template Renderer Contract ───
+//
+// Shared between the wireframe-/copy-generation pipeline (which produces a
+// CampaignBlueprint from approved copy + products) and the email-templates
+// renderer (which consumes one and emits HTML).
+//
+// `assets: Record<string, string>` replaces the old `hero_image_url: string`
+// — the operator now uploads N named assets (slot keys declared by the chosen
+// skeleton's requiredAssets), and bind paths reference them via `assets.<key>`.
 
 export interface CampaignBlueprint {
   campaign_id: string;
@@ -317,7 +317,6 @@ export interface CampaignBlueprint {
   market: Market;
   free_top_text: string | null;
   subject_variant: SubjectVariant;
-  hero_image_url: string;
   body_blocks: BodyBlock[];
   sms: string | null;
   nicky_quote: NickyQuote | null;
@@ -327,24 +326,33 @@ export interface CampaignBlueprint {
     image_url: string;
     link: string;
   }>;
+  assets: Record<string, string>;
 }
 
-// ─── Figma Service Interface ───
+// ─── Render artefacts persisted on the campaign row ───
 
-export interface FigmaTemplate {
-  id: string;
+/**
+ * One of the 3 candidate email layouts produced during rendering_candidates.
+ * `previewHtml` is rendered with placeholder asset URLs so the variant-
+ * selection iframe shows structure faithfully without an upload step.
+ */
+export interface CandidateVariant {
+  skeletonId: string;
+  /** Human-readable label for the variant card. */
   name: string;
+  /** Optional one-sentence rationale from the LLM ranker. null when v1 path. */
+  rationale: string | null;
+  previewHtml: string;
 }
 
-export interface FilledVariant {
-  variantName: string;
-  figmaFrameUrl: string;
-}
-
-export interface FigmaService {
-  getAvailableTemplates(): Promise<FigmaTemplate[]>;
-  fillTemplates(blueprint: CampaignBlueprint): Promise<FilledVariant[]>;
-  exportThumbnails(variants: FilledVariant[]): Promise<string[]>;
+/**
+ * Final post-asset_upload render. Stored on Campaign.renderResult.
+ */
+export interface FinalRenderResult {
+  skeletonId: string;
+  html: string;
+  /** ISO timestamp the render was produced. */
+  renderedAt: string;
 }
 
 // ─── Campaign (full record, as returned from DB) ───
@@ -362,7 +370,18 @@ export interface Campaign {
   approvedCopy: ApprovedCopy | null;
   generatedProducts: ProductSnapshot[] | null;
   approvedProducts: ProductSnapshot[] | null;
+  /**
+   * Legacy column kept for transitional compatibility. Step 4 drops it once
+   * no consumer references it.
+   */
   heroImagePath: string | null;
-  figmaResult: FigmaResult | null;
+  /** Operator-uploaded asset URLs keyed by AssetSlot.key from the chosen skeleton. */
+  assetPaths: Record<string, string> | null;
+  /** The 3 candidate variants rendered after CP1 approval. */
+  candidateVariants: CandidateVariant[] | null;
+  /** Skeleton id the operator picked at variant_selection. */
+  chosenSkeletonId: string | null;
+  /** Final HTML render produced after asset_upload. Served at /campaigns/[id]/preview/[variantId]. */
+  renderResult: FinalRenderResult | null;
   error: string | null;
 }
