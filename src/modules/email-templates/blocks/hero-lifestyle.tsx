@@ -14,7 +14,7 @@ export function HeroLifestyle({
   ctaHref,
 }: HeroLifestyleProps) {
   return (
-    <Section style={{ backgroundColor: COLORS.babyBlue }}>
+    <>
       <Img
         src={imageUrl}
         alt={headline ?? ""}
@@ -30,8 +30,7 @@ export function HeroLifestyle({
       <Section
         style={{
           backgroundColor: COLORS.white,
-          margin: "-40px 24px 0 24px",
-          padding: "32px 24px",
+          padding: "32px 32px 24px 32px",
           textAlign: "center",
         }}
       >
@@ -52,7 +51,7 @@ export function HeroLifestyle({
         {body ? (
           <Text
             style={{
-              margin: "0 0 16px 0",
+              margin: "0 0 20px 0",
               fontFamily: FONTS.body,
               fontSize: "15px",
               color: COLORS.black,
@@ -64,6 +63,6 @@ export function HeroLifestyle({
         ) : null}
         {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
       </Section>
-    </Section>
+    </>
   );
 }

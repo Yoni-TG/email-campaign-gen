@@ -118,6 +118,8 @@ export interface BlockPropsMap {
   editorial_split: EditorialSplitProps;
   product_grid_2x2: ProductGridProps;
   product_grid_3x2: ProductGridProps;
+  product_grid_4x1: ProductGridProps;
+  product_grid_magazine: ProductGridProps;
   nicky_quote_module: NickyQuoteModuleProps;
   cta_button: CtaButtonProps;
   section_label: SectionLabelProps;

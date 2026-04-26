@@ -19,7 +19,7 @@
       }
     },
     { "type": "section_label", "bind": { "text": "literal:THE PIECES" } },
-    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    { "type": "product_grid_magazine", "bind": { "products": "products" } },
     {
       "type": "editorial_split",
       "bind": {

@@ -19,10 +19,10 @@
         "body": "body_blocks[0].description"
       }
     },
-    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR EVERY DAY" } },
-    { "type": "product_grid_2x2", "bind": { "products": "products" } },
-    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR YOUR STORY" } },
-    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR FAMILY TIME" } },
+    { "type": "product_grid_4x1", "bind": { "products": "products" } },
+    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR HER STORY" } },
+    { "type": "product_grid_4x1", "bind": { "products": "products" } },
     {
       "type": "closing_block",
       "bind": {

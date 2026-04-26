@@ -15,6 +15,8 @@ import {
   NickyQuoteModule,
   ProductGrid2x2,
   ProductGrid3x2,
+  ProductGrid4x1,
+  ProductGridMagazine,
   SectionLabel,
   TextBlockCentered,
 } from "../blocks";
@@ -32,6 +34,8 @@ export const blockRegistry: BlockRegistry = {
   editorial_split: EditorialSplit,
   product_grid_2x2: ProductGrid2x2,
   product_grid_3x2: ProductGrid3x2,
+  product_grid_4x1: ProductGrid4x1,
+  product_grid_magazine: ProductGridMagazine,
   nicky_quote_module: NickyQuoteModule,
   cta_button: CtaButton,
   section_label: SectionLabel,

@@ -117,6 +117,8 @@ const KITCHEN_SINK: SkeletonManifest = {
     },
     { type: "product_grid_2x2", bind: { products: "products" } },
     { type: "product_grid_3x2", bind: { products: "products" } },
+    { type: "product_grid_4x1", bind: { products: "products" } },
+    { type: "product_grid_magazine", bind: { products: "products" } },
     {
       type: "nicky_quote_module",
       bind: {
