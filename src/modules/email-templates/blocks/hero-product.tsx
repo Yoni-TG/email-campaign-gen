@@ -6,7 +6,7 @@ import type { HeroProductProps } from "./types";
 
 export function HeroProduct({ imageUrl, headline, body, ctaLabel, ctaHref }: HeroProductProps) {
   return (
-    <Section style={{ backgroundColor: COLORS.babyBlue, padding: "32px 24px" }}>
+    <Section style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px" }}>
       <Row>
         <Column style={{ width: "50%", verticalAlign: "middle" }}>
           <Img

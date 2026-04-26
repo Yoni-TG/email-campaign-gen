@@ -17,7 +17,7 @@ export function HeroTileGraphic({
 }: HeroTileGraphicProps) {
   const visibleTiles = tiles.slice(0, 3);
   return (
-    <Section style={{ backgroundColor: COLORS.babyBlue, padding: "32px 24px", textAlign: "center" }}>
+    <Section style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px", textAlign: "center" }}>
       {subLabel ? (
         <Text
           style={{

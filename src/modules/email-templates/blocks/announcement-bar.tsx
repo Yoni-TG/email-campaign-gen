@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Section, Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { AnnouncementBarProps } from "./types";
@@ -7,7 +6,6 @@ export function AnnouncementBar({ text }: AnnouncementBarProps) {
   return (
     <Section
       style={{
-        backgroundColor: COLORS.babyBlue,
         padding: "8px 16px",
         textAlign: "center",
       }}
