@@ -57,12 +57,15 @@ export function EditableEmailFrame({ campaign, editableHtml }: Props) {
       const r = data.rect as { x: number; y: number; w: number; h: number };
       setEdit({
         target: data.target as string,
+        // Viewport-relative coords. Popover renders position:fixed so
+        // it doesn't get reparented under our `relative` wrapper, which
+        // would otherwise cause a double-offset (parent already sits
+        // hundreds of pixels into the page, and absolute positioning
+        // would add to that). The popover internally re-checks fit
+        // against window.innerHeight/innerWidth.
         rect: {
-          // Page-absolute coords (account for scroll so the popover
-          // stays anchored even if the operator scrolls between click
-          // and render).
-          left: iframeRect.left + window.scrollX + r.x,
-          top: iframeRect.top + window.scrollY + r.y,
+          left: iframeRect.left + r.x,
+          top: iframeRect.top + r.y,
           width: r.w,
           height: r.h,
         },

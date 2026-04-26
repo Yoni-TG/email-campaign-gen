@@ -34,7 +34,10 @@ interface Props {
 }
 
 export function EditPopover({ target, rect, campaign, onClose, onSaved }: Props) {
-  // Position: prefer below the element, fall back above if not enough room.
+  // Popover uses `position: fixed` so coordinates are viewport-relative.
+  // Default placement is below the clicked element; if it would overflow
+  // the bottom of the viewport we flip it above. Horizontally we clamp
+  // inside the viewport with a 16px gutter.
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState<{ left: number; top: number }>({
     left: rect.left,
@@ -42,22 +45,18 @@ export function EditPopover({ target, rect, campaign, onClose, onSaved }: Props)
   });
 
   useEffect(() => {
-    // After mount, measure popover height to flip above the element if needed.
     const el = wrapperRef.current;
     if (!el) return;
     const popoverHeight = el.offsetHeight;
-    const wantsBelowTop = rect.top + rect.height + 8;
-    const fitsBelow =
-      wantsBelowTop + popoverHeight < window.scrollY + window.innerHeight;
+    const popoverWidth = el.offsetWidth;
+    const belowTop = rect.top + rect.height + 8;
+    const fitsBelow = belowTop + popoverHeight <= window.innerHeight - 8;
     setCoords({
       left: Math.max(
-        16 + window.scrollX,
-        Math.min(
-          rect.left,
-          window.scrollX + window.innerWidth - el.offsetWidth - 16,
-        ),
+        16,
+        Math.min(rect.left, window.innerWidth - popoverWidth - 16),
       ),
-      top: fitsBelow ? wantsBelowTop : rect.top - popoverHeight - 8,
+      top: fitsBelow ? belowTop : Math.max(16, rect.top - popoverHeight - 8),
     });
   }, [rect.left, rect.top, rect.width, rect.height]);
 
@@ -132,7 +131,7 @@ export function EditPopover({ target, rect, campaign, onClose, onSaved }: Props)
       />
       <div
         ref={wrapperRef}
-        className="absolute z-50 w-80 rounded-lg border border-border bg-card p-4 shadow-2xl ring-1 ring-black/5"
+        className="fixed z-50 w-80 rounded-lg border border-border bg-card p-4 shadow-2xl ring-1 ring-black/5"
         style={{ left: coords.left, top: coords.top }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -180,8 +179,7 @@ function ImageEditor({
       toast.success("Image replaced — re-rendered.");
       onSaved();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Upload failed";
-      toast.error(message);
+      toast.error(shortError(err, "Upload failed"));
     } finally {
       setBusy(false);
     }
@@ -249,8 +247,7 @@ function TextEditor({
       toast.success("Copy updated — re-rendered.");
       onSaved();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Save failed";
-      toast.error(message);
+      toast.error(shortError(err, "Save failed"));
     } finally {
       setBusy(false);
     }
@@ -388,6 +385,16 @@ function stripCampaignId(copy: ApprovedCopy): Omit<ApprovedCopy, "campaign_id"> 
   return rest;
 }
 
+// Server errors can be huge (Prisma stack traces ramble). Clip to one
+// line so the toast doesn't dominate the screen — the full payload is
+// still visible in the network tab if the operator needs to forward it.
+function shortError(err: unknown, fallback: string): string {
+  const raw = err instanceof Error ? err.message : fallback;
+  const firstLine = raw.split("\n")[0] ?? raw;
+  if (firstLine.length <= 140) return firstLine;
+  return firstLine.slice(0, 140) + "…";
+}
+
 // ─── Background editor ──────────────────────────────────────────
 
 const BG_OPTIONS: Array<{ key: string; label: string; swatch: string }> = [
@@ -428,8 +435,7 @@ function BackgroundEditor({
       toast.success("Background updated — re-rendered.");
       onSaved();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Save failed";
-      toast.error(message);
+      toast.error(shortError(err, "Save failed"));
     } finally {
       setBusy(false);
     }
