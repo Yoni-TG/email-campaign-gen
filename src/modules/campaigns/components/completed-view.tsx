@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Pencil } from "lucide-react";
+import { ChevronDown, ExternalLink, Pencil } from "lucide-react";
 import {
   CAMPAIGN_TYPE_LABELS,
   LEAD_PERSONALITY_LABELS,
@@ -13,6 +14,7 @@ import type {
   FinalRenderResult,
   ProductSnapshot,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   formatPrice,
   isOnSale,
@@ -24,6 +26,13 @@ import {
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 import { EditableEmailFrame } from "./editable-email-frame";
+
+// Email-first layout. The rendered email is the page's hero — full-width,
+// dominant — with all action affordances (Copy HTML, sharable preview)
+// pinned to its top toolbar. Brief / approved copy / products are
+// collapsed into a single Reference section below the email, default
+// closed. The campaign name + status already live in the page header
+// (app/campaigns/[id]/page.tsx) so we don't repeat them here.
 
 function variantSlug(skeletonId: string): string {
   return skeletonId.replace(/\//g, "__");
@@ -52,78 +61,142 @@ export function CompletedView({ campaign, editableHtml }: CompletedViewProps) {
 
   return (
     <div className="space-y-6">
-      <PreviewBanner campaign={campaign} render={campaign.renderResult} />
-
       <FinalEmailCard
         campaign={campaign}
         render={campaign.renderResult}
         editableHtml={editableHtml}
       />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <BriefCard campaign={campaign} />
-        <CopyCard copy={campaign.approvedCopy} />
-      </div>
-
-      <ProductsCard
-        products={campaign.approvedProducts}
-        chosenSkeletonId={campaign.chosenSkeletonId}
+      <ReferenceSection
+        campaign={campaign}
+        approvedCopy={campaign.approvedCopy}
+        approvedProducts={campaign.approvedProducts}
       />
     </div>
   );
 }
 
-function PreviewBanner({
+// ─── Final email card (the hero) ───────────────────────────────
+
+function FinalEmailCard({
   campaign,
   render,
+  editableHtml,
 }: {
   campaign: Campaign;
   render: FinalRenderResult;
+  editableHtml: string | null;
 }) {
   return (
-    <div className="flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          Selected Layout
-        </p>
-        <p className="truncate text-base font-semibold">{render.skeletonId}</p>
-        <p className="text-sm text-muted-foreground">
-          {CAMPAIGN_TYPE_LABELS[campaign.campaignType]} · {campaign.createdBy}
-        </p>
-      </div>
-      <Link
-        href={`/campaigns/${campaign.id}/preview/${variantSlug(render.skeletonId)}`}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ExternalLink className="h-3.5 w-3.5" />
-        Sharable preview
-      </Link>
-      <CopyHtmlButton html={render.html} />
-    </div>
-  );
-}
-
-function Card({
-  title,
-  children,
-  hint,
-}: {
-  title: string;
-  children: React.ReactNode;
-  hint?: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <header className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {hint}
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <header className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Final Email
+          </p>
+          {editableHtml ? (
+            <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Pencil className="h-3 w-3" />
+              Click any image, headline, body or CTA to fine-tune
+            </p>
+          ) : (
+            <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground">
+              {render.skeletonId} · rendered{" "}
+              {new Date(render.renderedAt).toLocaleString()}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/campaigns/${campaign.id}/preview/${variantSlug(render.skeletonId)}`}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Sharable preview
+          </Link>
+          <CopyHtmlButton html={render.html} />
+        </div>
       </header>
-      {children}
+      <div className="p-4">
+        {editableHtml ? (
+          <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
+        ) : (
+          <AutoSizeIframe
+            title={`final-${render.skeletonId}`}
+            srcDoc={render.html}
+            className="w-full rounded border border-border/60"
+            minHeight={900}
+          />
+        )}
+      </div>
     </section>
   );
 }
 
-function BriefCard({ campaign }: { campaign: Campaign }) {
+// ─── Reference (collapsible) ────────────────────────────────────
+//
+// Single accordion holding the brief, approved copy, and the products
+// list. Default closed so the page lands clean on the email; the
+// operator opens it on demand. Inside, items render in a vertical
+// stack rather than a 2-up grid — keeps copy readable instead of
+// fighting for column space against the brief.
+
+function ReferenceSection({
+  campaign,
+  approvedCopy,
+  approvedProducts,
+}: {
+  campaign: Campaign;
+  approvedCopy: ApprovedCopy;
+  approvedProducts: ProductSnapshot[];
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/40"
+        aria-expanded={open}
+      >
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Reference
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Brief · approved copy · {approvedProducts.length} products
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div className="space-y-6 border-t border-border/60 p-6">
+          <BriefBlock campaign={campaign} />
+          <CopyBlock copy={approvedCopy} />
+          <ProductsBlock
+            products={approvedProducts}
+            chosenSkeletonId={campaign.chosenSkeletonId}
+          />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+      {children}
+    </h3>
+  );
+}
+
+function BriefBlock({ campaign }: { campaign: Campaign }) {
   const rows: Array<[string, string | null]> = [
     ["Type", CAMPAIGN_TYPE_LABELS[campaign.campaignType]],
     ["Lead value", LEAD_VALUE_LABELS[campaign.seed.leadValue]],
@@ -142,26 +215,28 @@ function BriefCard({ campaign }: { campaign: Campaign }) {
   const visible = rows.filter(([, v]) => v && v.length > 0);
 
   return (
-    <Card title="Brief">
-      <dl className="space-y-3 text-sm">
+    <section>
+      <SectionHeading>Brief</SectionHeading>
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
         {visible.map(([k, v]) => (
           <div
             key={k}
-            className="grid grid-cols-[110px_1fr] gap-3 border-t border-border/60 pt-3 first:border-t-0 first:pt-0"
+            className="grid grid-cols-[110px_1fr] gap-3 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
           >
             <dt className="text-muted-foreground">{k}</dt>
             <dd className="min-w-0 break-words">{v}</dd>
           </div>
         ))}
       </dl>
-    </Card>
+    </section>
   );
 }
 
-function CopyCard({ copy }: { copy: ApprovedCopy }) {
+function CopyBlock({ copy }: { copy: ApprovedCopy }) {
   return (
-    <Card title="Approved Copy">
-      <div className="space-y-4 text-sm">
+    <section>
+      <SectionHeading>Approved Copy</SectionHeading>
+      <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase text-muted-foreground">Subject</p>
           <p className="font-medium">{copy.subject_variant.subject}</p>
@@ -169,7 +244,6 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
             {copy.subject_variant.preheader}
           </p>
         </div>
-
         {copy.free_top_text && (
           <div>
             <p className="text-xs uppercase text-muted-foreground">
@@ -178,9 +252,8 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
             <p>{copy.free_top_text}</p>
           </div>
         )}
-
         {copy.nicky_quote && (
-          <div>
+          <div className="sm:col-span-2">
             <p className="text-xs uppercase text-muted-foreground">
               Nicky Quote
             </p>
@@ -193,8 +266,7 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
             </p>
           </div>
         )}
-
-        <div>
+        <div className="sm:col-span-2">
           <p className="mb-1.5 text-xs uppercase text-muted-foreground">
             Body Blocks
           </p>
@@ -219,61 +291,55 @@ function CopyCard({ copy }: { copy: ApprovedCopy }) {
             ))}
           </ol>
         </div>
-
         {copy.sms && (
-          <div>
+          <div className="sm:col-span-2">
             <p className="text-xs uppercase text-muted-foreground">SMS</p>
             <p>{copy.sms}</p>
           </div>
         )}
       </div>
-    </Card>
+    </section>
   );
 }
 
-function ProductsCard({
+function ProductsBlock({
   products,
   chosenSkeletonId,
 }: {
   products: ProductSnapshot[];
   chosenSkeletonId: string | null;
 }) {
-  // The chosen skeleton's grids cap how many of approvedProducts actually
-  // render in the email — anything beyond that lives as reserve in case
-  // the operator wants to swap one in. Show only the rendered set; the
-  // reserve count is mentioned in the card title so it's not surprising.
   const skeleton = chosenSkeletonId ? loadSkeletonById(chosenSkeletonId) : null;
   const cap = skeleton ? maxProductsRendered(skeleton) : products.length;
   const visible = products.slice(0, cap);
   const reserveCount = products.length - visible.length;
 
   return (
-    <Card
-      title={
-        reserveCount > 0
-          ? `Products in email (${visible.length} · ${reserveCount} held in reserve)`
-          : `Products (${visible.length})`
-      }
-    >
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    <section>
+      <SectionHeading>
+        {reserveCount > 0
+          ? `Products in email · ${visible.length} (· ${reserveCount} held in reserve)`
+          : `Products · ${visible.length}`}
+      </SectionHeading>
+      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {visible.map((product) => {
           const showSale = isOnSale(product);
           return (
             <li
               key={product.sku}
-              className="overflow-hidden rounded-lg border border-border/60 bg-card"
+              className="overflow-hidden rounded-lg border border-border/60 bg-background"
             >
               {product.imageUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-32 w-full object-cover"
+                  className="aspect-square w-full object-cover"
                 />
               )}
               <div className="p-2">
-                <p className="truncate text-xs font-medium">{product.name}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="truncate text-[11px] font-medium">{product.name}</p>
+                <p className="text-[11px] text-muted-foreground">
                   {showSale ? (
                     <>
                       <span className="line-through">
@@ -290,48 +356,6 @@ function ProductsCard({
           );
         })}
       </ul>
-    </Card>
-  );
-}
-
-function FinalEmailCard({
-  campaign,
-  render,
-  editableHtml,
-}: {
-  campaign: Campaign;
-  render: FinalRenderResult;
-  editableHtml: string | null;
-}) {
-  return (
-    <Card
-      title="Final Email"
-      hint={
-        editableHtml ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Pencil className="h-3 w-3" />
-            Click any image, headline, body or CTA to fine-tune
-          </span>
-        ) : null
-      }
-    >
-      {editableHtml ? (
-        <EditableEmailFrame
-          campaign={campaign}
-          editableHtml={editableHtml}
-        />
-      ) : (
-        <AutoSizeIframe
-          title={`final-${render.skeletonId}`}
-          srcDoc={render.html}
-          className="w-full rounded border border-border/60"
-          minHeight={900}
-        />
-      )}
-      <p className="mt-3 text-xs text-muted-foreground">
-        Rendered {new Date(render.renderedAt).toLocaleString()} · skeleton:{" "}
-        {render.skeletonId}
-      </p>
-    </Card>
+    </section>
   );
 }
