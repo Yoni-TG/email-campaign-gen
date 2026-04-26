@@ -17,6 +17,7 @@ import {
   formatPrice,
   isOnSale,
 } from "@/modules/products/utils/product-price";
+import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 
 function variantSlug(skeletonId: string): string {
@@ -250,10 +251,11 @@ function ProductsCard({ products }: { products: ProductSnapshot[] }) {
 function FinalEmailCard({ render }: { render: FinalRenderResult }) {
   return (
     <Card title="Final Email">
-      <iframe
+      <AutoSizeIframe
         title={`final-${render.skeletonId}`}
         srcDoc={render.html}
-        className="h-[640px] w-full rounded border border-border/60"
+        className="w-full rounded border border-border/60"
+        minHeight={900}
       />
       <p className="mt-3 text-xs text-muted-foreground">
         Rendered {new Date(render.renderedAt).toLocaleString()} · skeleton:{" "}

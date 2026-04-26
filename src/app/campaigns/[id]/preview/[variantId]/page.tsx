@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { AutoSizeIframe } from "@/modules/campaigns/components/auto-size-iframe";
 import { CopyHtmlButton } from "@/modules/campaigns/components/copy-html-button";
 import { getCampaign } from "@/modules/campaigns/utils/campaign-persistence";
 
@@ -70,10 +71,11 @@ export default async function PreviewPage({ params }: PageProps) {
         </div>
       </header>
 
-      <iframe
+      <AutoSizeIframe
         title={`${skeletonId} preview`}
         srcDoc={html}
-        className="block h-[900px] w-full rounded-lg border border-border bg-white"
+        className="block w-full rounded-lg border border-border bg-white"
+        minHeight={900}
       />
 
       {finalMatch && (

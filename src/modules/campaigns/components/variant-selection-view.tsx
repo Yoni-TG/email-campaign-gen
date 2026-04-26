@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVariantSelection } from "@/modules/campaigns/hooks/use-variant-selection";
+import { AutoSizeIframe } from "./auto-size-iframe";
 import type { Campaign, CandidateVariant } from "@/lib/types";
 
 // Three live iframes side-by-side. Click a card to expand to a full-size
@@ -103,13 +104,12 @@ function VariantCard({
         className="block w-full text-left"
         aria-label={`Expand preview of ${variant.name}`}
       >
-        <iframe
+        <AutoSizeIframe
           title={`${variant.skeletonId} preview`}
           srcDoc={variant.previewHtml}
-          className="block h-[420px] w-full border-0 bg-white"
-          // pointer-events: none lets the parent button receive the click
-          // even though the iframe sits on top of it visually.
-          style={{ pointerEvents: "none" }}
+          className="block w-full border-0 bg-white"
+          minHeight={600}
+          passThroughClicks
         />
       </button>
       <div className="border-t border-border/60 p-4">
@@ -193,10 +193,11 @@ function ExpandedPreview({
           {variant.rationale}
         </p>
       )}
-      <iframe
+      <AutoSizeIframe
         title={`${variant.skeletonId} expanded`}
         srcDoc={variant.previewHtml}
-        className="block h-[800px] w-full rounded-lg border border-border bg-white"
+        className="block w-full rounded-lg border border-border bg-white"
+        minHeight={900}
       />
     </div>
   );

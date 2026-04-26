@@ -10,7 +10,7 @@
 //                      gets a placeholder so the HTML is well-formed).
 
 import * as React from "react";
-import { Body, Container, Head, Html, Preview } from "@react-email/components";
+import { Body, Container, Font, Head, Html, Preview } from "@react-email/components";
 import { render } from "@react-email/render";
 import { COLORS } from "../blocks/theme";
 import type { ComponentType } from "react";
@@ -23,8 +23,10 @@ import type {
 import { blockRegistry } from "./block-registry";
 import type { RendererBlueprint } from "./types";
 
+// Neutral light-grey placeholder for missing/pending assets so the operator
+// reads structure without the placeholder competing with the brand palette.
 const PLACEHOLDER_IMAGE_URL =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'><rect width='640' height='360' fill='%23BEDFF7'/><text x='320' y='180' text-anchor='middle' font-family='Lato, sans-serif' font-size='14' fill='%231E1E1E'>Asset placeholder</text></svg>";
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'><rect width='640' height='360' fill='%23EEEEEE'/><text x='320' y='180' text-anchor='middle' font-family='Lato, sans-serif' font-size='14' fill='%23999999'>Asset placeholder</text></svg>";
 
 interface ResolveResult {
   value: unknown;
@@ -107,9 +109,35 @@ export async function renderSkeleton(
     return <Component key={index} {...props} />;
   });
 
+  // Email clients that honor web fonts (Apple Mail, iOS, Gmail with images
+  // enabled) load Lato from Google Fonts — the rest fall back to Helvetica
+  // via the stack in blocks/theme.ts. Big Caslon is proprietary; the
+  // display fallback chain keeps to Georgia-class serifs, which clients
+  // that can't load Big Caslon will use anyway.
   const tree = (
     <Html>
-      <Head />
+      <Head>
+        <Font
+          fontFamily="Lato"
+          fallbackFontFamily="Helvetica"
+          webFont={{
+            url: "https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjxAwXjeu.woff2",
+            format: "woff2",
+          }}
+          fontWeight={400}
+          fontStyle="normal"
+        />
+        <Font
+          fontFamily="Lato"
+          fallbackFontFamily="Helvetica"
+          webFont={{
+            url: "https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPGQ.woff2",
+            format: "woff2",
+          }}
+          fontWeight={700}
+          fontStyle="normal"
+        />
+      </Head>
       <Preview>{blueprint.subject_variant.preheader}</Preview>
       <Body style={{ backgroundColor: COLORS.white, margin: 0, padding: 0 }}>
         <Container
