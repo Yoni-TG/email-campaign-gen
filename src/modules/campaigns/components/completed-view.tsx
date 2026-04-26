@@ -20,6 +20,8 @@ import {
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 import { RefineAssetsCard } from "./refine-assets-card";
+import { RefineCopyCard } from "./refine-copy-card";
+import { RefineProductsCard } from "./refine-products-card";
 
 function variantSlug(skeletonId: string): string {
   return skeletonId.replace(/\//g, "__");
@@ -50,6 +52,8 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
 
       <ProductsCard products={campaign.approvedProducts} />
       <RefineAssetsCard campaign={campaign} />
+      <RefineProductsCard campaign={campaign} />
+      <RefineCopyCard campaign={campaign} />
       <FinalEmailCard render={campaign.renderResult} />
     </div>
   );
