@@ -31,6 +31,12 @@ interface AutoSizeIframeProps {
   scale?: number;
   /** Pre-measure floor for the wrapper height (in scaled pixels). */
   minHeight?: number;
+  /** Cap on the wrapper height (in scaled pixels). When the email is
+   *  taller than this, the bottom is cropped — used on the variant
+   *  cards so all 3 cards line up at the same height regardless of
+   *  skeleton length. The full layout is still reachable via the
+   *  expand-to-full-size view. */
+  maxHeight?: number;
   className?: string;
   /** When true, sets pointer-events:none so a parent button can receive
    *  the click. Used on variant cards where the iframe is the click
@@ -45,6 +51,7 @@ export function AutoSizeIframe({
   title,
   scale,
   minHeight = 600,
+  maxHeight,
   className,
   passThroughClicks = false,
 }: AutoSizeIframeProps) {
@@ -70,14 +77,18 @@ export function AutoSizeIframe({
   if (scale && scale > 0 && scale < 1) {
     // Scaled-thumbnail mode: render the iframe at native 640px width inside
     // a smaller wrapper, transform-scale the iframe to fit. Wrapper height
-    // = scaled content height; the operator sees the entire layout
-    // proportionally shrunk.
+    // = scaled content height (capped by maxHeight when supplied) so a
+    // row of cards stays aligned regardless of per-skeleton length.
+    const scaledHeight = contentHeight * scale;
+    const wrapperHeight = maxHeight
+      ? Math.min(scaledHeight, maxHeight)
+      : scaledHeight;
     return (
       <div
         className={className}
         style={{
           width: `${NATIVE_WIDTH * scale}px`,
-          height: `${contentHeight * scale}px`,
+          height: `${wrapperHeight}px`,
           overflow: "hidden",
           pointerEvents: passThroughClicks ? "none" : undefined,
         }}

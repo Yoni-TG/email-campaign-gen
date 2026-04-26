@@ -101,16 +101,22 @@ function VariantCard({
       <button
         type="button"
         onClick={onExpand}
-        className="flex w-full items-start justify-center bg-stone-50 p-3"
+        className="relative flex h-[520px] w-full items-start justify-center overflow-hidden bg-stone-50 p-3"
         aria-label={`Expand preview of ${variant.name}`}
       >
         <AutoSizeIframe
           title={`${variant.skeletonId} preview`}
           srcDoc={variant.previewHtml}
           className="bg-white shadow-sm"
-          scale={0.45}
-          minHeight={600}
+          scale={0.25}
+          minHeight={500}
+          maxHeight={500}
           passThroughClicks
+        />
+        {/* Soft fade at the bottom hints there's more layout below. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-stone-50 to-transparent"
         />
       </button>
       <div className="border-t border-border/60 p-4">
