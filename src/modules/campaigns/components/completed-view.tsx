@@ -132,13 +132,15 @@ function FinalEmailCard({
   );
 }
 
-// ─── Reference (collapsible) ────────────────────────────────────
+// ─── Reference (collapsible + tabs) ─────────────────────────────
 //
-// Single accordion holding the brief, approved copy, and the products
-// list. Default closed so the page lands clean on the email; the
-// operator opens it on demand. Inside, items render in a vertical
-// stack rather than a 2-up grid — keeps copy readable instead of
-// fighting for column space against the brief.
+// Single accordion with three tabs inside — Brief / Approved Copy /
+// Products. Tabs solve the "everything packed together" problem of a
+// flat stack: only one section paints at a time, giving each its own
+// breathing room. Default closed so the page lands clean on the
+// email; the operator opens it on demand.
+
+type ReferenceTab = "brief" | "copy" | "products";
 
 function ReferenceSection({
   campaign,
@@ -150,6 +152,7 @@ function ReferenceSection({
   approvedProducts: ProductSnapshot[];
 }) {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<ReferenceTab>("brief");
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
       <button
@@ -175,24 +178,70 @@ function ReferenceSection({
         />
       </button>
       {open && (
-        <div className="space-y-6 border-t border-border/60 p-6">
-          <BriefBlock campaign={campaign} />
-          <CopyBlock copy={approvedCopy} />
-          <ProductsBlock
-            products={approvedProducts}
-            chosenSkeletonId={campaign.chosenSkeletonId}
-          />
+        <div className="border-t border-border/60">
+          <nav
+            role="tablist"
+            className="flex gap-1 border-b border-border/60 px-4 pt-3"
+          >
+            <TabButton
+              active={tab === "brief"}
+              onClick={() => setTab("brief")}
+            >
+              Brief
+            </TabButton>
+            <TabButton
+              active={tab === "copy"}
+              onClick={() => setTab("copy")}
+            >
+              Approved Copy
+            </TabButton>
+            <TabButton
+              active={tab === "products"}
+              onClick={() => setTab("products")}
+            >
+              Products · {approvedProducts.length}
+            </TabButton>
+          </nav>
+          <div className="p-6">
+            {tab === "brief" && <BriefBlock campaign={campaign} />}
+            {tab === "copy" && <CopyBlock copy={approvedCopy} />}
+            {tab === "products" && (
+              <ProductsBlock
+                products={approvedProducts}
+                chosenSkeletonId={campaign.chosenSkeletonId}
+              />
+            )}
+          </div>
         </div>
       )}
     </section>
   );
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={cn(
+        "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+        active
+          ? "border-primary text-foreground"
+          : "border-transparent text-muted-foreground hover:text-foreground",
+      )}
+    >
       {children}
-    </h3>
+    </button>
   );
 }
 
@@ -215,90 +264,90 @@ function BriefBlock({ campaign }: { campaign: Campaign }) {
   const visible = rows.filter(([, v]) => v && v.length > 0);
 
   return (
-    <section>
-      <SectionHeading>Brief</SectionHeading>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-        {visible.map(([k, v]) => (
-          <div
-            key={k}
-            className="grid grid-cols-[110px_1fr] gap-3 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
-          >
-            <dt className="text-muted-foreground">{k}</dt>
-            <dd className="min-w-0 break-words">{v}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
+    <dl className="divide-y divide-border/60 text-sm">
+      {visible.map(([k, v]) => (
+        <div key={k} className="grid grid-cols-[140px_1fr] gap-4 py-3 first:pt-0 last:pb-0">
+          <dt className="text-muted-foreground">{k}</dt>
+          <dd className="min-w-0 break-words">{v}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
 function CopyBlock({ copy }: { copy: ApprovedCopy }) {
   return (
-    <section>
-      <SectionHeading>Approved Copy</SectionHeading>
-      <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-        <div>
-          <p className="text-xs uppercase text-muted-foreground">Subject</p>
+    <div className="space-y-6 text-sm">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <Field label="Subject">
           <p className="font-medium">{copy.subject_variant.subject}</p>
-          <p className="text-muted-foreground">
+          <p className="mt-0.5 text-muted-foreground">
             {copy.subject_variant.preheader}
           </p>
-        </div>
+        </Field>
         {copy.free_top_text && (
-          <div>
-            <p className="text-xs uppercase text-muted-foreground">
-              Free Top Text
-            </p>
+          <Field label="Free Top Text">
             <p>{copy.free_top_text}</p>
-          </div>
-        )}
-        {copy.nicky_quote && (
-          <div className="sm:col-span-2">
-            <p className="text-xs uppercase text-muted-foreground">
-              Nicky Quote
-            </p>
-            <p className="italic">&ldquo;{copy.nicky_quote.quote}&rdquo;</p>
-            <p className="text-muted-foreground">
-              — Nicky Hilton
-              {copy.nicky_quote.response && (
-                <span> | {copy.nicky_quote.response}</span>
-              )}
-            </p>
-          </div>
-        )}
-        <div className="sm:col-span-2">
-          <p className="mb-1.5 text-xs uppercase text-muted-foreground">
-            Body Blocks
-          </p>
-          <ol className="space-y-2">
-            {copy.body_blocks.map((block, i) => (
-              <li
-                key={i}
-                className="rounded-md border border-border/60 bg-muted/30 p-3"
-              >
-                {block.title && <p className="font-medium">{block.title}</p>}
-                {block.description && (
-                  <p className="mt-1 text-muted-foreground">
-                    {block.description}
-                  </p>
-                )}
-                {block.cta && (
-                  <p className="mt-1 text-xs font-medium uppercase tracking-wide">
-                    CTA: {block.cta}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-        {copy.sms && (
-          <div className="sm:col-span-2">
-            <p className="text-xs uppercase text-muted-foreground">SMS</p>
-            <p>{copy.sms}</p>
-          </div>
+          </Field>
         )}
       </div>
-    </section>
+
+      {copy.nicky_quote && (
+        <Field label="Nicky Quote">
+          <p className="italic">&ldquo;{copy.nicky_quote.quote}&rdquo;</p>
+          <p className="mt-0.5 text-muted-foreground">
+            — Nicky Hilton
+            {copy.nicky_quote.response && (
+              <span> · {copy.nicky_quote.response}</span>
+            )}
+          </p>
+        </Field>
+      )}
+
+      <Field label="Body Blocks">
+        <ol className="space-y-2">
+          {copy.body_blocks.map((block, i) => (
+            <li
+              key={i}
+              className="rounded-md border border-border/60 bg-muted/30 p-3"
+            >
+              {block.title && <p className="font-medium">{block.title}</p>}
+              {block.description && (
+                <p className="mt-1 text-muted-foreground">{block.description}</p>
+              )}
+              {block.cta && (
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide">
+                  CTA: {block.cta}
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
+      </Field>
+
+      {copy.sms && (
+        <Field label="SMS">
+          <p>{copy.sms}</p>
+        </Field>
+      )}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      {children}
+    </div>
   );
 }
 
@@ -315,13 +364,13 @@ function ProductsBlock({
   const reserveCount = products.length - visible.length;
 
   return (
-    <section>
-      <SectionHeading>
-        {reserveCount > 0
-          ? `Products in email · ${visible.length} (· ${reserveCount} held in reserve)`
-          : `Products · ${visible.length}`}
-      </SectionHeading>
-      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+    <div className="space-y-3">
+      {reserveCount > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {visible.length} in email · {reserveCount} held in reserve
+        </p>
+      )}
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {visible.map((product) => {
           const showSale = isOnSale(product);
           return (
@@ -337,9 +386,9 @@ function ProductsBlock({
                   className="aspect-square w-full object-cover"
                 />
               )}
-              <div className="p-2">
-                <p className="truncate text-[11px] font-medium">{product.name}</p>
-                <p className="text-[11px] text-muted-foreground">
+              <div className="p-2.5">
+                <p className="truncate text-xs font-medium">{product.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {showSale ? (
                     <>
                       <span className="line-through">
@@ -356,6 +405,6 @@ function ProductsBlock({
           );
         })}
       </ul>
-    </section>
+    </div>
   );
 }
