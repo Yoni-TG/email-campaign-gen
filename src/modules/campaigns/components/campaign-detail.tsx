@@ -9,7 +9,15 @@ import { AssetUploadView } from "./asset-upload-view";
 import { RenderingFinalView } from "./rendering-final-view";
 import { CompletedView } from "./completed-view";
 
-export function CampaignDetail({ campaign }: { campaign: Campaign }) {
+interface Props {
+  campaign: Campaign;
+  /** Server-rendered editable HTML for the click-to-edit completed view.
+   *  Computed in app/campaigns/[id]/page.tsx and only populated when
+   *  status === "completed". */
+  editableHtml: string | null;
+}
+
+export function CampaignDetail({ campaign, editableHtml }: Props) {
   switch (campaign.status) {
     case "draft":
     case "generating":
@@ -25,6 +33,8 @@ export function CampaignDetail({ campaign }: { campaign: Campaign }) {
     case "rendering_final":
       return <RenderingFinalView campaign={campaign} />;
     case "completed":
-      return <CompletedView campaign={campaign} />;
+      return (
+        <CompletedView campaign={campaign} editableHtml={editableHtml} />
+      );
   }
 }

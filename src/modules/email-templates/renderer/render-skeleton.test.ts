@@ -33,12 +33,12 @@ function makeBlueprint(overrides: Partial<RendererBlueprint> = {}): RendererBlue
       response: "Thank you Nicky!",
     },
     products: [
-      { title: "Heart Pendant", price: "$98", image_url: "https://cdn.example.com/p1.jpg", link: "https://theograce.com/p/1" },
-      { title: "Stack Ring", price: "$76", image_url: "https://cdn.example.com/p2.jpg", link: "https://theograce.com/p/2" },
-      { title: "Birth Stone Bracelet", price: "$112", image_url: "https://cdn.example.com/p3.jpg", link: "https://theograce.com/p/3" },
-      { title: "Initial Necklace", price: "$84", image_url: "https://cdn.example.com/p4.jpg", link: "https://theograce.com/p/4" },
-      { title: "Pearl Studs", price: "$68", image_url: "https://cdn.example.com/p5.jpg", link: "https://theograce.com/p/5" },
-      { title: "Charm Anklet", price: "$58", image_url: "https://cdn.example.com/p6.jpg", link: "https://theograce.com/p/6" },
+      { sku: "P1", title: "Heart Pendant", price: "$98", image_url: "https://cdn.example.com/p1.jpg", link: "https://theograce.com/p/1" },
+      { sku: "P2", title: "Stack Ring", price: "$76", image_url: "https://cdn.example.com/p2.jpg", link: "https://theograce.com/p/2" },
+      { sku: "P3", title: "Birth Stone Bracelet", price: "$112", image_url: "https://cdn.example.com/p3.jpg", link: "https://theograce.com/p/3" },
+      { sku: "P4", title: "Initial Necklace", price: "$84", image_url: "https://cdn.example.com/p4.jpg", link: "https://theograce.com/p/4" },
+      { sku: "P5", title: "Pearl Studs", price: "$68", image_url: "https://cdn.example.com/p5.jpg", link: "https://theograce.com/p/5" },
+      { sku: "P6", title: "Charm Anklet", price: "$58", image_url: "https://cdn.example.com/p6.jpg", link: "https://theograce.com/p/6" },
     ],
     assets: {
       hero: "https://cdn.example.com/hero.jpg",

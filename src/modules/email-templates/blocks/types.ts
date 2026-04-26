@@ -4,10 +4,21 @@
 
 import type { BlockBackground } from "./theme";
 
+// When the renderer runs in editable mode it derives a map from each
+// bindable prop to a `data-edit-target` string and passes it to the
+// block. Blocks then place the attribute on the visible element that
+// renders that prop. A missing entry just means "this prop isn't
+// editable" — the attribute is omitted, and clicks on that element
+// behave normally.
+type EditTargets = Record<string, string>;
+
 // Matches the wire format used by CampaignBlueprint.products and the LLM
 // copy/product agents — snake_case to stay consistent with the rest of the
-// blueprint payload.
+// blueprint payload. `sku` is carried through so the editable renderer can
+// emit per-product edit targets that the fine-tune endpoints can resolve
+// back to the right approvedProducts row.
 export interface BlueprintProduct {
+  sku: string;
   title: string;
   price: string;
   image_url: string;
@@ -21,6 +32,7 @@ export interface LogoHeaderProps {
 export interface AnnouncementBarProps {
   text: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface HeroLifestyleProps {
@@ -31,6 +43,7 @@ export interface HeroLifestyleProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface HeroFramedProps {
@@ -41,6 +54,7 @@ export interface HeroFramedProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface HeroProductProps {
@@ -50,6 +64,7 @@ export interface HeroProductProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface HeroTypographyProps {
@@ -59,6 +74,7 @@ export interface HeroTypographyProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface HeroTileGraphicProps {
@@ -70,6 +86,7 @@ export interface HeroTileGraphicProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface TextBlockCenteredProps {
@@ -79,6 +96,7 @@ export interface TextBlockCenteredProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface EditorialSplitProps {
@@ -90,10 +108,12 @@ export interface EditorialSplitProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface ProductGridProps {
   products: BlueprintProduct[];
+  editTargets?: EditTargets;
 }
 
 export interface NickyQuoteModuleProps {
@@ -101,17 +121,22 @@ export interface NickyQuoteModuleProps {
   response?: string | null;
   portraitUrl?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface CtaButtonProps {
   label: string;
   href?: string;
   align?: "left" | "center";
+  /** Optional click-to-edit target. When set, the button becomes
+   *  editable on the in-app editing surface. */
+  editTarget?: string;
 }
 
 export interface SectionLabelProps {
   text: string;
   align?: "left" | "center";
+  editTarget?: string;
 }
 
 export interface ClosingBlockProps {
@@ -121,6 +146,7 @@ export interface ClosingBlockProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  editTargets?: EditTargets;
 }
 
 export interface FooterProps {

@@ -15,12 +15,14 @@ export function HeroTileGraphic({
   ctaLabel,
   ctaHref,
   background = "pale_blue",
+  editTargets,
 }: HeroTileGraphicProps) {
   const visibleTiles = tiles.slice(0, 3);
   return (
     <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px", textAlign: "center" }}>
       {subLabel ? (
         <Text
+          data-edit-target={editTargets?.subLabel}
           style={{
             margin: "0 0 12px 0",
             fontFamily: FONTS.body,
@@ -35,6 +37,7 @@ export function HeroTileGraphic({
         </Text>
       ) : null}
       <Text
+        data-edit-target={editTargets?.headline}
         style={{
           margin: "0 0 24px 0",
           fontFamily: FONTS.display,
@@ -79,6 +82,7 @@ export function HeroTileGraphic({
       </Row>
       {urgency ? (
         <Text
+          data-edit-target={editTargets?.urgency}
           style={{
             margin: "16px 0 8px 0",
             fontFamily: FONTS.body,
@@ -94,6 +98,7 @@ export function HeroTileGraphic({
       ) : null}
       {body ? (
         <Text
+          data-edit-target={editTargets?.body}
           style={{
             margin: "0 0 16px 0",
             fontFamily: FONTS.body,
@@ -105,7 +110,13 @@ export function HeroTileGraphic({
           {body}
         </Text>
       ) : null}
-      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+      {ctaLabel ? (
+        <CtaButton
+          label={ctaLabel}
+          href={ctaHref}
+          editTarget={editTargets?.ctaLabel}
+        />
+      ) : null}
     </Section>
   );
 }

@@ -3,9 +3,14 @@ import { Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { SectionLabelProps } from "./types";
 
-export function SectionLabel({ text, align = "center" }: SectionLabelProps) {
+export function SectionLabel({
+  text,
+  align = "center",
+  editTarget,
+}: SectionLabelProps) {
   return (
     <Text
+      data-edit-target={editTarget}
       style={{
         margin: "0 0 12px 0",
         fontFamily: FONTS.body,

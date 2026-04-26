@@ -18,9 +18,11 @@ const GAP = 6;
 function ImageCell({
   product,
   height,
+  editable,
 }: {
   product: ProductGridProps["products"][number];
   height: number;
+  editable: boolean;
 }) {
   return (
     <Link
@@ -31,6 +33,7 @@ function ImageCell({
         src={product.image_url}
         alt={product.title}
         width="640"
+        data-edit-target={editable ? `image:product:${product.sku}` : undefined}
         style={{
           display: "block",
           width: "100%",
@@ -44,10 +47,11 @@ function ImageCell({
   );
 }
 
-export function ProductGridMagazine({ products }: ProductGridProps) {
+export function ProductGridMagazine({ products, editTargets }: ProductGridProps) {
   const visible = products.slice(0, 6);
   const rowA = visible.slice(0, 3); // big-left, two-stacked-right
   const rowB = visible.slice(3, 6); // two-stacked-left, big-right
+  const editable = Boolean(editTargets?.products);
 
   const stackedColumn = (
     items: ProductGridProps["products"],
@@ -61,9 +65,13 @@ export function ProductGridMagazine({ products }: ProductGridProps) {
         paddingRight: side === "left" ? `${GAP}px` : 0,
       }}
     >
-      {items[0] ? <ImageCell product={items[0]} height={SMALL_HEIGHT} /> : null}
+      {items[0] ? (
+        <ImageCell product={items[0]} height={SMALL_HEIGHT} editable={editable} />
+      ) : null}
       <div style={{ height: `${GAP}px` }} />
-      {items[1] ? <ImageCell product={items[1]} height={SMALL_HEIGHT} /> : null}
+      {items[1] ? (
+        <ImageCell product={items[1]} height={SMALL_HEIGHT} editable={editable} />
+      ) : null}
     </Column>
   );
 
@@ -79,7 +87,7 @@ export function ProductGridMagazine({ products }: ProductGridProps) {
         paddingRight: side === "left" ? `${GAP}px` : 0,
       }}
     >
-      {item ? <ImageCell product={item} height={BIG_HEIGHT} /> : null}
+      {item ? <ImageCell product={item} height={BIG_HEIGHT} editable={editable} /> : null}
     </Column>
   );
 

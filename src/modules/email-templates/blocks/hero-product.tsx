@@ -11,6 +11,7 @@ export function HeroProduct({
   ctaLabel,
   ctaHref,
   background = "pale_blue",
+  editTargets,
 }: HeroProductProps) {
   return (
     <Section style={{ backgroundColor: bgColor(background), padding: "32px 24px" }}>
@@ -20,6 +21,7 @@ export function HeroProduct({
             src={imageUrl}
             alt={headline ?? "Product"}
             width="280"
+            data-edit-target={editTargets?.imageUrl}
             style={{
               display: "block",
               width: "100%",
@@ -32,6 +34,7 @@ export function HeroProduct({
         <Column style={{ width: "50%", verticalAlign: "middle", paddingLeft: "16px" }}>
           {headline ? (
             <Text
+              data-edit-target={editTargets?.headline}
               style={{
                 margin: "0 0 12px 0",
                 fontFamily: FONTS.display,
@@ -45,6 +48,7 @@ export function HeroProduct({
           ) : null}
           {body ? (
             <Text
+              data-edit-target={editTargets?.body}
               style={{
                 margin: "0 0 16px 0",
                 fontFamily: FONTS.body,
@@ -56,7 +60,14 @@ export function HeroProduct({
               {body}
             </Text>
           ) : null}
-          {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} align="left" /> : null}
+          {ctaLabel ? (
+            <CtaButton
+              label={ctaLabel}
+              href={ctaHref}
+              align="left"
+              editTarget={editTargets?.ctaLabel}
+            />
+          ) : null}
         </Column>
       </Row>
     </Section>

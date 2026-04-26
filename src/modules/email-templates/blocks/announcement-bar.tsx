@@ -2,7 +2,11 @@ import { Section, Text } from "@react-email/components";
 import { COLORS, FONTS, bgColor } from "./theme";
 import type { AnnouncementBarProps } from "./types";
 
-export function AnnouncementBar({ text, background = "baby_blue" }: AnnouncementBarProps) {
+export function AnnouncementBar({
+  text,
+  background = "baby_blue",
+  editTargets,
+}: AnnouncementBarProps) {
   return (
     <Section
       style={{
@@ -12,6 +16,7 @@ export function AnnouncementBar({ text, background = "baby_blue" }: Announcement
       }}
     >
       <Text
+        data-edit-target={editTargets?.text}
         style={{
           margin: 0,
           fontFamily: FONTS.body,

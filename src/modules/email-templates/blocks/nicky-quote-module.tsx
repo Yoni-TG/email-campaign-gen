@@ -8,10 +8,12 @@ export function NickyQuoteModule({
   response,
   portraitUrl,
   background = "pale_blue",
+  editTargets,
 }: NickyQuoteModuleProps) {
   const quoteContent = (
     <>
       <Text
+        data-edit-target={editTargets?.quote}
         style={{
           margin: "0 0 12px 0",
           fontFamily: FONTS.display,
@@ -36,6 +38,7 @@ export function NickyQuoteModule({
       </Text>
       {response ? (
         <Text
+          data-edit-target={editTargets?.response}
           style={{
             margin: "8px 0 0 0",
             fontFamily: FONTS.body,
@@ -59,6 +62,7 @@ export function NickyQuoteModule({
               src={portraitUrl}
               alt="Nicky Hilton"
               width="120"
+              data-edit-target={editTargets?.portraitUrl}
               style={{
                 display: "block",
                 width: "100%",

@@ -321,6 +321,7 @@ export interface CampaignBlueprint {
   sms: string | null;
   nicky_quote: NickyQuote | null;
   products: Array<{
+    sku: string;
     title: string;
     price: string;
     image_url: string;

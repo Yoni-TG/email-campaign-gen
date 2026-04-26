@@ -12,6 +12,7 @@ export function TextBlockCentered({
   ctaLabel,
   ctaHref,
   background = "white",
+  editTargets,
 }: TextBlockCenteredProps) {
   return (
     <Section
@@ -22,9 +23,12 @@ export function TextBlockCentered({
       }}
     >
       <Section style={{ maxWidth: "560px", margin: "0 auto" }}>
-        {subLabel ? <SectionLabel text={subLabel} /> : null}
+        {subLabel ? (
+          <SectionLabel text={subLabel} editTarget={editTargets?.subLabel} />
+        ) : null}
         {headline ? (
           <Text
+            data-edit-target={editTargets?.headline}
             style={{
               margin: "0 0 16px 0",
               fontFamily: FONTS.display,
@@ -38,6 +42,7 @@ export function TextBlockCentered({
         ) : null}
         {body ? (
           <Text
+            data-edit-target={editTargets?.body}
             style={{
               margin: "0 0 16px 0",
               fontFamily: FONTS.body,
@@ -49,7 +54,13 @@ export function TextBlockCentered({
             {body}
           </Text>
         ) : null}
-        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+        {ctaLabel ? (
+          <CtaButton
+            label={ctaLabel}
+            href={ctaHref}
+            editTarget={editTargets?.ctaLabel}
+          />
+        ) : null}
       </Section>
     </Section>
   );

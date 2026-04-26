@@ -38,6 +38,7 @@ export function buildBlueprint({
     sms: approvedCopy.sms,
     nicky_quote: approvedCopy.nicky_quote,
     products: approvedProducts.map((p) => ({
+      sku: p.sku,
       title: p.name,
       price: p.salePrice || p.price,
       image_url: p.imageUrl,

@@ -13,6 +13,7 @@ export function HeroLifestyle({
   ctaLabel,
   ctaHref,
   background = "white",
+  editTargets,
 }: HeroLifestyleProps) {
   return (
     <>
@@ -20,6 +21,7 @@ export function HeroLifestyle({
         src={imageUrl}
         alt={headline ?? ""}
         width="640"
+        data-edit-target={editTargets?.imageUrl}
         style={{
           display: "block",
           width: "100%",
@@ -35,9 +37,12 @@ export function HeroLifestyle({
           textAlign: "center",
         }}
       >
-        {subLabel ? <SectionLabel text={subLabel} /> : null}
+        {subLabel ? (
+          <SectionLabel text={subLabel} editTarget={editTargets?.subLabel} />
+        ) : null}
         {headline ? (
           <Text
+            data-edit-target={editTargets?.headline}
             style={{
               margin: "0 0 16px 0",
               fontFamily: FONTS.display,
@@ -51,6 +56,7 @@ export function HeroLifestyle({
         ) : null}
         {body ? (
           <Text
+            data-edit-target={editTargets?.body}
             style={{
               margin: "0 0 20px 0",
               fontFamily: FONTS.body,
@@ -62,7 +68,13 @@ export function HeroLifestyle({
             {body}
           </Text>
         ) : null}
-        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+        {ctaLabel ? (
+          <CtaButton
+            label={ctaLabel}
+            href={ctaHref}
+            editTarget={editTargets?.ctaLabel}
+          />
+        ) : null}
       </Section>
     </>
   );

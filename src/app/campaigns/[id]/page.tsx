@@ -4,9 +4,14 @@ import { CAMPAIGN_TYPE_LABELS } from "@/lib/types";
 import { CampaignDetail } from "@/modules/campaigns/components/campaign-detail";
 import { StatusBadge } from "@/modules/campaigns/components/status-badge";
 import { getCampaign } from "@/modules/campaigns/utils/campaign-persistence";
+import { renderEditableForCampaign } from "@/modules/campaigns/utils/render-editable";
 
-// Polling refreshes this route every 2s during `generating` / `filling_figma`,
-// so we must re-fetch per request rather than cache at build time.
+// Polling refreshes this route every 2s during `generating` /
+// `rendering_*`, so we must re-fetch per request rather than cache at
+// build time. Editable HTML for the click-to-edit completed view is
+// computed server-side here too — the renderer is fast enough that
+// re-rendering on each load is fine, and it keeps the client component
+// purely presentational.
 export const dynamic = "force-dynamic";
 
 export default async function CampaignPage({
@@ -17,6 +22,13 @@ export default async function CampaignPage({
   const { id } = await params;
   const campaign = await getCampaign(id);
   if (!campaign) notFound();
+
+  // Only completed campaigns get an editable render — everywhere else
+  // the existing flow handles its own iframe needs.
+  const editableHtml =
+    campaign.status === "completed"
+      ? await renderEditableForCampaign(campaign)
+      : null;
 
   return (
     <div>
@@ -36,7 +48,7 @@ export default async function CampaignPage({
           {campaign.createdAt.toLocaleDateString()}
         </p>
       </div>
-      <CampaignDetail campaign={campaign} />
+      <CampaignDetail campaign={campaign} editableHtml={editableHtml} />
     </div>
   );
 }

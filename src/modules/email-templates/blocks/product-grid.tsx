@@ -13,6 +13,10 @@ interface ProductGridInternalProps {
   /** When true, hide the product name and price under each cell — used by
    *  asymmetric / magazine-style layouts where the cells are visual only. */
   imageOnly?: boolean;
+  /** Set when the grid is rendered in editable mode — each product image
+   *  gets a per-sku data-edit-target so the click-to-edit popover knows
+   *  which approvedProducts row to update. */
+  editable?: boolean;
 }
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -28,6 +32,7 @@ export function ProductGridInternal({
   columns,
   rows: rowCount,
   imageOnly = false,
+  editable = false,
 }: ProductGridInternalProps) {
   const visible = products.slice(0, columns * rowCount);
   const rows = chunk(visible, columns);
@@ -48,6 +53,9 @@ export function ProductGridInternal({
                   src={product.image_url}
                   alt={product.title}
                   width="280"
+                  data-edit-target={
+                    editable ? `image:product:${product.sku}` : undefined
+                  }
                   style={{
                     display: "block",
                     width: "100%",

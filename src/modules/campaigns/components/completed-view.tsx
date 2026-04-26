@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Pencil } from "lucide-react";
 import {
   CAMPAIGN_TYPE_LABELS,
   LEAD_PERSONALITY_LABELS,
@@ -19,15 +19,20 @@ import {
 } from "@/modules/products/utils/product-price";
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
-import { RefineAssetsCard } from "./refine-assets-card";
-import { RefineCopyCard } from "./refine-copy-card";
-import { RefineProductsCard } from "./refine-products-card";
+import { EditableEmailFrame } from "./editable-email-frame";
 
 function variantSlug(skeletonId: string): string {
   return skeletonId.replace(/\//g, "__");
 }
 
-export function CompletedView({ campaign }: { campaign: Campaign }) {
+interface CompletedViewProps {
+  campaign: Campaign;
+  /** Server-rendered editable HTML — when present, the email below is
+   *  click-to-edit. Falls back to the static iframe when null. */
+  editableHtml: string | null;
+}
+
+export function CompletedView({ campaign, editableHtml }: CompletedViewProps) {
   if (
     !campaign.approvedCopy ||
     !campaign.approvedProducts ||
@@ -45,16 +50,18 @@ export function CompletedView({ campaign }: { campaign: Campaign }) {
     <div className="space-y-6">
       <PreviewBanner campaign={campaign} render={campaign.renderResult} />
 
+      <FinalEmailCard
+        campaign={campaign}
+        render={campaign.renderResult}
+        editableHtml={editableHtml}
+      />
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <BriefCard campaign={campaign} />
         <CopyCard copy={campaign.approvedCopy} />
       </div>
 
       <ProductsCard products={campaign.approvedProducts} />
-      <RefineAssetsCard campaign={campaign} />
-      <RefineProductsCard campaign={campaign} />
-      <RefineCopyCard campaign={campaign} />
-      <FinalEmailCard render={campaign.renderResult} />
     </div>
   );
 }
@@ -92,13 +99,18 @@ function PreviewBanner({
 function Card({
   title,
   children,
+  hint,
 }: {
   title: string;
   children: React.ReactNode;
+  hint?: React.ReactNode;
 }) {
   return (
     <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="mb-4 text-base font-semibold text-foreground">{title}</h3>
+      <header className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        {hint}
+      </header>
       {children}
     </section>
   );
@@ -254,15 +266,40 @@ function ProductsCard({ products }: { products: ProductSnapshot[] }) {
   );
 }
 
-function FinalEmailCard({ render }: { render: FinalRenderResult }) {
+function FinalEmailCard({
+  campaign,
+  render,
+  editableHtml,
+}: {
+  campaign: Campaign;
+  render: FinalRenderResult;
+  editableHtml: string | null;
+}) {
   return (
-    <Card title="Final Email">
-      <AutoSizeIframe
-        title={`final-${render.skeletonId}`}
-        srcDoc={render.html}
-        className="w-full rounded border border-border/60"
-        minHeight={900}
-      />
+    <Card
+      title="Final Email"
+      hint={
+        editableHtml ? (
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Pencil className="h-3 w-3" />
+            Click any image, headline, body or CTA to fine-tune
+          </span>
+        ) : null
+      }
+    >
+      {editableHtml ? (
+        <EditableEmailFrame
+          campaign={campaign}
+          editableHtml={editableHtml}
+        />
+      ) : (
+        <AutoSizeIframe
+          title={`final-${render.skeletonId}`}
+          srcDoc={render.html}
+          className="w-full rounded border border-border/60"
+          minHeight={900}
+        />
+      )}
       <p className="mt-3 text-xs text-muted-foreground">
         Rendered {new Date(render.renderedAt).toLocaleString()} · skeleton:{" "}
         {render.skeletonId}

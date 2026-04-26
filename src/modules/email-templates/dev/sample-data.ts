@@ -17,12 +17,12 @@ export const SAMPLE_PORTRAIT_URL =
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200";
 
 export const SAMPLE_PRODUCTS: BlueprintProduct[] = [
-  { title: "Heart Pendant", price: "$98", image_url: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300", link: "#" },
-  { title: "Stack Ring Set", price: "$76", image_url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300", link: "#" },
-  { title: "Birth Stone Bracelet", price: "$112", image_url: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300", link: "#" },
-  { title: "Initial Necklace", price: "$84", image_url: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=300", link: "#" },
-  { title: "Pearl Studs", price: "$68", image_url: "https://images.unsplash.com/photo-1535632066274-36ee5b30b859?w=300", link: "#" },
-  { title: "Charm Anklet", price: "$58", image_url: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300", link: "#" },
+  { sku: "TG-HEART-01", title: "Heart Pendant", price: "$98", image_url: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300", link: "#" },
+  { sku: "TG-STACK-01", title: "Stack Ring Set", price: "$76", image_url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300", link: "#" },
+  { sku: "TG-BIRTH-01", title: "Birth Stone Bracelet", price: "$112", image_url: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300", link: "#" },
+  { sku: "TG-INIT-01", title: "Initial Necklace", price: "$84", image_url: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=300", link: "#" },
+  { sku: "TG-PEARL-01", title: "Pearl Studs", price: "$68", image_url: "https://images.unsplash.com/photo-1535632066274-36ee5b30b859?w=300", link: "#" },
+  { sku: "TG-CHARM-01", title: "Charm Anklet", price: "$58", image_url: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300", link: "#" },
 ];
 
 export function sampleBlueprint(withAssets: boolean): CampaignBlueprint {

@@ -22,6 +22,7 @@ export function HeroFramed({
   ctaLabel,
   ctaHref,
   background = "baby_blue",
+  editTargets,
 }: HeroFramedProps) {
   return (
     <Section
@@ -35,6 +36,7 @@ export function HeroFramed({
         src={imageUrl}
         alt={headline ?? ""}
         width="568"
+        data-edit-target={editTargets?.imageUrl}
         style={{
           display: "block",
           width: "100%",
@@ -44,9 +46,12 @@ export function HeroFramed({
           backgroundColor: COLORS.paleBlue,
         }}
       />
-      {subLabel ? <SectionLabel text={subLabel} /> : null}
+      {subLabel ? (
+        <SectionLabel text={subLabel} editTarget={editTargets?.subLabel} />
+      ) : null}
       {headline ? (
         <Text
+          data-edit-target={editTargets?.headline}
           style={{
             margin: "0 0 12px 0",
             fontFamily: FONTS.display,
@@ -60,6 +65,7 @@ export function HeroFramed({
       ) : null}
       {body ? (
         <Text
+          data-edit-target={editTargets?.body}
           style={{
             margin: "0 0 16px 0",
             fontFamily: FONTS.body,
@@ -74,7 +80,13 @@ export function HeroFramed({
           {body}
         </Text>
       ) : null}
-      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+      {ctaLabel ? (
+        <CtaButton
+          label={ctaLabel}
+          href={ctaHref}
+          editTarget={editTargets?.ctaLabel}
+        />
+      ) : null}
     </Section>
   );
 }

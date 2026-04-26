@@ -8,6 +8,14 @@
 //                      Any key the manifest references but the blueprint
 //                      doesn't supply is reported in `missingAssets` (still
 //                      gets a placeholder so the HTML is well-formed).
+//
+// editable mode (off by default) layers click-to-edit hooks on top of the
+// regular render. Each block gets `editTargets` derived from its bind
+// paths, the rendered DOM tags editable elements with data-edit-target,
+// and a small inline script postMessages clicks back to the parent
+// window. The completed-view embeds this editable HTML inside an
+// EditableEmailFrame; the final HTML stored on the campaign always uses
+// editable: false.
 
 import * as React from "react";
 import { Body, Container, Font, Head, Html, Preview } from "@react-email/components";
@@ -83,10 +91,81 @@ function resolveBindValue(
   return { value, missingAsset: null };
 }
 
+// Maps a bind path (the resolver-side identifier of where a value comes
+// from) to a click-to-edit data attribute that survives into the rendered
+// HTML. The popover layer uses this string to pick the right edit
+// surface (file picker for images, text input for copy) and to derive
+// the API call. `null` = this prop isn't user-editable (literal:, or the
+// products array — grids emit per-cell targets themselves).
+function pathToEditTarget(path: string): string | null {
+  if (path.startsWith("literal:")) return null;
+  if (path.startsWith("assets.")) {
+    return `image:asset:${path.slice("assets.".length)}`;
+  }
+  if (path === "products") return "products";
+  if (
+    /^body_blocks\[\d+\]\.(title|description|cta)$/.test(path) ||
+    path === "subject_variant.subject" ||
+    path === "subject_variant.preheader" ||
+    path === "free_top_text" ||
+    path === "nicky_quote.quote" ||
+    path === "nicky_quote.response" ||
+    path === "sms"
+  ) {
+    return `text:${path}`;
+  }
+  return null;
+}
+
+function computeEditTargets(
+  bind: Record<string, BindValue>,
+): Record<string, string> {
+  const targets: Record<string, string> = {};
+  for (const [propName, value] of Object.entries(bind)) {
+    if (typeof value !== "string") continue;
+    const target = pathToEditTarget(value);
+    if (target) targets[propName] = target;
+  }
+  return targets;
+}
+
+// Click-listener injected into the rendered HTML when editable: true.
+// Captures clicks early (capture phase) so anchor / button defaults
+// don't fire, then posts the editable element's id + rect to the parent
+// window so the popover layer can position itself over it.
+const EDIT_CLICK_SCRIPT = `
+(function() {
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-edit-target]');
+    if (!t) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var r = t.getBoundingClientRect();
+    window.parent.postMessage({
+      type: 'theograce:edit',
+      target: t.getAttribute('data-edit-target'),
+      rect: { x: r.left, y: r.top, w: r.width, h: r.height }
+    }, '*');
+  }, true);
+})();
+`;
+
+const EDIT_HIGHLIGHT_CSS = `
+[data-edit-target] {
+  cursor: pointer !important;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 120ms;
+}
+[data-edit-target]:hover {
+  outline-color: #76A4C4;
+}
+`;
+
 export async function renderSkeleton(
   manifest: SkeletonManifest,
   blueprint: RendererBlueprint,
-  opts: { withAssets: boolean },
+  opts: { withAssets: boolean; editable?: boolean },
 ): Promise<RenderResult> {
   const missingAssets: string[] = [];
 
@@ -106,14 +185,12 @@ export async function renderSkeleton(
         missingAssets.push(missingAsset);
       }
     }
+    if (opts.editable) {
+      props.editTargets = computeEditTargets(entry.bind);
+    }
     return <Component key={index} {...props} />;
   });
 
-  // Email clients that honor web fonts (Apple Mail, iOS, Gmail with images
-  // enabled) load Lato from Google Fonts — the rest fall back to Helvetica
-  // via the stack in blocks/theme.ts. Big Caslon is proprietary; the
-  // display fallback chain keeps to Georgia-class serifs, which clients
-  // that can't load Big Caslon will use anyway.
   const tree = (
     <Html>
       <Head>
@@ -137,6 +214,12 @@ export async function renderSkeleton(
           fontWeight={700}
           fontStyle="normal"
         />
+        {opts.editable ? (
+          <>
+            <style dangerouslySetInnerHTML={{ __html: EDIT_HIGHLIGHT_CSS }} />
+            <script dangerouslySetInnerHTML={{ __html: EDIT_CLICK_SCRIPT }} />
+          </>
+        ) : null}
       </Head>
       <Preview>{blueprint.subject_variant.preheader}</Preview>
       <Body style={{ backgroundColor: COLORS.white, margin: 0, padding: 0 }}>

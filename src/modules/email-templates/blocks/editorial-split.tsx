@@ -14,6 +14,7 @@ export function EditorialSplit({
   ctaLabel,
   ctaHref,
   background = "white",
+  editTargets,
 }: EditorialSplitProps) {
   const imageColumn = (
     <Column key="image" style={{ width: "50%", verticalAlign: "middle" }}>
@@ -21,6 +22,7 @@ export function EditorialSplit({
         src={imageUrl}
         alt={headline ?? ""}
         width="320"
+        data-edit-target={editTargets?.imageUrl}
         style={{
           display: "block",
           width: "100%",
@@ -40,9 +42,16 @@ export function EditorialSplit({
         padding: imageSide === "left" ? "24px 24px 24px 16px" : "24px 16px 24px 24px",
       }}
     >
-      {subLabel ? <SectionLabel text={subLabel} align="left" /> : null}
+      {subLabel ? (
+        <SectionLabel
+          text={subLabel}
+          align="left"
+          editTarget={editTargets?.subLabel}
+        />
+      ) : null}
       {headline ? (
         <Text
+          data-edit-target={editTargets?.headline}
           style={{
             margin: "0 0 12px 0",
             fontFamily: FONTS.display,
@@ -56,6 +65,7 @@ export function EditorialSplit({
       ) : null}
       {body ? (
         <Text
+          data-edit-target={editTargets?.body}
           style={{
             margin: "0 0 16px 0",
             fontFamily: FONTS.body,
@@ -67,7 +77,14 @@ export function EditorialSplit({
           {body}
         </Text>
       ) : null}
-      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} align="left" /> : null}
+      {ctaLabel ? (
+        <CtaButton
+          label={ctaLabel}
+          href={ctaHref}
+          align="left"
+          editTarget={editTargets?.ctaLabel}
+        />
+      ) : null}
     </Column>
   );
   return (

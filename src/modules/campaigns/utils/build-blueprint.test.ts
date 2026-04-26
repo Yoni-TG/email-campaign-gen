@@ -91,6 +91,7 @@ describe("buildBlueprint", () => {
     });
 
     expect(out.products[0]).toEqual({
+      sku: "SKU-1",
       title: "Ring",
       price: "120",
       image_url: "https://cdn/r.jpg",

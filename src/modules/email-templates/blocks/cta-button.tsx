@@ -3,11 +3,17 @@ import { Button, Section } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { CtaButtonProps } from "./types";
 
-export function CtaButton({ label, href = "#", align = "center" }: CtaButtonProps) {
+export function CtaButton({
+  label,
+  href = "#",
+  align = "center",
+  editTarget,
+}: CtaButtonProps) {
   return (
     <Section style={{ textAlign: align, padding: "16px 0" }}>
       <Button
         href={href}
+        data-edit-target={editTarget}
         style={{
           backgroundColor: COLORS.black,
           color: COLORS.white,

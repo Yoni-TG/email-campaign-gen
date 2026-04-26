@@ -11,11 +11,13 @@ export function HeroTypography({
   ctaLabel,
   ctaHref,
   background = "white",
+  editTargets,
 }: HeroTypographyProps) {
   return (
     <Section style={{ backgroundColor: bgColor(background), padding: "48px 32px", textAlign: "center" }}>
       {topline ? (
         <Text
+          data-edit-target={editTargets?.topline}
           style={{
             margin: "0 0 16px 0",
             fontFamily: FONTS.body,
@@ -30,6 +32,7 @@ export function HeroTypography({
         </Text>
       ) : null}
       <Text
+        data-edit-target={editTargets?.headline}
         style={{
           margin: "0 0 12px 0",
           fontFamily: FONTS.display,
@@ -43,6 +46,7 @@ export function HeroTypography({
       </Text>
       {subhead ? (
         <Text
+          data-edit-target={editTargets?.subhead}
           style={{
             margin: "0 0 24px 0",
             fontFamily: FONTS.body,
@@ -55,7 +59,13 @@ export function HeroTypography({
           {subhead}
         </Text>
       ) : null}
-      {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+      {ctaLabel ? (
+        <CtaButton
+          label={ctaLabel}
+          href={ctaHref}
+          editTarget={editTargets?.ctaLabel}
+        />
+      ) : null}
     </Section>
   );
 }

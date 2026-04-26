@@ -11,6 +11,7 @@ export function ClosingBlock({
   ctaLabel,
   ctaHref,
   background = "baby_blue",
+  editTargets,
 }: ClosingBlockProps) {
   const bg = bgColor(background);
   return (
@@ -26,6 +27,7 @@ export function ClosingBlock({
           src={imageUrl}
           alt={headline ?? ""}
           width="640"
+          data-edit-target={editTargets?.imageUrl}
           style={{
             display: "block",
             width: "100%",
@@ -44,6 +46,7 @@ export function ClosingBlock({
       >
         {headline ? (
           <Text
+            data-edit-target={editTargets?.headline}
             style={{
               margin: "0 0 12px 0",
               fontFamily: FONTS.display,
@@ -57,6 +60,7 @@ export function ClosingBlock({
         ) : null}
         {body ? (
           <Text
+            data-edit-target={editTargets?.body}
             style={{
               margin: "0 0 16px 0",
               fontFamily: FONTS.body,
@@ -68,7 +72,13 @@ export function ClosingBlock({
             {body}
           </Text>
         ) : null}
-        {ctaLabel ? <CtaButton label={ctaLabel} href={ctaHref} /> : null}
+        {ctaLabel ? (
+          <CtaButton
+            label={ctaLabel}
+            href={ctaHref}
+            editTarget={editTargets?.ctaLabel}
+          />
+        ) : null}
       </Section>
     </Section>
   );
