@@ -71,6 +71,12 @@ function InfoHint({ children }: { children: ReactNode }) {
 
 // Tooltip-wrapped chip. Used for lead-value and lead-personality pills so
 // hovering a chip explains what it shifts in the AI output.
+//
+// base-ui's TooltipTrigger render-prop spreads its own onClick (used by the
+// click-to-dismiss behavior) — we have to spread `props` FIRST, then merge
+// our chip's onClick with whatever the trigger provided. Spreading `props`
+// last would silently clobber our handler and the chip would stop responding
+// to clicks (regression caught here).
 function ChipWithTooltip({
   active,
   onClick,
@@ -88,9 +94,12 @@ function ChipWithTooltip({
         render={(props) => (
           <button
             type="button"
-            onClick={onClick}
             className={chipClass(active)}
             {...props}
+            onClick={(event) => {
+              props.onClick?.(event);
+              onClick();
+            }}
           >
             {label}
           </button>
