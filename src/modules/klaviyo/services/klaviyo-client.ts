@@ -224,14 +224,25 @@ export class KlaviyoClient {
       data: {
         type: "campaign-values-report",
         attributes: {
+          // Pull Klaviyo's pre-computed rates alongside the raw counts.
+          // Klaviyo's UI uses these (denominator is `delivered`, not
+          // `recipients`) so the numbers in our report match what the
+          // operator sees in the Klaviyo dashboard. We still request
+          // the raw counts so we can show recipient size + total
+          // revenue without re-deriving them.
           statistics: [
             "opens",
             "opens_unique",
+            "open_rate",
             "clicks",
             "clicks_unique",
+            "click_rate",
             "conversions",
             "conversion_value",
+            "conversion_rate",
             "recipients",
+            "delivered",
+            "revenue_per_recipient",
           ],
           timeframe: {
             start: window.start.toISOString(),
@@ -274,12 +285,17 @@ function toCampaignStatistics(row: CampaignValuesResultRow): CampaignStatistics 
     opens: stats.opens ?? 0,
     opensUnique,
     recipients,
-    openRate: recipients > 0 ? opensUnique / recipients : 0,
+    // Prefer Klaviyo's pre-computed rate (matches the dashboard).
+    // Fall back to a raw-count derivation if the field is missing.
+    openRate:
+      stats.open_rate ?? (recipients > 0 ? opensUnique / recipients : 0),
     clicks: stats.clicks ?? 0,
     clicksUnique,
-    clickRate: recipients > 0 ? clicksUnique / recipients : 0,
+    clickRate:
+      stats.click_rate ?? (recipients > 0 ? clicksUnique / recipients : 0),
     conversions,
-    conversionRate: recipients > 0 ? conversions / recipients : 0,
+    conversionRate:
+      stats.conversion_rate ?? (recipients > 0 ? conversions / recipients : 0),
     revenue: stats.conversion_value ?? 0,
   };
 }
@@ -345,11 +361,16 @@ interface CampaignValuesResultRow {
   statistics?: {
     opens?: number;
     opens_unique?: number;
+    open_rate?: number;
     clicks?: number;
     clicks_unique?: number;
+    click_rate?: number;
     conversions?: number;
     conversion_value?: number;
+    conversion_rate?: number;
     recipients?: number;
+    delivered?: number;
+    revenue_per_recipient?: number;
   };
 }
 
