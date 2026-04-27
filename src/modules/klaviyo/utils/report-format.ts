@@ -22,7 +22,7 @@ export function formatReportAsMarkdown(report: ReportData): string {
   lines.push(`| Median open rate | ${pct(summary.medianOpenRate)} |`);
   lines.push(`| Mean click rate | ${pct(summary.meanClickRate)} |`);
   lines.push(`| Median click rate | ${pct(summary.medianClickRate)} |`);
-  lines.push(`| Mean conversion rate | ${pct(summary.meanConversionRate)} |`);
+  lines.push(`| Mean conversion rate | ${pctConv(summary.meanConversionRate)} |`);
   lines.push(`| Mean recipients / send | ${formatInt(Math.round(summary.meanRecipients))} |`);
   lines.push("");
 
@@ -32,6 +32,13 @@ export function formatReportAsMarkdown(report: ReportData): string {
     ...section("Top by conversion rate", report.topByConversionRate, "conversionRate"),
   );
   lines.push(...section("Top by revenue", report.topByRevenue, "revenue"));
+  lines.push(
+    ...section(
+      "Top by revenue per recipient (efficiency, normalised for audience size)",
+      report.topByRevenuePerRecipient,
+      "revenuePerRecipient",
+    ),
+  );
   lines.push(
     ...section("Bottom by open rate (for contrast)", report.bottomByOpenRate, "openRate"),
   );
@@ -44,7 +51,7 @@ function section(
   rows: CampaignRow[],
   highlight: keyof Pick<
     CampaignRow,
-    "openRate" | "clickRate" | "conversionRate" | "revenue"
+    "openRate" | "clickRate" | "conversionRate" | "revenue" | "revenuePerRecipient"
   >,
 ): string[] {
   const lines: string[] = [];
@@ -55,11 +62,13 @@ function section(
     lines.push("");
     return lines;
   }
-  lines.push(`| # | Sent | Subject | Recipients | Open | Click | Rev | ${labelFor(highlight)} |`);
-  lines.push(`|---|---|---|---|---|---|---|---|`);
+  lines.push(
+    `| # | Sent | Subject | Recipients | Delivered | Open | Click | Conv | Rev | $/recip | ${labelFor(highlight)} |`,
+  );
+  lines.push(`|---|---|---|---|---|---|---|---|---|---|---|`);
   rows.forEach((row, idx) => {
     lines.push(
-      `| ${idx + 1} | ${formatDate(row.sentAt)} | ${escape(row.subject)} | ${formatInt(row.recipients)} | ${pct(row.openRate)} | ${pct(row.clickRate)} | ${formatRevenue(row.revenue)} | **${formatHighlight(row, highlight)}** |`,
+      `| ${idx + 1} | ${formatDate(row.sentAt)} | ${escape(row.subject)} | ${formatInt(row.recipients)} | ${formatInt(row.delivered)} | ${pct(row.openRate)} | ${pct(row.clickRate)} | ${pctConv(row.conversionRate)} | ${formatRevenue(row.revenue)} | ${formatPerRecipient(row.revenuePerRecipient)} | **${formatHighlight(row, highlight)}** |`,
     );
   });
   lines.push("");
@@ -76,6 +85,8 @@ function labelFor(field: string): string {
       return "Conv rate";
     case "revenue":
       return "Revenue";
+    case "revenuePerRecipient":
+      return "$/recip";
     default:
       return field;
   }
@@ -85,6 +96,8 @@ function formatHighlight(row: CampaignRow, field: keyof CampaignRow): string {
   const v = row[field];
   if (typeof v !== "number") return "";
   if (field === "revenue") return formatRevenue(v);
+  if (field === "revenuePerRecipient") return formatPerRecipient(v);
+  if (field === "conversionRate") return pctConv(v);
   return pct(v);
 }
 
@@ -92,8 +105,17 @@ function pct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
 }
 
+/** Conversion rate is two orders of magnitude smaller than open/click — needs more decimals to be readable. */
+function pctConv(value: number): string {
+  return `${(value * 100).toFixed(3)}%`;
+}
+
 function formatRevenue(value: number): string {
   return `$${formatInt(Math.round(value))}`;
+}
+
+function formatPerRecipient(value: number): string {
+  return `$${value.toFixed(3)}`;
 }
 
 function formatInt(value: number): string {

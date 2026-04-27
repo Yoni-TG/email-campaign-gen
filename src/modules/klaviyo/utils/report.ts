@@ -10,10 +10,14 @@ export interface CampaignRow {
   subject: string;
   sentAt: string | null;
   recipients: number;
+  delivered: number;
+  /** Bounces / recipients. 0..1. */
+  bounceRate: number;
   openRate: number;
   clickRate: number;
   conversionRate: number;
   revenue: number;
+  revenuePerRecipient: number;
 }
 
 export interface ReportSummary {
@@ -39,6 +43,7 @@ export interface ReportData {
   topByClickRate: CampaignRow[];
   topByConversionRate: CampaignRow[];
   topByRevenue: CampaignRow[];
+  topByRevenuePerRecipient: CampaignRow[];
   bottomByOpenRate: CampaignRow[];
 }
 
@@ -70,16 +75,20 @@ export function buildReport(
     .map((c) => {
       const stat = statsById.get(c.id);
       if (!stat) return null;
+      const bounced = Math.max(0, stat.recipients - stat.delivered);
       return {
         id: c.id,
         name: c.name,
         subject: c.subject,
         sentAt: c.sentAt,
         recipients: stat.recipients,
+        delivered: stat.delivered,
+        bounceRate: stat.recipients > 0 ? bounced / stat.recipients : 0,
         openRate: stat.openRate,
         clickRate: stat.clickRate,
         conversionRate: stat.conversionRate,
         revenue: stat.revenue,
+        revenuePerRecipient: stat.revenuePerRecipient,
       } satisfies CampaignRow;
     })
     .filter((row): row is CampaignRow => row !== null)
@@ -109,6 +118,12 @@ export function buildReport(
     topByClickRate: take(ranked, (r) => r.clickRate, topN, "desc"),
     topByConversionRate: take(ranked, (r) => r.conversionRate, topN, "desc"),
     topByRevenue: take(ranked, (r) => r.revenue, topN, "desc"),
+    topByRevenuePerRecipient: take(
+      ranked,
+      (r) => r.revenuePerRecipient,
+      topN,
+      "desc",
+    ),
     bottomByOpenRate: take(ranked, (r) => r.openRate, bottomN, "asc"),
   };
 }

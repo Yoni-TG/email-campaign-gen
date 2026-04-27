@@ -29,20 +29,32 @@ function campaign(
 function stat(
   campaignId: string,
   recipients: number,
-  rates: { openRate: number; clickRate?: number; conversionRate?: number; revenue?: number },
+  rates: {
+    openRate: number;
+    clickRate?: number;
+    conversionRate?: number;
+    revenue?: number;
+    delivered?: number;
+    revenuePerRecipient?: number;
+  },
 ): CampaignStatistics {
+  const delivered = rates.delivered ?? recipients;
+  const revenue = rates.revenue ?? 0;
   return {
     campaignId,
     opens: 0,
     opensUnique: 0,
     recipients,
+    delivered,
     openRate: rates.openRate,
     clicks: 0,
     clicksUnique: 0,
     clickRate: rates.clickRate ?? 0,
     conversions: 0,
     conversionRate: rates.conversionRate ?? 0,
-    revenue: rates.revenue ?? 0,
+    revenue,
+    revenuePerRecipient:
+      rates.revenuePerRecipient ?? (recipients > 0 ? revenue / recipients : 0),
   };
 }
 
@@ -69,7 +81,24 @@ describe("buildReport", () => {
     expect(report.topByOpenRate.map((r) => r.id)).toEqual(["a", "c"]);
     expect(report.topByClickRate.map((r) => r.id)).toEqual(["b", "c"]);
     expect(report.topByRevenue.map((r) => r.id)).toEqual(["b", "c"]);
+    expect(report.topByRevenuePerRecipient.map((r) => r.id)).toEqual(["b", "c"]);
     expect(report.bottomByOpenRate.map((r) => r.id)).toEqual(["d", "b"]);
+  });
+
+  it("computes bounceRate and revenuePerRecipient on each row", () => {
+    const campaigns = [campaign("a", "Subject A", "2026-04-01T12:00:00Z")];
+    const stats = [
+      stat("a", 1000, {
+        openRate: 0.5,
+        delivered: 990,
+        revenue: 100,
+      }),
+    ];
+
+    const [row] = buildReport(campaigns, stats, WINDOW).all;
+    expect(row.delivered).toBe(990);
+    expect(row.bounceRate).toBeCloseTo(0.01);
+    expect(row.revenuePerRecipient).toBeCloseTo(0.1);
   });
 
   it("excludes campaigns below minRecipients from rankings but keeps them in `all`", () => {

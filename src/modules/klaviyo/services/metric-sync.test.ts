@@ -31,6 +31,7 @@ function stats(
     opens: 0,
     opensUnique: 0,
     recipients: 1000,
+    delivered: 1000,
     openRate,
     clicks: 0,
     clicksUnique: 0,
@@ -38,6 +39,7 @@ function stats(
     conversions: 0,
     conversionRate: 0,
     revenue: 0,
+    revenuePerRecipient: 0,
   };
 }
 

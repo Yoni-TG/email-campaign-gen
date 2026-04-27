@@ -218,7 +218,7 @@ describe("getCampaignValues", () => {
     );
   });
 
-  it("computes derived rates from raw counts", async () => {
+  it("prefers Klaviyo's pre-computed rates when present", async () => {
     const fetchImpl = vi.fn().mockResolvedValue(
       jsonResponse({
         data: {
@@ -229,7 +229,49 @@ describe("getCampaignValues", () => {
                 statistics: {
                   opens: 1200,
                   opens_unique: 1000,
+                  open_rate: 0.21,
                   clicks: 200,
+                  clicks_unique: 180,
+                  click_rate: 0.04,
+                  conversions: 40,
+                  conversion_value: 4500,
+                  conversion_rate: 0.009,
+                  recipients: 5000,
+                  delivered: 4900,
+                  revenue_per_recipient: 0.92,
+                },
+              },
+            ],
+          },
+        },
+      }),
+    );
+    const client = new KlaviyoClient({
+      apiKey: "pk_test",
+      fetchImpl,
+      conversionMetricId: "metric_placed_order",
+    });
+    const [stats] = await client.getCampaignValues(["c1"], WINDOW);
+
+    expect(stats.campaignId).toBe("c1");
+    expect(stats.openRate).toBe(0.21);
+    expect(stats.clickRate).toBe(0.04);
+    expect(stats.conversionRate).toBe(0.009);
+    expect(stats.delivered).toBe(4900);
+    expect(stats.revenue).toBe(4500);
+    expect(stats.revenuePerRecipient).toBe(0.92);
+  });
+
+  it("falls back to raw-count derivation when pre-computed rates are missing", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse({
+        data: {
+          attributes: {
+            results: [
+              {
+                groupings: { campaign_id: "c1" },
+                statistics: {
+                  opens_unique: 1000,
                   clicks_unique: 180,
                   conversions: 40,
                   conversion_value: 4500,
@@ -248,11 +290,11 @@ describe("getCampaignValues", () => {
     });
     const [stats] = await client.getCampaignValues(["c1"], WINDOW);
 
-    expect(stats.campaignId).toBe("c1");
+    expect(stats.delivered).toBe(5000); // falls back to recipients
     expect(stats.openRate).toBeCloseTo(0.2);
     expect(stats.clickRate).toBeCloseTo(0.036);
     expect(stats.conversionRate).toBeCloseTo(0.008);
-    expect(stats.revenue).toBe(4500);
+    expect(stats.revenuePerRecipient).toBeCloseTo(0.9);
   });
 
   it("yields zero rates when recipients is 0 (avoids NaN)", async () => {
@@ -279,5 +321,6 @@ describe("getCampaignValues", () => {
     expect(stats.openRate).toBe(0);
     expect(stats.clickRate).toBe(0);
     expect(stats.conversionRate).toBe(0);
+    expect(stats.revenuePerRecipient).toBe(0);
   });
 });

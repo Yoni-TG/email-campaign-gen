@@ -277,26 +277,31 @@ interface MetricsResponse {
 function toCampaignStatistics(row: CampaignValuesResultRow): CampaignStatistics {
   const stats = row.statistics ?? {};
   const recipients = stats.recipients ?? 0;
+  const delivered = stats.delivered ?? recipients;
   const opensUnique = stats.opens_unique ?? 0;
   const clicksUnique = stats.clicks_unique ?? 0;
   const conversions = stats.conversions ?? 0;
+  const revenue = stats.conversion_value ?? 0;
   return {
     campaignId: row.groupings?.campaign_id ?? "",
     opens: stats.opens ?? 0,
     opensUnique,
     recipients,
+    delivered,
     // Prefer Klaviyo's pre-computed rate (matches the dashboard).
     // Fall back to a raw-count derivation if the field is missing.
     openRate:
-      stats.open_rate ?? (recipients > 0 ? opensUnique / recipients : 0),
+      stats.open_rate ?? (delivered > 0 ? opensUnique / delivered : 0),
     clicks: stats.clicks ?? 0,
     clicksUnique,
     clickRate:
-      stats.click_rate ?? (recipients > 0 ? clicksUnique / recipients : 0),
+      stats.click_rate ?? (delivered > 0 ? clicksUnique / delivered : 0),
     conversions,
     conversionRate:
-      stats.conversion_rate ?? (recipients > 0 ? conversions / recipients : 0),
-    revenue: stats.conversion_value ?? 0,
+      stats.conversion_rate ?? (delivered > 0 ? conversions / delivered : 0),
+    revenue,
+    revenuePerRecipient:
+      stats.revenue_per_recipient ?? (recipients > 0 ? revenue / recipients : 0),
   };
 }
 

@@ -56,16 +56,20 @@ export interface CampaignStatistics {
   opens: number;
   opensUnique: number;
   recipients: number;
-  /** opensUnique / recipients, 0..1. Pre-computed for convenience. */
+  /** Recipients - bounces. The denominator Klaviyo uses for its rates. */
+  delivered: number;
+  /** Klaviyo-pre-computed `open_rate` (opens_unique / delivered), 0..1. */
   openRate: number;
   clicks: number;
   clicksUnique: number;
-  /** clicksUnique / recipients, 0..1. */
+  /** Klaviyo-pre-computed `click_rate`, 0..1. */
   clickRate: number;
   conversions: number;
-  /** conversions / recipients, 0..1. */
+  /** Klaviyo-pre-computed `conversion_rate`, 0..1. */
   conversionRate: number;
   revenue: number;
+  /** Klaviyo-pre-computed `revenue_per_recipient`. */
+  revenuePerRecipient: number;
 }
 
 /** Persisted shape of a `klaviyo_metrics` row (post-parse). */
