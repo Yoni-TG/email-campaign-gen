@@ -193,6 +193,24 @@ export function CreativeSeedForm() {
           </div>
         </div>
 
+        <div>
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-input/60 bg-muted/30 px-3.5 py-2.5 text-sm transition-colors hover:bg-muted/50">
+            <input
+              type="checkbox"
+              checked={state.includeNicky}
+              onChange={(e) => setField("includeNicky", e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input"
+            />
+            <span>
+              <span className="font-medium">Include a Nicky Hilton quote</span>
+              <span className="block text-xs text-muted-foreground">
+                Off by default — Claude generates one only when this is on.
+                You can also add one later from the fine-tune editor.
+              </span>
+            </span>
+          </label>
+        </div>
+
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5">
             <Label htmlFor="market">Market *</Label>

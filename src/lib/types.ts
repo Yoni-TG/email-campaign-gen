@@ -132,6 +132,11 @@ export interface CreativeSeed {
   milledInspirationUrls?: string[];
   additionalNotes?: string;
   includeSms: boolean;
+  // Opt-in for the Nicky Hilton quote module (brand-guide §7). Off by
+  // default — Claude only generates a `nicky_quote` when this is true.
+  // Optional in the type for backward compat with campaigns created
+  // before this field existed; undefined is treated as false.
+  includeNicky?: boolean;
   // Brief-time decisions that shape copy voice and wireframe mood.
   // Lead value is singular (pick one). Personalities can be 1+; the order
   // is not meaningful.
