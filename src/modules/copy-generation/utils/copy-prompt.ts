@@ -41,9 +41,33 @@ export interface FewShotExample {
 
 const BRAND_GUIDE_PATH = join("src", "content", "brand-guide.md");
 const FEW_SHOT_PATH = join("src", "content", "few-shot-examples.json");
+const WINNING_SUBJECTS_PATH = join("src", "content", "winning-subjects.json");
 
 let brandGuideCache: string | null = null;
 let fewShotCache: FewShotExample[] | null = null;
+let winningSubjectsCache: WinningSubject[] | null = null;
+
+/**
+ * Top-performing past subjects (pulled from Klaviyo by
+ * `npm run report:klaviyo -- --write-winners`). The ranking is by
+ * revenue per recipient — the closest proxy for "this subject made
+ * money" — and tiny win-back / review-incentive sends are filtered
+ * out. Klaviyo Liquid tokens are stripped because the copy generator
+ * doesn't emit Liquid; first-name personalization is a separate
+ * concern handled at paste-time.
+ *
+ * Optional file. If `winning-subjects.json` doesn't exist we fall
+ * back to the static few-shots only — useful for fresh checkouts and
+ * for keeping the test suite hermetic.
+ */
+export interface WinningSubject {
+  subject: string;
+  sentAt: string | null;
+  recipients: number;
+  openRate: number;
+  conversionRate: number;
+  revenuePerRecipient: number;
+}
 
 export function loadBrandGuide(): string {
   if (brandGuideCache !== null) return brandGuideCache;
@@ -56,6 +80,21 @@ export function loadFewShotExamples(): FewShotExample[] {
   const raw = readFileSync(join(process.cwd(), FEW_SHOT_PATH), "utf-8");
   fewShotCache = JSON.parse(raw) as FewShotExample[];
   return fewShotCache;
+}
+
+export function loadWinningSubjects(): WinningSubject[] {
+  if (winningSubjectsCache !== null) return winningSubjectsCache;
+  try {
+    const raw = readFileSync(
+      join(process.cwd(), WINNING_SUBJECTS_PATH),
+      "utf-8",
+    );
+    winningSubjectsCache = JSON.parse(raw) as WinningSubject[];
+  } catch {
+    // Optional artefact — absent on fresh checkouts and in unit tests.
+    winningSubjectsCache = [];
+  }
+  return winningSubjectsCache;
 }
 
 // ─── System prompt (stable → cacheable) ─────────────────────────────────────
@@ -115,6 +154,7 @@ export function buildCopySystemPrompt(): string {
 
   const guide = loadBrandGuide();
   const examples = loadFewShotExamples();
+  const winners = loadWinningSubjects();
 
   // Each example is a past campaign archive — the month + campaign name form
   // the brief context, and the rest of the fields are the shape the tool
@@ -129,6 +169,8 @@ export function buildCopySystemPrompt(): string {
     })
     .join("\n\n");
 
+  const winnersSection = buildWinningSubjectsSection(winners);
+
   systemPromptCache = [
     `You are the Theo Grace email-campaign copy agent.`,
     ``,
@@ -140,10 +182,55 @@ export function buildCopySystemPrompt(): string {
     `## Past Campaign Examples`,
     examplesText,
     ``,
+    ...(winnersSection ? [winnersSection, ``] : []),
     CRITICAL_RULES,
   ].join("\n");
 
   return systemPromptCache;
+}
+
+/**
+ * Renders the high-performing subject section. Each row shows the
+ * subject + the revenue-per-recipient it earned — the perf number is
+ * the social proof: "this subject earned $X per email sent." Ranked
+ * by $/recipient. Returns null when no winners file is loaded so the
+ * section is omitted entirely from the system prompt.
+ *
+ * Design notes:
+ * - We surface $/recipient and conversion rate, not open rate, because
+ *   open rate is a noisy proxy here (mean 50%+ regardless of subject).
+ * - We do NOT instruct Claude to copy these verbatim — we want voice,
+ *   shape, and rhythm to be lifted, not the exact wording. The phrase
+ *   "emulate tone and structure" is load-bearing.
+ */
+function buildWinningSubjectsSection(winners: WinningSubject[]): string | null {
+  if (winners.length === 0) return null;
+  const rows = winners
+    .map(
+      (w) =>
+        `- "${w.subject}"  (${formatCents(w.revenuePerRecipient)}/recipient, conv ${formatConv(w.conversionRate)})`,
+    )
+    .join("\n");
+  return [
+    `## High-Performing Past Subjects`,
+    ``,
+    `These subject lines earned the most revenue per email sent at Theo Grace ` +
+      `over the recent send window. Use them as a reference for tone, length, ` +
+      `urgency, emoji usage, and rhythm — emulate the *shape* but never ` +
+      `re-use a subject verbatim. The metric in parentheses is revenue per ` +
+      `recipient (the strongest signal we have for "this subject converted") ` +
+      `followed by conversion rate.`,
+    ``,
+    rows,
+  ].join("\n");
+}
+
+function formatCents(value: number): string {
+  return `$${value.toFixed(3)}`;
+}
+
+function formatConv(value: number): string {
+  return `${(value * 100).toFixed(3)}%`;
 }
 
 // ─── User prompt (varies per campaign) ──────────────────────────────────────
@@ -206,5 +293,6 @@ export function buildCopyUserPrompt(
 export function __resetPromptCaches(): void {
   brandGuideCache = null;
   fewShotCache = null;
+  winningSubjectsCache = null;
   systemPromptCache = null;
 }

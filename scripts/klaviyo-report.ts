@@ -17,7 +17,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { KlaviyoClient } from "../src/modules/klaviyo/services/klaviyo-client";
 import type { MetricWindow } from "../src/modules/klaviyo/types";
-import { buildReport } from "../src/modules/klaviyo/utils/report";
+import { buildReport, extractWinners } from "../src/modules/klaviyo/utils/report";
 import { formatReportAsMarkdown } from "../src/modules/klaviyo/utils/report-format";
 
 interface Args {
@@ -27,6 +27,7 @@ interface Args {
   bottomN: number;
   minRecipients: number;
   listMetrics: boolean;
+  writeWinners: string | null;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -37,6 +38,7 @@ function parseArgs(argv: string[]): Args {
     bottomN: 5,
     minRecipients: 100,
     listMetrics: false,
+    writeWinners: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -65,6 +67,14 @@ function parseArgs(argv: string[]): Args {
       case "--list-metrics":
         out.listMetrics = true;
         break;
+      case "--write-winners":
+        if (next && !next.startsWith("--")) {
+          out.writeWinners = next;
+          i++;
+        } else {
+          out.writeWinners = "src/content/winning-subjects.json";
+        }
+        break;
       case "--help":
       case "-h":
         printHelp();
@@ -89,6 +99,8 @@ function printHelp(): void {
       "  --bottom <n>           Rows in the bottom-N table (default 5)",
       "  --min-recipients <n>   Drop sends below this size before ranking (default 100)",
       "  --list-metrics         Print every metric in the workspace (id, name, integration) and exit",
+      "  --write-winners [path] Also emit a curated winners JSON the copy prompt consumes",
+      "                         (default: src/content/winning-subjects.json)",
     ].join("\n"),
   );
 }
@@ -146,6 +158,16 @@ async function main(): Promise<void> {
 
   console.log(`[klaviyo-report] wrote ${mdPath}`);
   console.log(`[klaviyo-report] wrote ${jsonPath}`);
+
+  if (args.writeWinners) {
+    const winners = extractWinners(report.all);
+    const winnersPath = resolve(args.writeWinners);
+    await mkdir(dirname(winnersPath), { recursive: true });
+    await writeFile(winnersPath, JSON.stringify(winners, null, 2) + "\n", "utf8");
+    console.log(
+      `[klaviyo-report] wrote ${winnersPath} (${winners.length} winners)`,
+    );
+  }
 }
 
 main().catch((err) => {

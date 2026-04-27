@@ -140,6 +140,89 @@ function take(
     .slice(0, n);
 }
 
+// ─── Winners extraction (feeds the copy prompt) ─────────────────────────────
+
+export interface WinningSubject {
+  subject: string;
+  sentAt: string | null;
+  recipients: number;
+  openRate: number;
+  conversionRate: number;
+  revenuePerRecipient: number;
+}
+
+export interface ExtractWinnersOptions {
+  /** Minimum recipient count — drops tiny win-back / review-incentive sends. Default 50,000. */
+  minRecipients?: number;
+  /** Maximum bounce rate — keeps healthy lists only. Default 0.01 (1%). */
+  maxBounceRate?: number;
+  /** How many winners to emit. Default 15. */
+  topN?: number;
+}
+
+/**
+ * Pulls the campaigns that earned the most revenue per email out of the
+ * ranked set, strips Klaviyo Liquid tokens from the subject (the copy
+ * generator doesn't emit Liquid), and returns just the fields the copy
+ * prompt needs.
+ *
+ * Why $/recipient rather than open rate or revenue: revenue rewards
+ * audience size, open rate is a vanity metric on this list (consistently
+ * 50%+ regardless of subject quality). Revenue/recipient normalises for
+ * audience size and is the closest proxy we have for "did this subject
+ * actually drive money."
+ */
+export function extractWinners(
+  rows: CampaignRow[],
+  options: ExtractWinnersOptions = {},
+): WinningSubject[] {
+  const minRecipients = options.minRecipients ?? 50_000;
+  const maxBounceRate = options.maxBounceRate ?? 0.01;
+  const topN = options.topN ?? 15;
+
+  return rows
+    .filter(
+      (r) =>
+        r.recipients >= minRecipients &&
+        r.bounceRate <= maxBounceRate &&
+        r.subject.trim().length > 0,
+    )
+    .sort((a, b) => b.revenuePerRecipient - a.revenuePerRecipient)
+    .slice(0, topN)
+    .map((r) => ({
+      subject: stripLiquid(r.subject).trim(),
+      sentAt: r.sentAt,
+      recipients: r.recipients,
+      openRate: r.openRate,
+      conversionRate: r.conversionRate,
+      revenuePerRecipient: r.revenuePerRecipient,
+    }))
+    // After stripping, the subject can become empty (rare — would mean
+    // the subject was *only* Liquid). Drop those.
+    .filter((w) => w.subject.length > 0);
+}
+
+/**
+ * Removes Klaviyo Liquid template syntax: `{% ... %}` blocks and
+ * `{{ ... }}` expressions. Collapses runs of whitespace introduced by
+ * removed tokens. We're stripping rather than rendering because the
+ * copy generator doesn't emit Liquid — first-name personalization etc.
+ * is out of scope for the LLM and the operator can re-add it on paste.
+ */
+export function stripLiquid(input: string): string {
+  return input
+    .replace(/\{%[^%]*%\}/g, "")
+    .replace(/\{\{[^}]*\}\}/g, "")
+    // Token removal can leave " , " between words (the token sat in front of
+    // a comma). Collapse that to a single space so "Hi {{x}}, ready?" reads
+    // as "Hi ready?" not "Hi , ready?".
+    .replace(/\s+,\s+/g, " ")
+    // Same for orphan commas at the start: "{{x}}, hi" → ", hi" → "hi".
+    .replace(/^\s*,\s*/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function sentAtDesc(a: string | null, b: string | null): number {
   if (a === null && b === null) return 0;
   if (a === null) return 1;

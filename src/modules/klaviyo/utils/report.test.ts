@@ -4,7 +4,7 @@ import type {
   KlaviyoCampaign,
   MetricWindow,
 } from "@/modules/klaviyo/types";
-import { buildReport } from "./report";
+import { buildReport, extractWinners, stripLiquid } from "./report";
 
 const WINDOW: MetricWindow = {
   start: new Date("2026-01-27T00:00:00Z"),
@@ -166,5 +166,117 @@ describe("buildReport", () => {
 
     const report = buildReport(campaigns, stats, WINDOW);
     expect(report.all.map((r) => r.id)).toEqual(["recent", "old", "nodate"]);
+  });
+});
+
+describe("stripLiquid", () => {
+  it("removes {{ }} expressions", () => {
+    expect(stripLiquid("Hi {{ first_name|capitalize }}, ready?")).toBe(
+      "Hi ready?",
+    );
+  });
+
+  it("removes {% %} blocks", () => {
+    expect(
+      stripLiquid("{% if first_name %}{{ first_name }}, {% endif %}Are You In?"),
+    ).toBe("Are You In?");
+  });
+
+  it("collapses extra whitespace and strips a leading orphan comma", () => {
+    expect(stripLiquid("{{ first_name }}, hi   there")).toBe("hi there");
+  });
+
+  it("leaves clean strings alone", () => {
+    expect(stripLiquid("Last Day for Free Mother's Day Shipping + 25% OFF 💙"))
+      .toBe("Last Day for Free Mother's Day Shipping + 25% OFF 💙");
+  });
+});
+
+describe("extractWinners", () => {
+  function row(
+    overrides: Partial<{
+      id: string;
+      subject: string;
+      recipients: number;
+      bounceRate: number;
+      revenuePerRecipient: number;
+      sentAt: string | null;
+    }> = {},
+  ) {
+    const stat = {
+      campaignId: overrides.id ?? "x",
+      opens: 0,
+      opensUnique: 0,
+      recipients: overrides.recipients ?? 100_000,
+      delivered: Math.floor(
+        (overrides.recipients ?? 100_000) * (1 - (overrides.bounceRate ?? 0)),
+      ),
+      openRate: 0.5,
+      clicks: 0,
+      clicksUnique: 0,
+      clickRate: 0,
+      conversions: 0,
+      conversionRate: 0,
+      revenue: 0,
+      revenuePerRecipient: overrides.revenuePerRecipient ?? 0.01,
+    };
+    const c: KlaviyoCampaign = {
+      id: overrides.id ?? "x",
+      name: overrides.subject ?? "X",
+      subject: overrides.subject ?? "X",
+      channel: "email",
+      sentAt: overrides.sentAt ?? "2026-04-01T12:00:00Z",
+      status: "Sent",
+    };
+    return { campaign: c, stat };
+  }
+
+  it("filters by minRecipients, sorts by $/recipient desc, takes top N, strips liquid", () => {
+    const fixtures = [
+      row({ id: "a", subject: "{{ first_name }}, last call!", recipients: 200_000, revenuePerRecipient: 0.05 }),
+      row({ id: "tiny", subject: "Tiny send big rate", recipients: 1_000, revenuePerRecipient: 1.0 }),
+      row({ id: "b", subject: "Mother's Day 💙", recipients: 300_000, revenuePerRecipient: 0.04 }),
+      row({ id: "c", subject: "Earth Day 30% Off", recipients: 250_000, revenuePerRecipient: 0.02 }),
+    ];
+
+    const report = buildReport(
+      fixtures.map((f) => f.campaign),
+      fixtures.map((f) => f.stat) as CampaignStatistics[],
+      WINDOW,
+      { minRecipients: 100 },
+    );
+    const winners = extractWinners(report.all, { minRecipients: 50_000, topN: 2 });
+
+    expect(winners).toHaveLength(2);
+    expect(winners[0].subject).toBe("last call!");
+    expect(winners[1].subject).toBe("Mother's Day 💙");
+  });
+
+  it("drops sends with too-high bounce rate", () => {
+    const fixtures = [
+      row({ id: "good", subject: "Clean", recipients: 100_000, bounceRate: 0.005, revenuePerRecipient: 0.01 }),
+      row({ id: "bouncy", subject: "Junk list", recipients: 100_000, bounceRate: 0.05, revenuePerRecipient: 1.0 }),
+    ];
+    const report = buildReport(
+      fixtures.map((f) => f.campaign),
+      fixtures.map((f) => f.stat) as CampaignStatistics[],
+      WINDOW,
+    );
+    const winners = extractWinners(report.all);
+    expect(winners.map((w) => w.subject)).toEqual(["Clean"]);
+  });
+
+  it("drops winners whose subject becomes empty after stripping liquid", () => {
+    const fixtures = [
+      row({ id: "only_liquid", subject: "{{ first_name }}", recipients: 100_000, revenuePerRecipient: 0.5 }),
+      row({ id: "real", subject: "Real subject", recipients: 100_000, revenuePerRecipient: 0.1 }),
+    ];
+    const report = buildReport(
+      fixtures.map((f) => f.campaign),
+      fixtures.map((f) => f.stat) as CampaignStatistics[],
+      WINDOW,
+    );
+    const winners = extractWinners(report.all);
+    expect(winners.map((w) => w.subject)).toEqual(["Real subject"]);
   });
 });
