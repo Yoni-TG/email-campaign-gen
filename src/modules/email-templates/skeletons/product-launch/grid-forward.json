@@ -1,0 +1,36 @@
+{
+  "id": "product-launch/grid-forward",
+  "name": "Hero Product · 3×2 Grid",
+  "campaignTypes": ["product_launch"],
+  "tags": ["product-forward", "grid-heavy", "shop-now"],
+  "description": "Single hero product anchors the launch followed by a wide 3×2 grid. Best when the launch is a small capsule and you want every piece visible above the fold.",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero product image (square)", "required": true }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_product",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:SHOP THE COLLECTION" } },
+    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

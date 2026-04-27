@@ -48,7 +48,7 @@ describe("buildBlueprint", () => {
       seed,
       approvedCopy,
       approvedProducts: [snapshot()],
-      heroImagePath: "/uploads/cmp_1/hero.jpg",
+      assets: { hero: "/uploads/cmp_1/hero.jpg" },
     });
 
     expect(out.campaign_id).toBe("cmp_1");
@@ -59,7 +59,7 @@ describe("buildBlueprint", () => {
     ]);
     expect(out.free_top_text).toBe("TIMELESS. ALWAYS HAS BEEN");
     expect(out.subject_variant).toEqual(approvedCopy.subject_variant);
-    expect(out.hero_image_url).toBe("/uploads/cmp_1/hero.jpg");
+    expect(out.assets).toEqual({ hero: "/uploads/cmp_1/hero.jpg" });
     expect(out.body_blocks).toEqual(approvedCopy.body_blocks);
     expect(out.sms).toBe("Gifts she'll love: {link}");
   });
@@ -73,7 +73,6 @@ describe("buildBlueprint", () => {
         snapshot({ sku: "ON-SALE", price: "120", salePrice: "99" }),
         snapshot({ sku: "FULL-PRICE", price: "180", salePrice: "" }),
       ],
-      heroImagePath: null,
     });
 
     expect(out.products[0].price).toBe("99");
@@ -88,10 +87,11 @@ describe("buildBlueprint", () => {
       approvedProducts: [
         snapshot({ name: "Ring", imageUrl: "https://cdn/r.jpg" }),
       ],
-      heroImagePath: "/uploads/cmp_1/hero.jpg",
+      assets: { hero: "/uploads/cmp_1/hero.jpg" },
     });
 
     expect(out.products[0]).toEqual({
+      sku: "SKU-1",
       title: "Ring",
       price: "120",
       image_url: "https://cdn/r.jpg",
@@ -99,14 +99,13 @@ describe("buildBlueprint", () => {
     });
   });
 
-  it("coerces a missing hero image path to an empty string", () => {
+  it("defaults to an empty assets map when none are supplied (candidate render phase)", () => {
     const out = buildBlueprint({
       campaignId: "cmp_1",
       seed,
       approvedCopy,
       approvedProducts: [],
-      heroImagePath: null,
     });
-    expect(out.hero_image_url).toBe("");
+    expect(out.assets).toEqual({});
   });
 });

@@ -1,0 +1,46 @@
+{
+  "id": "product-launch/hero-story-grid",
+  "name": "Hero · Story · Grid",
+  "campaignTypes": ["product_launch"],
+  "tags": ["image-led", "narrative", "balanced"],
+  "description": "Lifestyle hero introduces the launch, a centered text block carries the story, a 2×2 grid presents the new pieces, and the closing block reinforces brand mood with a final image + CTA.",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true },
+    { "key": "closing", "label": "Closing image", "required": false }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:NEW IN",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "subLabel": "literal:THE STORY",
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description"
+      }
+    },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "imageUrl": "assets.closing",
+        "headline": "body_blocks[2].title",
+        "body": "body_blocks[2].description",
+        "ctaLabel": "body_blocks[2].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

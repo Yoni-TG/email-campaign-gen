@@ -30,7 +30,7 @@ export function useVariantSelection(
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ variantName: selected }),
+          body: JSON.stringify({ skeletonId: selected }),
         },
       );
       if (!res.ok) {

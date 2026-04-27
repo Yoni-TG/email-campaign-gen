@@ -5,8 +5,13 @@
 # Email Campaign Generation — Agent Guide
 
 Internal Theo Grace tool that automates email-campaign creation end-to-end:
-creative brief → LLM-generated copy → product selection → Figma template
-fill → human review gates → completed campaign.
+creative brief → LLM-generated copy → product selection → CP1 review → 3
+react-email candidate variants → CP2 variant pick → asset upload → final
+HTML render → Copy to Klaviyo.
+
+The plan originally called for a Figma integration as the render layer; we
+swapped that for **react-email** with a curated component library before
+shipping anything Figma-touched. See [Known Deviations](#known-deviations-from-plan).
 
 **Implementation plan (source of truth):**
 `/Users/Yoni.Ra/Documents/Work/raw/projects/Email Campaign Generation/implementation-plan.md`
@@ -25,11 +30,17 @@ fill → human review gates → completed campaign.
 - **LLM:** `@anthropic-ai/sdk`, default model `claude-sonnet-4-6`
   (override via `CLAUDE_MODEL` env). Plan references retired
   `claude-sonnet-4-20250514` — ignore that; use current 4.x IDs.
+- **Email rendering:** `react-email` + `@react-email/components` +
+  `@react-email/render`. Atomic block components live in
+  `src/modules/email-templates/blocks/`; skeletons (JSON manifests that
+  compose blocks) live in `src/modules/email-templates/skeletons/`. The
+  renderer emits HTML strings consumed by the variant-selection iframes
+  and the final completed-view preview. **No Figma module any more.**
 - **Product feed:** public CDN JSON (`PRODUCT_FEED_URL`, served by
   static.myka.com). Plain `fetch()` — no AWS SDK. Dev fallback reads
   `data/product-feed.fixture.json` (gitignored; see `data/README.md`).
-  Hero images land in `/uploads` (gitignored, mounted volume in Docker
-  when we containerize).
+  Operator-uploaded assets land in `/uploads/<campaignId>/<slotKey>.<ext>`
+  (gitignored, mounted volume in Docker when we containerize).
 - **Drag-and-drop:** `@dnd-kit` for product reordering.
 - **Testing:** `vitest` + `@testing-library/react` + `jsdom`.
 
@@ -46,6 +57,8 @@ src/
 ├── app/                               # Next.js routes — keep slim
 │   ├── layout.tsx
 │   ├── page.tsx                       # delegates to a module component
+│   ├── blocks/                        # /blocks — dev catalog of every atomic block + variants
+│   ├── skeletons/                     # /skeletons — dev catalog of every skeleton, rendered
 │   ├── campaigns/…                    # route handlers import from modules
 │   └── api/…
 ├── modules/
@@ -57,7 +70,12 @@ src/
 │   │   └── types.ts                   # feature-local types (re-export from lib/types when shared)
 │   ├── products/
 │   ├── copy-generation/
-│   └── figma/
+│   └── email-templates/               # rendering layer (replaces the old figma module)
+│       ├── blocks/                    # atomic React-Email components (typed) + theme
+│       ├── skeletons/                 # JSON manifests + index loader
+│       ├── renderer/                  # block-registry + renderSkeleton
+│       ├── selection/                 # selectSkeletons + llm-ranker (dormant in v1)
+│       └── dev/                       # shared sample data + preview definitions
 ├── lib/                               # cross-module primitives
 │   ├── db.ts                          # Prisma singleton + parseCampaign
 │   ├── types.ts                       # shared domain types (CAMPAIGN_*, Campaign, Seed, …)
@@ -93,17 +111,42 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
    test. Colocate as `*.test.ts` or put in `__tests__/` mirroring the source
    path.
 
+### Email-templates rules
+
+7. **One source of truth for block previews.** Both the `/blocks` route
+   and `scripts/preview-blocks.tsx` pull from
+   `src/modules/email-templates/dev/block-previews.tsx`. When you add a new
+   block or variant, register it there — both surfaces update without
+   further wiring.
+8. **Skeletons are JSON, not TS objects.** Each lives at
+   `skeletons/<campaign-type>/<id>.json` and is imported + cast to
+   `SkeletonManifest` in `skeletons/index.ts`. Adding a new one = a JSON
+   file + one new line in the index.
+9. **Bind paths reference `CampaignBlueprint`.** Strings starting with
+   `literal:` are passed through verbatim; `assets.<key>` resolves against
+   the operator-uploaded asset map (placeholder during the candidate phase);
+   anything else is a dotted path walked into the blueprint
+   (e.g. `body_blocks[0].title`). Non-string bind values (objects, arrays)
+   are inline literals.
+10. **Block prop typing is enforced via `BlockPropsMap`.** Every entry in
+    `BLOCK_TYPES` must have a corresponding `BlockPropsMap[T]` entry and a
+    `blockRegistry[T]` component. Adding a new block = update all three —
+    `BLOCK_TYPES`, `BlockPropsMap`, `blockRegistry` — and TypeScript will
+    catch the omission.
+
 ---
 
 ## Workflow
 
 - **One branch per plan phase.** `phase-N-<slug>` off `main`, PR in, green
-  build before merge.
+  build before merge. The Figma-replacement work is the explicit exception
+  — bundled into the single `feature/email-template-generation` branch so we
+  can verify the swap in isolation before announcing it externally.
 - **Verification:** run `npm run typecheck`, `npm run test:run`, and `npm run build` before
   opening a PR. Never claim "done" without output you've seen.
 - **Secrets:** only `.env.example` is committed; real keys live in `.env`
-  (gitignored). Current state: Anthropic API key present; S3 creds +
-  Postgres pending from IT.
+  (gitignored). Current state: Anthropic API key present; Postgres pending
+  from IT. Figma credentials are no longer needed.
 
 ---
 
@@ -116,6 +159,47 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 - `npm run test:run` — vitest single run (CI-style)
 - `npx prisma migrate dev --name <name>` — create + apply a migration
 - `npx prisma studio` — DB browser
+- `npx tsx scripts/preview-blocks.tsx` — render every atomic block to `out/block-previews/` (offline mirror of `/blocks`)
+- `npx tsx scripts/preview-skeletons.ts --withAssets` — render every skeleton to `out/skeleton-previews/` (offline mirror of `/skeletons`)
+
+### In-app dev catalogs
+
+- `/blocks` — every block + variant rendered in isolation, grouped by type.
+  Use during design review or when adding a new block. The catalog entries
+  live in `src/modules/email-templates/dev/block-previews.tsx`.
+- `/skeletons` — every skeleton rendered with sample copy + products + assets,
+  grouped by campaign type. Use to spot-check a new skeleton or verify a
+  brand tweak applied across the library.
+
+Both pages are `force-static` and pull from the same source of truth as the
+offline scripts — `src/modules/email-templates/dev/`.
+
+---
+
+## Status Flow
+
+```
+draft → generating → review (CP1) →
+rendering_candidates → variant_selection (CP2) →
+asset_upload → rendering_final → completed
+```
+
+Each transition has a dedicated server action under
+`src/modules/campaigns/actions/`:
+
+- `approve-campaign.ts`: review → rendering_candidates
+- `render-candidates.ts`: rendering_candidates → variant_selection (calls
+  `selectSkeletons` + `renderSkeleton` ×3, persists `candidateVariants`)
+- `select-variant.ts`: variant_selection → asset_upload (writes
+  `chosenSkeletonId`)
+- `upload-asset.ts`: asset_upload → asset_upload (more required slots) or
+  rendering_final (all required slots filled). Asset slots are declared by
+  the chosen skeleton's `requiredAssets[]`.
+- `render-final.ts`: rendering_final → completed (calls `renderSkeleton`
+  with assets, persists `renderResult`)
+
+The completed view shows the rendered iframe + a Copy-HTML button for
+Klaviyo paste-in. Klaviyo API push is deferred.
 
 ---
 
@@ -123,6 +207,9 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 
 | Plan says | We do | Why |
 |---|---|---|
+| Figma integration as the rendering layer | **react-email** with a curated 17-block library + 15 skeleton manifests | Figma's API was the wrong fit (auth/rate-limit pain, mandatory export step, weak alignment with eventual Klaviyo API push). HTML-native output is directly pasteable today and API-ready tomorrow. The library mirrors existing Theo Grace wireframes for brand consistency. |
+| `figma_result` + `hero_image_path` columns; `hero_upload` / `filling_figma` statuses | `render_result`, `candidate_variants`, `chosen_skeleton_id`, `asset_paths` columns; `rendering_candidates` / `asset_upload` / `rendering_final` statuses; `hero_image_path` kept as legacy nullable until Phase 4 cleanup | Schema refactored alongside the react-email swap. Existing dev rows had `hero_upload` / `filling_figma` mapped onto the new flow during the migration. |
+| Operator uploads hero before variant render | Operator picks variant *first*, then uploads only the assets the chosen skeleton's `requiredAssets[]` declares (could be 0, 1, or 2 image slots) | Skeletons need different assets — Mystery Sale is graphic-led with no photo, photo-overlay needs a hero, gift-guide may want a closing image too. Asset slots are declarative on the manifest. |
 | Postgres from day one | SQLite in dev, Postgres later | Creds not yet available |
 | Prisma (implicit latest) | Prisma 6.19 | v7 driver-adapter churn not worth phase-2 overhead |
 | Next.js 15 | Next.js 16 | `create-next-app@latest` pulled 16 |
@@ -132,3 +219,41 @@ Plan documents use flat paths (e.g. `src/components/creative-seed-form.tsx`).
 | Plan's TitleCase `FeedProduct` (`SKU`, `"product type"`, `"Out of Stock (Stock/OOS)"`, …) | Real shape: snake_case + singular (`sku`, `product_type`, `stock_status`, `is_active`, `image_url`, `has_perosnalization`, `num_of_inscriptions`). `image_url` read directly; no `Description` or `Shape` fields. | Inspected the real `static.myka.com/.../email-marketing.json` on 2026-04-19 — plan was written from memory |
 | Plan filters only on OOS | We also drop `is_active !== "Yes"` | Real feed has inactive-but-not-OOS rows |
 
+
+
+---
+
+# MANDATORY: Post-Task Documentation (SR-PTD)
+
+**CRITICAL: After completing ANY task that modifies files, you MUST invoke this skill:**
+
+```
+Skill tool -> skill: "sr-ptd-skill"
+```
+
+**This is NOT optional. Skipping this skill means the task is INCOMPLETE.**
+
+When planning ANY development task, add as the FINAL item in your task list:
+```
+[ ] Create SR-PTD documentation
+```
+
+### Before Starting Any Task:
+1. Create your task plan as usual
+2. Add SR-PTD documentation as the last task item
+3. This step is MANDATORY for: features, bug fixes, refactors, maintenance, research
+
+### When Completing the SR-PTD Task:
+1. Read `~/.claude/skills/sr-ptd-skill/SKILL.md` for full instructions
+2. Choose template: Full (complex tasks) or Quick (simple tasks)
+3. Create file: `SR-PTD_YYYY-MM-DD_[task-id]_[description].md`
+4. Save to: `C:/projects/Skills/Dev_doc_for_skills`
+5. Fill all applicable sections thoroughly
+
+### Task Completion Criteria:
+A task is NOT complete until SR-PTD documentation exists.
+
+### If Conversation Continues After Task:
+Update the existing SR-PTD document instead of creating a new one.
+
+---

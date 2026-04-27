@@ -192,6 +192,11 @@ export function buildCopyUserPrompt(
       ? `- Include SMS copy (short, punchy, with \`{link}\` placeholder — ≤130 chars)`
       : `- No SMS copy needed`,
   );
+  lines.push(
+    seed.includeNicky
+      ? `- Nicky quote allowed: include a \`nicky_quote\` if a claim about Theo Grace would sound boastful in our own voice (brand-guide §7). Max one per email.`
+      : `- Do NOT generate a nicky_quote — return null. The operator will add one on demand from the fine-tune editor.`,
+  );
 
   return lines.join("\n");
 }

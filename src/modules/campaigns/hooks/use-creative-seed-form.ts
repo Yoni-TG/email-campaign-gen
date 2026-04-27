@@ -22,6 +22,7 @@ export interface CreativeSeedFormState {
   secondaryMessage: string;
   additionalNotes: string;
   includeSms: boolean;
+  includeNicky: boolean;
   leadValue: LeadValue;
   leadPersonalities: LeadPersonality[];
   pinnedProducts: ProductSnapshot[];
@@ -52,6 +53,7 @@ const EMPTY: CreativeSeedFormState = {
   secondaryMessage: "",
   additionalNotes: "",
   includeSms: false,
+  includeNicky: false,
   leadValue: "family_first",
   leadPersonalities: [],
   pinnedProducts: [],
@@ -71,6 +73,7 @@ function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
     pinnedSkus: state.pinnedProducts.map((p) => p.sku),
     additionalNotes: state.additionalNotes || undefined,
     includeSms: state.includeSms,
+    includeNicky: state.includeNicky,
     leadValue: state.leadValue,
     leadPersonalities: state.leadPersonalities,
     market: state.market,

@@ -1,0 +1,35 @@
+{
+  "id": "sale-promo/typography-banner",
+  "name": "Typography Banner",
+  "campaignTypes": ["sale_promo"],
+  "tags": ["text-led", "bold-offer", "no-image-hero", "site-wide"],
+  "description": "Big-typography offer hero with no operator-uploaded image — works for site-wide percent-off pushes and free-shipping moments. Followed by a 2×2 grid and a final CTA closing block.",
+  "requiredAssets": [],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "hero_typography",
+      "bind": {
+        "topline": "subject_variant.subject",
+        "headline": "body_blocks[0].title",
+        "subhead": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#",
+        "background": "literal:baby_blue"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:WHILE YOU'RE HERE" } },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

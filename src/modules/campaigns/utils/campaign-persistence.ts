@@ -5,8 +5,9 @@ import type {
   Campaign,
   CampaignStatus,
   CampaignType,
+  CandidateVariant,
   CreativeSeed,
-  FigmaResult,
+  FinalRenderResult,
   GeneratedCopy,
   ProductSnapshot,
 } from "@/lib/types";
@@ -24,8 +25,14 @@ export interface CampaignWrite {
   generatedProducts?: ProductSnapshot[] | null;
   approvedProducts?: ProductSnapshot[] | null;
   heroImagePath?: string | null;
-  figmaResult?: FigmaResult | null;
+  assetPaths?: Record<string, string> | null;
+  blockOverrides?: Record<number, Record<string, unknown>> | null;
+  candidateVariants?: CandidateVariant[] | null;
+  chosenSkeletonId?: string | null;
+  renderResult?: FinalRenderResult | null;
   error?: string | null;
+  /** Pass a Date to archive, null to unarchive. */
+  archivedAt?: Date | null;
 }
 
 export function serializeForDb(
@@ -38,7 +45,10 @@ export function serializeForDb(
   if (data.campaignType !== undefined) out.campaignType = data.campaignType;
   if (data.createdBy !== undefined) out.createdBy = data.createdBy;
   if (data.heroImagePath !== undefined) out.heroImagePath = data.heroImagePath;
+  if (data.chosenSkeletonId !== undefined)
+    out.chosenSkeletonId = data.chosenSkeletonId;
   if (data.error !== undefined) out.error = data.error;
+  if (data.archivedAt !== undefined) out.archivedAt = data.archivedAt;
 
   if (data.seed !== undefined) out.seed = JSON.stringify(data.seed);
   if (data.generatedCopy !== undefined)
@@ -57,9 +67,21 @@ export function serializeForDb(
     out.approvedProducts = data.approvedProducts
       ? JSON.stringify(data.approvedProducts)
       : null;
-  if (data.figmaResult !== undefined)
-    out.figmaResult = data.figmaResult
-      ? JSON.stringify(data.figmaResult)
+  if (data.assetPaths !== undefined)
+    out.assetPaths = data.assetPaths
+      ? JSON.stringify(data.assetPaths)
+      : null;
+  if (data.blockOverrides !== undefined)
+    out.blockOverrides = data.blockOverrides
+      ? JSON.stringify(data.blockOverrides)
+      : null;
+  if (data.candidateVariants !== undefined)
+    out.candidateVariants = data.candidateVariants
+      ? JSON.stringify(data.candidateVariants)
+      : null;
+  if (data.renderResult !== undefined)
+    out.renderResult = data.renderResult
+      ? JSON.stringify(data.renderResult)
       : null;
 
   return out;
@@ -104,10 +126,27 @@ export interface CampaignSummary {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+  archivedAt: Date | null;
 }
 
-export async function listCampaignSummaries(): Promise<CampaignSummary[]> {
+export type ListScope = "active" | "archived" | "all";
+
+// `archivedAt` is the only DB-side filter the list cares about. The
+// rest (search / type / status / sort direction) are applied in-memory
+// against the returned summaries — at human-team scale (low thousands)
+// the round-trip + JSON parse cost dwarfs any client-side iteration,
+// and keeping it server-component-friendly avoids two query paths.
+export async function listCampaignSummaries(
+  scope: ListScope = "active",
+): Promise<CampaignSummary[]> {
+  const where =
+    scope === "active"
+      ? { archivedAt: null }
+      : scope === "archived"
+        ? { NOT: { archivedAt: null } }
+        : {};
   const rows = await prisma.campaign.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -117,6 +156,7 @@ export async function listCampaignSummaries(): Promise<CampaignSummary[]> {
       createdBy: true,
       createdAt: true,
       updatedAt: true,
+      archivedAt: true,
     },
   });
   return rows.map((row) => ({

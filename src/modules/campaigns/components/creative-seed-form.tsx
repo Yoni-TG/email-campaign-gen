@@ -71,6 +71,12 @@ function InfoHint({ children }: { children: ReactNode }) {
 
 // Tooltip-wrapped chip. Used for lead-value and lead-personality pills so
 // hovering a chip explains what it shifts in the AI output.
+//
+// base-ui's TooltipTrigger render-prop spreads its own onClick (used by the
+// click-to-dismiss behavior) — we have to spread `props` FIRST, then merge
+// our chip's onClick with whatever the trigger provided. Spreading `props`
+// last would silently clobber our handler and the chip would stop responding
+// to clicks (regression caught here).
 function ChipWithTooltip({
   active,
   onClick,
@@ -88,9 +94,12 @@ function ChipWithTooltip({
         render={(props) => (
           <button
             type="button"
-            onClick={onClick}
             className={chipClass(active)}
             {...props}
+            onClick={(event) => {
+              props.onClick?.(event);
+              onClick();
+            }}
           >
             {label}
           </button>
@@ -182,6 +191,24 @@ export function CreativeSeedForm() {
               <span>Include SMS copy</span>
             </label>
           </div>
+        </div>
+
+        <div>
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-input/60 bg-muted/30 px-3.5 py-2.5 text-sm transition-colors hover:bg-muted/50">
+            <input
+              type="checkbox"
+              checked={state.includeNicky}
+              onChange={(e) => setField("includeNicky", e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input"
+            />
+            <span>
+              <span className="font-medium">Include a Nicky Hilton quote</span>
+              <span className="block text-xs text-muted-foreground">
+                Off by default — Claude generates one only when this is on.
+                You can also add one later from the fine-tune editor.
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="space-y-1.5">

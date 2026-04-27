@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import { serializeForDb } from "./campaign-persistence";
 import type {
   ApprovedCopy,
+  CandidateVariant,
   CreativeSeed,
-  FigmaResult,
+  FinalRenderResult,
   GeneratedCopy,
   ProductSnapshot,
 } from "@/lib/types";
@@ -53,14 +54,18 @@ describe("serializeForDb", () => {
       approvedCopy: null,
       generatedProducts: null,
       approvedProducts: null,
-      figmaResult: null,
+      assetPaths: null,
+      candidateVariants: null,
+      renderResult: null,
     });
     expect(out).toEqual({
       generatedCopy: null,
       approvedCopy: null,
       generatedProducts: null,
       approvedProducts: null,
-      figmaResult: null,
+      assetPaths: null,
+      candidateVariants: null,
+      renderResult: null,
     });
   });
 
@@ -95,28 +100,39 @@ describe("serializeForDb", () => {
       reviewTier: null,
       personalizationSummary: null,
     };
-    const figmaResult: FigmaResult = {
-      variants: [
-        {
-          variantName: "Mosaic Grid",
-          figmaFrameUrl: "https://figma/x",
-          thumbnailUrl: "https://thumb/x",
-        },
-      ],
+    const candidateVariants: CandidateVariant[] = [
+      {
+        skeletonId: "product-launch/hero-story-grid",
+        name: "Hero · Story · Grid",
+        rationale: null,
+        previewHtml: "<html><body>preview</body></html>",
+      },
+    ];
+    const renderResult: FinalRenderResult = {
+      skeletonId: "product-launch/hero-story-grid",
+      html: "<html><body>final</body></html>",
+      renderedAt: "2026-04-26T00:00:00.000Z",
     };
+    const assetPaths = { hero: "/uploads/c1/hero.jpg" };
 
     const out = serializeForDb({
       generatedCopy,
       approvedCopy,
       generatedProducts: [product],
       approvedProducts: [product],
-      figmaResult,
+      assetPaths,
+      candidateVariants,
+      renderResult,
     });
 
     expect(JSON.parse(out.generatedCopy as string)).toEqual(generatedCopy);
     expect(JSON.parse(out.approvedCopy as string)).toEqual(approvedCopy);
     expect(JSON.parse(out.generatedProducts as string)).toEqual([product]);
     expect(JSON.parse(out.approvedProducts as string)).toEqual([product]);
-    expect(JSON.parse(out.figmaResult as string)).toEqual(figmaResult);
+    expect(JSON.parse(out.assetPaths as string)).toEqual(assetPaths);
+    expect(JSON.parse(out.candidateVariants as string)).toEqual(
+      candidateVariants,
+    );
+    expect(JSON.parse(out.renderResult as string)).toEqual(renderResult);
   });
 });

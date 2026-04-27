@@ -1,34 +1,41 @@
-import type { Campaign, FigmaResult } from "@/lib/types";
+import type { Campaign } from "@/lib/types";
 import { updateCampaign } from "@/modules/campaigns/utils/campaign-persistence";
 
 export interface SelectVariantResult {
-  status: "completed";
-  figmaResult: FigmaResult;
+  status: "asset_upload";
+  chosenSkeletonId: string;
 }
 
+// variant_selection → asset_upload
+//
+// Records the operator's pick and advances. The chosen skeleton's
+// requiredAssets[] declares what the operator needs to upload next.
 export async function selectVariant(
   campaign: Campaign,
-  variantName: string,
+  skeletonId: string,
 ): Promise<SelectVariantResult> {
-  const figmaResult = campaign.figmaResult;
-  if (!figmaResult) {
-    throw new Error("Campaign has no figmaResult — fill-figma must run first.");
+  if (!campaign.candidateVariants) {
+    throw new Error(
+      "Campaign has no candidateVariants — render-candidates must run first.",
+    );
   }
 
-  const exists = figmaResult.variants.some((v) => v.variantName === variantName);
+  const exists = campaign.candidateVariants.some(
+    (v) => v.skeletonId === skeletonId,
+  );
   if (!exists) {
     throw new Error(
-      `Unknown variant "${variantName}". Available: ${figmaResult.variants
-        .map((v) => v.variantName)
+      `Unknown skeleton "${skeletonId}". Available: ${campaign.candidateVariants
+        .map((v) => v.skeletonId)
         .join(", ")}`,
     );
   }
 
-  const updated: FigmaResult = { ...figmaResult, selectedVariant: variantName };
   await updateCampaign(campaign.id, {
-    figmaResult: updated,
-    status: "completed",
+    chosenSkeletonId: skeletonId,
+    status: "asset_upload",
+    error: null,
   });
 
-  return { status: "completed", figmaResult: updated };
+  return { status: "asset_upload", chosenSkeletonId: skeletonId };
 }

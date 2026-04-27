@@ -27,11 +27,38 @@ model Campaign {
   generatedProducts String?  @map("generated_products")
   approvedProducts  String?  @map("approved_products")
 
+  // Legacy hero upload column. Step 4 drops it; new uploads write to
+  // assetPaths under the slot key declared by the chosen skeleton.
   heroImagePath     String?  @map("hero_image_path")
 
-  figmaResult       String?  @map("figma_result")
+  // Replaces figma_result. JSON-encoded FinalRenderResult — produced by
+  // the email-templates renderer after asset_upload completes.
+  renderResult      String?  @map("render_result")
+
+  // 3 candidate variants from rendering_candidates. JSON-encoded
+  // CandidateVariant[].
+  candidateVariants String?  @map("candidate_variants")
+
+  // Skeleton id the operator picked at variant_selection.
+  chosenSkeletonId  String?  @map("chosen_skeleton_id")
+
+  // Operator-uploaded asset URLs keyed by AssetSlot.key.
+  // JSON-encoded Record<string, string>.
+  assetPaths        String?  @map("asset_paths")
+
+  // Per-block prop overrides applied at render time on top of the
+  // bind-resolved values. Keyed by block index in the manifest.
+  // JSON-encoded Record<string, Partial<BlockProps>>. Used today for
+  // background colour fine-tuning; may grow over time.
+  blockOverrides    String?  @map("block_overrides")
 
   error             String?
+
+  // Soft-archive timestamp. Null = active (shown in the default list);
+  // non-null = archived (hidden until the operator switches to the
+  // archived view). Archive is a UI affordance — the row remains
+  // editable / openable / re-renderable; it just gets out of the way.
+  archivedAt        DateTime? @map("archived_at")
 
   @@map("campaigns")
 }

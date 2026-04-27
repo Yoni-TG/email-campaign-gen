@@ -1,0 +1,45 @@
+{
+  "id": "editorial/nicky-led",
+  "name": "Nicky-Led Edit",
+  "campaignTypes": ["editorial"],
+  "tags": ["nicky-fronted", "intimate", "quote-anchored"],
+  "description": "Nicky-fronted editorial. Lifestyle hero, Nicky pull-quote with portrait, then a curated 2×2 grid. Best for high-touch moments (limited editions, founder picks, VIP).",
+  "requiredAssets": [
+    { "key": "hero", "label": "Hero lifestyle image", "required": true },
+    { "key": "portrait", "label": "Nicky portrait", "required": false }
+  ],
+  "blocks": [
+    { "type": "logo_header", "bind": {} },
+    {
+      "type": "hero_lifestyle",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "subLabel": "literal:WITH NICKY",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    {
+      "type": "nicky_quote_module",
+      "bind": {
+        "quote": "nicky_quote.quote",
+        "response": "nicky_quote.response",
+        "portraitUrl": "assets.portrait"
+      }
+    },
+    { "type": "section_label", "bind": { "text": "literal:NICKY'S PICKS" } },
+    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "closing_block",
+      "bind": {
+        "headline": "body_blocks[1].title",
+        "body": "body_blocks[1].description",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "literal:#"
+      }
+    },
+    { "type": "footer", "bind": {} }
+  ]
+}

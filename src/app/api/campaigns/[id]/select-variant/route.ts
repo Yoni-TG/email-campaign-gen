@@ -3,7 +3,7 @@ import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { selectVariant } from "@/modules/campaigns/actions/select-variant";
 
 interface SelectVariantBody {
-  variantName?: string;
+  skeletonId?: string;
 }
 
 export async function POST(
@@ -15,15 +15,15 @@ export async function POST(
   if (!result.ok) return result.response;
 
   const body = (await request.json()) as SelectVariantBody;
-  if (typeof body.variantName !== "string" || body.variantName.length === 0) {
+  if (typeof body.skeletonId !== "string" || body.skeletonId.length === 0) {
     return NextResponse.json(
-      { error: "Missing 'variantName'" },
+      { error: "Missing 'skeletonId'" },
       { status: 400 },
     );
   }
 
   try {
-    const out = await selectVariant(result.campaign, body.variantName);
+    const out = await selectVariant(result.campaign, body.skeletonId);
     return NextResponse.json(out);
   } catch (err) {
     const message =
