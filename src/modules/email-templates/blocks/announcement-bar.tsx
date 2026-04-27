@@ -4,7 +4,7 @@ import type { AnnouncementBarProps } from "./types";
 
 export function AnnouncementBar({
   text,
-  background = "baby_blue",
+  background = "white",
   editTargets,
 }: AnnouncementBarProps) {
   return (
