@@ -153,32 +153,25 @@ export interface ClosingBlockProps {
 /**
  * One persistent footer used across every Theo Grace email. Six
  * vertical strips:
- *   1. "The Theo Grace Experience" + 4 USP icons (white background)
- *   2. "As Seen On" + press logos                (pale-blue background)
+ *   1. "The Theo Grace Experience" composite (title + 4 USP icons)
+ *   2. "As Seen On" composite (title + 6 press logos)
  *   3. Social icon row (Facebook / Instagram / TikTok / Pinterest)
  *   4. Optional disclaimer (limited-time / promo terms)
  *   5. theo grace wordmark
  *   6. Unsubscribe + Privacy + Copyright + address
  *
  * All strips render in the same component because the operator never
- * needs to compose them differently on a per-campaign basis. Asset
- * URLs are exposed as props so the brand can swap them without code
- * edits; static text (including the four USP labels and the press
- * logo set) is hardcoded to defaults but overridable.
+ * needs to compose them differently on a per-campaign basis. The
+ * Experience and As-Seen-On strips are rendered from single brand-
+ * supplied composite images (see src/modules/email-templates/assets/),
+ * so the title text + icons + labels all live in the asset rather
+ * than as separate React elements.
  */
-export interface FooterExperienceItem {
-  iconUrl: string;
-  label: string;
-}
-
-export interface FooterPressLogo {
-  url: string;
-  alt: string;
-}
-
 export interface FooterProps {
-  experience?: FooterExperienceItem[];
-  pressLogos?: FooterPressLogo[];
+  /** Path / URL to the Experience composite image. */
+  experienceImageUrl?: string;
+  /** Path / URL to the As Seen On composite image. */
+  pressLogosImageUrl?: string;
   /** Limited-time-offer disclaimer. Pass null to hide the strip. */
   disclaimer?: string | null;
   /** Optional Theo Grace wordmark image. Falls back to text rendered in FONTS.display. */

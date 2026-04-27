@@ -1,54 +1,27 @@
 import * as React from "react";
-import {
-  Column,
-  Hr,
-  Img,
-  Link,
-  Row,
-  Section,
-  Text,
-} from "@react-email/components";
+import { Hr, Img, Link, Section, Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
-import type {
-  FooterExperienceItem,
-  FooterPressLogo,
-  FooterProps,
-} from "./types";
+import type { FooterProps } from "./types";
 
-// ─── Brand defaults (overridable via props) ─────────────────────────────────
+// ─── Asset URL resolution ──────────────────────────────────────────────────
 //
-// These are the brand's canonical footer assets. Asset URLs are placeholders
-// that should resolve to real Theo Grace CDN paths once the brand uploads
-// them. Until then, swap them via the `experience` / `pressLogos` /
-// `logoImageUrl` props or replace them in this file.
+// Source images live at src/modules/email-templates/assets/ and are
+// copied to public/email-assets/ at build time so Next.js can serve
+// them. For dev preview at /blocks the relative path resolves under
+// the same origin. For production sends, set
+// NEXT_PUBLIC_EMAIL_ASSETS_BASE_URL to your CDN (e.g.
+// https://cdn.theograce.com) — the renderer will produce absolute
+// URLs that email clients can fetch.
 
-const DEFAULT_EXPERIENCE: FooterExperienceItem[] = [
-  {
-    iconUrl: "https://theograce.com/email-assets/footer/free-shipping.png",
-    label: "Free Shipping",
-  },
-  {
-    iconUrl: "https://theograce.com/email-assets/footer/100-day-returns.png",
-    label: "100-Day Returns",
-  },
-  {
-    iconUrl: "https://theograce.com/email-assets/footer/2-year-warranty.png",
-    label: "2-Year Warranty",
-  },
-  {
-    iconUrl: "https://theograce.com/email-assets/footer/free-engraving.png",
-    label: "Free Engraving",
-  },
-];
+function asset(path: string): string {
+  const base = process.env.NEXT_PUBLIC_EMAIL_ASSETS_BASE_URL ?? "";
+  return `${base}${path}`;
+}
 
-const DEFAULT_PRESS_LOGOS: FooterPressLogo[] = [
-  { url: "https://theograce.com/email-assets/press/cosmopolitan.png", alt: "Cosmopolitan" },
-  { url: "https://theograce.com/email-assets/press/popsugar.png", alt: "Popsugar" },
-  { url: "https://theograce.com/email-assets/press/forbes.png", alt: "Forbes" },
-  { url: "https://theograce.com/email-assets/press/daily.png", alt: "Daily" },
-  { url: "https://theograce.com/email-assets/press/the-knot.png", alt: "The Knot" },
-  { url: "https://theograce.com/email-assets/press/today.png", alt: "TODAY" },
-];
+const DEFAULT_EXPERIENCE_IMAGE = asset("/email-assets/tgr-experience.png");
+const DEFAULT_PRESS_LOGOS_IMAGE = asset("/email-assets/footer-as-seen.png");
+
+// ─── Static brand text ─────────────────────────────────────────────────────
 
 const DEFAULT_DISCLAIMER =
   "Discount applied at checkout. This is a limited time offer. Free gift and " +
@@ -87,11 +60,16 @@ const SOCIAL_LINKS = [
 
 const COPYRIGHT_START_YEAR = 2006;
 
+// Width of the composite strip images. The container is 640px; we
+// pad by 24px on each side, so 560 leaves a small breathing margin
+// and stays within the safe content area for every major email client.
+const STRIP_IMAGE_WIDTH = 560;
+
 // ─── Component ─────────────────────────────────────────────────────────────
 
 export function Footer({
-  experience = DEFAULT_EXPERIENCE,
-  pressLogos = DEFAULT_PRESS_LOGOS,
+  experienceImageUrl = DEFAULT_EXPERIENCE_IMAGE,
+  pressLogosImageUrl = DEFAULT_PRESS_LOGOS_IMAGE,
   disclaimer = DEFAULT_DISCLAIMER,
   logoImageUrl,
   privacyHref = "https://theograce.com/privacy",
@@ -99,110 +77,50 @@ export function Footer({
   editTargets,
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
-  const pressTopRow = pressLogos.slice(0, 3);
-  const pressBottomRow = pressLogos.slice(3, 6);
 
   return (
     <>
-      {/* 1. Experience strip — white */}
+      {/* 1. Experience composite — white */}
       <Section
-        style={{ backgroundColor: COLORS.white, padding: "32px 24px 28px" }}
+        style={{
+          backgroundColor: COLORS.white,
+          padding: "32px 24px",
+          textAlign: "center",
+        }}
       >
-        <Text
+        <Img
+          src={experienceImageUrl}
+          alt="The Theo Grace Experience: Free Shipping, 100-Day Returns, 2-Year Warranty, Free Engraving"
+          width={STRIP_IMAGE_WIDTH}
           style={{
-            margin: "0 0 24px 0",
-            fontFamily: FONTS.display,
-            fontSize: "22px",
-            color: COLORS.black,
-            textAlign: "center",
-            letterSpacing: "0.01em",
+            display: "block",
+            margin: "0 auto",
+            maxWidth: "100%",
+            height: "auto",
           }}
-        >
-          The Theo Grace Experience
-        </Text>
-        <Row>
-          {experience.map((item, idx) => (
-            <Column
-              key={`${item.label}-${idx}`}
-              align="center"
-              style={{ verticalAlign: "top" }}
-            >
-              <Img
-                src={item.iconUrl}
-                alt={item.label}
-                width={48}
-                height={48}
-                style={{ display: "block", margin: "0 auto 8px" }}
-              />
-              <Text
-                style={{
-                  margin: 0,
-                  fontFamily: FONTS.body,
-                  fontSize: "13px",
-                  color: COLORS.black,
-                  textAlign: "center",
-                }}
-              >
-                {item.label}
-              </Text>
-            </Column>
-          ))}
-        </Row>
+        />
       </Section>
 
-      {/* 2. As Seen On — pale blue */}
+      {/* 2. As Seen On composite — pale blue */}
       <Section
         data-edit-target={editTargets?.background}
-        style={{ backgroundColor: COLORS.paleBlue, padding: "32px 24px 16px" }}
+        style={{
+          backgroundColor: COLORS.paleBlue,
+          padding: "32px 24px 16px",
+          textAlign: "center",
+        }}
       >
-        <Text
+        <Img
+          src={pressLogosImageUrl}
+          alt="As Seen On: Cosmopolitan, Popsugar, Forbes, Daily, The Knot, TODAY"
+          width={STRIP_IMAGE_WIDTH}
           style={{
-            margin: "0 0 20px 0",
-            fontFamily: FONTS.display,
-            fontSize: "22px",
-            color: COLORS.black,
-            textAlign: "center",
-            letterSpacing: "0.01em",
+            display: "block",
+            margin: "0 auto",
+            maxWidth: "100%",
+            height: "auto",
           }}
-        >
-          As Seen On
-        </Text>
-        {pressTopRow.length > 0 && (
-          <Row style={{ marginBottom: pressBottomRow.length > 0 ? "16px" : 0 }}>
-            {pressTopRow.map((logo, idx) => (
-              <Column
-                key={`top-${idx}`}
-                align="center"
-                style={{ verticalAlign: "middle" }}
-              >
-                <Img
-                  src={logo.url}
-                  alt={logo.alt}
-                  height={22}
-                  style={{ display: "block", margin: "0 auto" }}
-                />
-              </Column>
-            ))}
-          </Row>
-        )}
-        {pressBottomRow.length > 0 && (
-          <Row>
-            {pressBottomRow.map((logo, idx) => (
-              <Column
-                key={`bottom-${idx}`}
-                align="center"
-                style={{ verticalAlign: "middle" }}
-              >
-                <Img
-                  src={logo.url}
-                  alt={logo.alt}
-                  height={22}
-                  style={{ display: "block", margin: "0 auto" }}
-                />
-              </Column>
-            ))}
-          </Row>
-        )}
+        />
       </Section>
 
       <Section style={{ backgroundColor: COLORS.paleBlue, padding: "0 24px" }}>
