@@ -158,10 +158,64 @@ describe("listEmailCampaigns", () => {
 describe("getCampaignValues", () => {
   it("returns [] without calling the API when no ids are provided", async () => {
     const fetchImpl = vi.fn();
-    const client = new KlaviyoClient({ apiKey: "pk_test", fetchImpl });
+    const client = new KlaviyoClient({
+      apiKey: "pk_test",
+      fetchImpl,
+      conversionMetricId: "metric_placed_order",
+    });
     const out = await client.getCampaignValues([], WINDOW);
     expect(out).toEqual([]);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("auto-discovers Placed Order metric when no id is configured", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: [{ id: "metric_auto_discovered", attributes: { name: "Placed Order" } }],
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: {
+              attributes: {
+                results: [
+                  {
+                    groupings: { campaign_id: "c1" },
+                    statistics: { recipients: 100 },
+                  },
+                ],
+              },
+            },
+          }),
+          { status: 200 },
+        ),
+      );
+
+    const client = new KlaviyoClient({ apiKey: "pk_test", fetchImpl });
+    const out = await client.getCampaignValues(["c1"], WINDOW);
+    expect(out).toHaveLength(1);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+
+    const valuesBody = JSON.parse(fetchImpl.mock.calls[1][1].body);
+    expect(valuesBody.data.attributes.conversion_metric_id).toBe(
+      "metric_auto_discovered",
+    );
+  });
+
+  it("throws KlaviyoConfigError when no Placed Order metric exists", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: [] }), { status: 200 }),
+    );
+    const client = new KlaviyoClient({ apiKey: "pk_test", fetchImpl });
+    await expect(client.getCampaignValues(["c1"], WINDOW)).rejects.toThrow(
+      /Could not auto-discover/,
+    );
   });
 
   it("computes derived rates from raw counts", async () => {
@@ -187,7 +241,11 @@ describe("getCampaignValues", () => {
         },
       }),
     );
-    const client = new KlaviyoClient({ apiKey: "pk_test", fetchImpl });
+    const client = new KlaviyoClient({
+      apiKey: "pk_test",
+      fetchImpl,
+      conversionMetricId: "metric_placed_order",
+    });
     const [stats] = await client.getCampaignValues(["c1"], WINDOW);
 
     expect(stats.campaignId).toBe("c1");
@@ -212,7 +270,11 @@ describe("getCampaignValues", () => {
         },
       }),
     );
-    const client = new KlaviyoClient({ apiKey: "pk_test", fetchImpl });
+    const client = new KlaviyoClient({
+      apiKey: "pk_test",
+      fetchImpl,
+      conversionMetricId: "metric_placed_order",
+    });
     const [stats] = await client.getCampaignValues(["c1"], WINDOW);
     expect(stats.openRate).toBe(0);
     expect(stats.clickRate).toBe(0);

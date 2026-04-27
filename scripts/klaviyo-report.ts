@@ -26,6 +26,7 @@ interface Args {
   topN: number;
   bottomN: number;
   minRecipients: number;
+  listMetrics: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -35,6 +36,7 @@ function parseArgs(argv: string[]): Args {
     topN: 10,
     bottomN: 5,
     minRecipients: 100,
+    listMetrics: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -60,6 +62,9 @@ function parseArgs(argv: string[]): Args {
         out.minRecipients = Number(next);
         i++;
         break;
+      case "--list-metrics":
+        out.listMetrics = true;
+        break;
       case "--help":
       case "-h":
         printHelp();
@@ -83,12 +88,25 @@ function printHelp(): void {
       "  --top <n>              Rows in each top-N table (default 10)",
       "  --bottom <n>           Rows in the bottom-N table (default 5)",
       "  --min-recipients <n>   Drop sends below this size before ranking (default 100)",
+      "  --list-metrics         Print every metric in the workspace (id, name, integration) and exit",
     ].join("\n"),
   );
 }
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+  const client = new KlaviyoClient();
+
+  if (args.listMetrics) {
+    const metrics = await client.listMetrics();
+    console.log(`[klaviyo-report] ${metrics.length} metrics in this workspace:`);
+    const sorted = [...metrics].sort((a, b) => a.name.localeCompare(b.name));
+    for (const m of sorted) {
+      const tag = m.integration ? ` (${m.integration})` : "";
+      console.log(`  ${m.id}  ${m.name}${tag}`);
+    }
+    return;
+  }
 
   const end = new Date();
   const start = new Date(end.getTime() - args.days * 86400_000);
@@ -97,8 +115,6 @@ async function main(): Promise<void> {
   console.log(
     `[klaviyo-report] window: ${start.toISOString()} → ${end.toISOString()}`,
   );
-
-  const client = new KlaviyoClient();
 
   console.log("[klaviyo-report] listing campaigns…");
   const campaigns = await client.listEmailCampaigns(window);
