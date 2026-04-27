@@ -69,8 +69,15 @@ export async function uploadAsset(
     .filter((a) => a.required && !assetPaths[a.key])
     .map((a) => a.key);
 
+  // Don't regress the status: if a previous upload in the same batch
+  // already advanced us to `rendering_final` (last required slot filled)
+  // and the operator is now uploading an optional slot, keep us in
+  // `rendering_final` — going back to `asset_upload` would block the
+  // render-final trigger that fires after the upload loop completes.
   const nextStatus: UploadAssetResult["status"] =
-    pendingRequired.length === 0 ? "rendering_final" : "asset_upload";
+    pendingRequired.length === 0 || campaign.status === "rendering_final"
+      ? "rendering_final"
+      : "asset_upload";
 
   await updateCampaign(campaign.id, {
     assetPaths,
