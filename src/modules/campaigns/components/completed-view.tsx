@@ -117,20 +117,16 @@ function FinalEmailCard({
           <CopyHtmlButton html={render.html} />
         </div>
       </header>
-      <div className="bg-muted/40 px-4 py-8 sm:px-8 sm:py-10">
-        <div className="mx-auto max-w-[680px]">
-          {editableHtml ? (
-            <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
-          ) : (
-            <AutoSizeIframe
-              title={`final-${render.skeletonId}`}
-              srcDoc={render.html}
-              className="block w-full rounded-lg border border-border/60 bg-white shadow-sm"
-              minHeight={900}
-            />
-          )}
-        </div>
-      </div>
+      {editableHtml ? (
+        <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
+      ) : (
+        <AutoSizeIframe
+          title={`final-${render.skeletonId}`}
+          srcDoc={render.html}
+          className="block w-full bg-white"
+          minHeight={900}
+        />
+      )}
     </section>
   );
 }

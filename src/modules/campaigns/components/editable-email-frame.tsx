@@ -89,7 +89,7 @@ export function EditableEmailFrame({ campaign, editableHtml }: Props) {
         scrolling="no"
         onLoad={measure}
         style={{ height: `${contentHeight}px`, overflow: "hidden" }}
-        className="block w-full rounded-lg border border-border bg-white"
+        className="block w-full bg-white"
       />
       {edit ? (
         <EditPopover
