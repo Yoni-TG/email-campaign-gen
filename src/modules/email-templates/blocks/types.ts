@@ -150,9 +150,43 @@ export interface ClosingBlockProps {
   editTargets?: EditTargets;
 }
 
+/**
+ * One persistent footer used across every Theo Grace email. Six
+ * vertical strips:
+ *   1. "The Theo Grace Experience" + 4 USP icons (white background)
+ *   2. "As Seen On" + press logos                (pale-blue background)
+ *   3. Social icon row (Facebook / Instagram / TikTok / Pinterest)
+ *   4. Optional disclaimer (limited-time / promo terms)
+ *   5. theo grace wordmark
+ *   6. Unsubscribe + Privacy + Copyright + address
+ *
+ * All strips render in the same component because the operator never
+ * needs to compose them differently on a per-campaign basis. Asset
+ * URLs are exposed as props so the brand can swap them without code
+ * edits; static text (including the four USP labels and the press
+ * logo set) is hardcoded to defaults but overridable.
+ */
+export interface FooterExperienceItem {
+  iconUrl: string;
+  label: string;
+}
+
+export interface FooterPressLogo {
+  url: string;
+  alt: string;
+}
+
 export interface FooterProps {
-  legalText?: string;
-  background?: BlockBackground;
+  experience?: FooterExperienceItem[];
+  pressLogos?: FooterPressLogo[];
+  /** Limited-time-offer disclaimer. Pass null to hide the strip. */
+  disclaimer?: string | null;
+  /** Optional Theo Grace wordmark image. Falls back to text rendered in FONTS.display. */
+  logoImageUrl?: string;
+  /** Privacy Policy link target. Defaults to https://theograce.com/privacy. */
+  privacyHref?: string;
+  /** Postal address shown in the legal strip. */
+  address?: string;
   editTargets?: EditTargets;
 }
 

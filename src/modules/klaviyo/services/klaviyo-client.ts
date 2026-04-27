@@ -67,10 +67,21 @@ export class KlaviyoClient {
       headers.set("Content-Type", "application/vnd.api+json");
     }
 
-    const response = await this.fetchImpl(`${BASE_URL}${path}`, {
-      ...init,
-      headers,
-    });
+    // Klaviyo can take its time on large responses (e.g. /api/templates
+    // returns full HTML bodies inline by default). Cap at 60s so we
+    // fail fast on hangs instead of letting the script run forever.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60_000);
+    let response: Response;
+    try {
+      response = await this.fetchImpl(`${BASE_URL}${path}`, {
+        ...init,
+        headers,
+        signal: init.signal ?? controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");
@@ -209,15 +220,21 @@ export class KlaviyoClient {
    * template-extraction script to inventory past designs before
    * picking which to translate into React-Email blocks.
    */
-  async listTemplates(): Promise<KlaviyoTemplateSummary[]> {
+  async listTemplates(
+    options: { onPage?: (loaded: number) => void } = {},
+  ): Promise<KlaviyoTemplateSummary[]> {
     let cursor: string | null = null;
     const out: KlaviyoTemplateSummary[] = [];
     do {
-      const params = new URLSearchParams();
+      // Sparse fieldset — exclude `html` and `text` from the list
+      // response. Without this, every template's full rendered HTML is
+      // inlined into the list payload, which can balloon to tens of MB
+      // and hang the socket. We only need metadata for `--list`.
+      const params = new URLSearchParams({
+        "fields[template]": "name,editor_type,created,updated",
+      });
       if (cursor) params.set("page[cursor]", cursor);
-      const path = params.toString()
-        ? `/api/templates?${params.toString()}`
-        : `/api/templates`;
+      const path = `/api/templates?${params.toString()}`;
       const response = await this.request<TemplatesListResponse>(path);
       for (const t of response.data ?? []) {
         out.push({
@@ -228,6 +245,7 @@ export class KlaviyoClient {
           updatedAt: t.attributes?.updated ?? null,
         });
       }
+      options.onPage?.(out.length);
       cursor = extractCursor(response.links?.next);
     } while (cursor);
     return out;

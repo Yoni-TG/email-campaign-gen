@@ -403,7 +403,14 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
   {
     id: "footer",
     label: "footer",
-    height: 280,
+    height: 880,
     jsx: <Footer />,
+  },
+  {
+    id: "footer-no-disclaimer",
+    label: "footer",
+    variant: "disclaimer hidden (editorial sends)",
+    height: 760,
+    jsx: <Footer disclaimer={null} />,
   },
 ];
