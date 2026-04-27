@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
-    "report:klaviyo": "tsx scripts/klaviyo-report.ts"
+    "report:klaviyo": "tsx scripts/klaviyo-report.ts",
+    "uc:klaviyo": "tsx scripts/klaviyo-universal-content.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -43,6 +44,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/formidable": "^3.5.1",
+    "@types/jsdom": "^28.0.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -205,6 +205,130 @@ export class KlaviyoClient {
   }
 
   /**
+   * Lists every template in the workspace. Paginated. Used by the
+   * template-extraction script to inventory past designs before
+   * picking which to translate into React-Email blocks.
+   */
+  async listTemplates(): Promise<KlaviyoTemplateSummary[]> {
+    let cursor: string | null = null;
+    const out: KlaviyoTemplateSummary[] = [];
+    do {
+      const params = new URLSearchParams();
+      if (cursor) params.set("page[cursor]", cursor);
+      const path = params.toString()
+        ? `/api/templates?${params.toString()}`
+        : `/api/templates`;
+      const response = await this.request<TemplatesListResponse>(path);
+      for (const t of response.data ?? []) {
+        out.push({
+          id: t.id,
+          name: t.attributes?.name ?? "",
+          editor: t.attributes?.editor_type ?? "UNKNOWN",
+          createdAt: t.attributes?.created ?? null,
+          updatedAt: t.attributes?.updated ?? null,
+        });
+      }
+      cursor = extractCursor(response.links?.next);
+    } while (cursor);
+    return out;
+  }
+
+  /**
+   * Fetches one template's full payload, including the rendered HTML
+   * (`html`), the plain-text fallback (`text`), and — for templates
+   * built in the drag-and-drop editor — the structured `definition`
+   * block tree if Klaviyo exposes it on this endpoint.
+   */
+  async getTemplate(id: string): Promise<KlaviyoTemplateFull> {
+    const response = await this.request<TemplateGetResponse>(
+      `/api/templates/${id}`,
+    );
+    const t = response.data;
+    if (!t) {
+      throw new KlaviyoApiError(404, "", `Template ${id} not in response`);
+    }
+    return {
+      id: t.id,
+      name: t.attributes?.name ?? "",
+      editor: t.attributes?.editor_type ?? "UNKNOWN",
+      html: t.attributes?.html ?? "",
+      text: t.attributes?.text ?? null,
+      // The drag-and-drop block tree is on `definition` for templates
+      // edited in the visual editor. Older HTML templates won't have it.
+      definition: t.attributes?.definition ?? null,
+      createdAt: t.attributes?.created ?? null,
+      updatedAt: t.attributes?.updated ?? null,
+    };
+  }
+
+  /**
+   * Lists every Universal Content block in the workspace. These are
+   * the brand's saved reusable blocks from the Klaviyo drag-and-drop
+   * editor — the closest thing to a brand component library.
+   * Block types currently supported by Klaviyo: button, drop_shadow,
+   * horizontal_rule, html, image, spacer, text.
+   */
+  async listUniversalContent(): Promise<KlaviyoUniversalContentSummary[]> {
+    let cursor: string | null = null;
+    const out: KlaviyoUniversalContentSummary[] = [];
+    do {
+      const params = new URLSearchParams();
+      if (cursor) params.set("page[cursor]", cursor);
+      const path = params.toString()
+        ? `/api/template-universal-content?${params.toString()}`
+        : `/api/template-universal-content`;
+      const response = await this.request<UniversalContentListResponse>(path);
+      for (const block of response.data ?? []) {
+        const def = block.attributes?.definition as
+          | { content_type?: string; type?: string }
+          | null
+          | undefined;
+        out.push({
+          id: block.id,
+          name: block.attributes?.name ?? "",
+          // Klaviyo nests the content_type / type inside `definition`.
+          // Both keys are seen across revisions; pick whichever is set.
+          type: (def?.content_type ?? def?.type ?? "unknown").toLowerCase(),
+          createdAt: block.attributes?.created ?? null,
+          updatedAt: block.attributes?.updated ?? null,
+        });
+      }
+      cursor = extractCursor(response.links?.next);
+    } while (cursor);
+    return out;
+  }
+
+  /**
+   * Fetches one Universal Content block's full payload, including the
+   * structured `definition` object. For atomic blocks (button, image,
+   * text, spacer, horizontal_rule, drop_shadow) the `definition`
+   * carries the typed props directly. For `html` blocks the
+   * `definition.data.content` carries raw HTML that needs the
+   * template parser to extract structure.
+   */
+  async getUniversalContent(id: string): Promise<KlaviyoUniversalContentFull> {
+    const response = await this.request<UniversalContentGetResponse>(
+      `/api/template-universal-content/${id}`,
+    );
+    const block = response.data;
+    if (!block) {
+      throw new KlaviyoApiError(404, "", `Universal content ${id} not in response`);
+    }
+    const def = block.attributes?.definition as
+      | { content_type?: string; type?: string }
+      | null
+      | undefined;
+    return {
+      id: block.id,
+      name: block.attributes?.name ?? "",
+      type: (def?.content_type ?? def?.type ?? "unknown").toLowerCase(),
+      definition: block.attributes?.definition ?? null,
+      createdAt: block.attributes?.created ?? null,
+      updatedAt: block.attributes?.updated ?? null,
+    };
+  }
+
+  /**
    * Fetches per-campaign aggregate statistics. Klaviyo's campaign-values-
    * reports endpoint accepts a list of campaign ids and statistic keys,
    * and returns one row per campaign.
@@ -385,4 +509,78 @@ interface CampaignValuesResponse {
       results?: CampaignValuesResultRow[];
     };
   };
+}
+
+// ─── Templates ──────────────────────────────────────────────────────────
+
+export interface KlaviyoTemplateSummary {
+  id: string;
+  name: string;
+  editor: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface KlaviyoTemplateFull extends KlaviyoTemplateSummary {
+  html: string;
+  text: string | null;
+  /** Structured block tree for drag-and-drop templates; null for raw HTML ones. */
+  definition: unknown;
+}
+
+interface TemplateAttributes {
+  name?: string;
+  editor_type?: string;
+  html?: string;
+  text?: string | null;
+  definition?: unknown;
+  created?: string | null;
+  updated?: string | null;
+}
+
+interface TemplatesListResponse {
+  data?: Array<{ id: string; attributes?: TemplateAttributes }>;
+  links?: { next?: string };
+}
+
+interface TemplateGetResponse {
+  data?: { id: string; attributes?: TemplateAttributes };
+}
+
+// ─── Universal Content (saved reusable blocks) ───────────────────────────
+
+export interface KlaviyoUniversalContentSummary {
+  id: string;
+  name: string;
+  /** button | image | text | html | spacer | horizontal_rule | drop_shadow | unknown */
+  type: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface KlaviyoUniversalContentFull
+  extends KlaviyoUniversalContentSummary {
+  /**
+   * Klaviyo's structured `definition` object. Shape varies by block
+   * type; consumers narrow on `type` before reading. Loosely typed
+   * at this boundary because Klaviyo's exact shape is workspace-
+   * dependent.
+   */
+  definition: unknown;
+}
+
+interface UniversalContentAttributes {
+  name?: string;
+  definition?: unknown;
+  created?: string | null;
+  updated?: string | null;
+}
+
+interface UniversalContentListResponse {
+  data?: Array<{ id: string; attributes?: UniversalContentAttributes }>;
+  links?: { next?: string };
+}
+
+interface UniversalContentGetResponse {
+  data?: { id: string; attributes?: UniversalContentAttributes };
 }
