@@ -3,10 +3,20 @@ import {
   KlaviyoApiError,
   KlaviyoConfigError,
 } from "@/modules/klaviyo/services/klaviyo-client";
-import { syncKlaviyoMetrics } from "@/modules/klaviyo/services/metric-sync";
+import { syncWinningSubjects } from "@/modules/klaviyo/services/winners-sync";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * External-trigger refresh of `winning-subjects.json`. Optional —
+ * the in-app lazy refresh inside `loadWinningSubjects()` keeps the
+ * file fresh on its own. This route exists so a deployment with an
+ * external scheduler (k8s CronJob, GitHub Action, Vercel Cron) can
+ * force a refresh on its own cadence, or so an operator can curl
+ * the endpoint to update on demand.
+ *
+ * Auth: `Authorization: Bearer ${KLAVIYO_SYNC_SECRET}`.
+ */
 export async function POST(request: Request): Promise<Response> {
   const expected = process.env.KLAVIYO_SYNC_SECRET;
   if (!expected) {
@@ -22,7 +32,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const result = await syncKlaviyoMetrics();
+    const result = await syncWinningSubjects();
     return NextResponse.json(result);
   } catch (err) {
     if (err instanceof KlaviyoConfigError) {

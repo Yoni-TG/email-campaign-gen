@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
   CAMPAIGN_TYPE_LABELS,
@@ -82,19 +82,86 @@ export function loadFewShotExamples(): FewShotExample[] {
   return fewShotCache;
 }
 
+/** Re-read the file when it's newer than the cached copy. */
+let winningSubjectsCacheMtime: number | null = null;
+/** Files older than this trigger a background refresh. */
+const WINNERS_MAX_AGE_MS = 30 * 86400_000;
+/** Module-level guard so concurrent loads share one in-flight refresh. */
+let backgroundRefreshInFlight: Promise<unknown> | null = null;
+
 export function loadWinningSubjects(): WinningSubject[] {
-  if (winningSubjectsCache !== null) return winningSubjectsCache;
+  const absolutePath = process.env.WINNERS_PATH
+    ? process.env.WINNERS_PATH.startsWith("/")
+      ? process.env.WINNERS_PATH
+      : join(process.cwd(), process.env.WINNERS_PATH)
+    : join(process.cwd(), WINNING_SUBJECTS_PATH);
+
+  let mtimeMs: number | null = null;
   try {
-    const raw = readFileSync(
-      join(process.cwd(), WINNING_SUBJECTS_PATH),
-      "utf-8",
-    );
-    winningSubjectsCache = JSON.parse(raw) as WinningSubject[];
+    mtimeMs = statSync(absolutePath).mtimeMs;
   } catch {
-    // Optional artefact — absent on fresh checkouts and in unit tests.
+    // File doesn't exist yet. Kick off a refresh so the next call has data,
+    // but serve [] today (the prompt will skip the section).
+    triggerBackgroundRefresh();
     winningSubjectsCache = [];
+    winningSubjectsCacheMtime = null;
+    return winningSubjectsCache;
   }
-  return winningSubjectsCache;
+
+  // Re-read on stale cache.
+  if (
+    winningSubjectsCache === null ||
+    winningSubjectsCacheMtime === null ||
+    mtimeMs > winningSubjectsCacheMtime
+  ) {
+    try {
+      const raw = readFileSync(absolutePath, "utf-8");
+      winningSubjectsCache = JSON.parse(raw) as WinningSubject[];
+      winningSubjectsCacheMtime = mtimeMs;
+      // The system prompt embeds these — invalidate it too.
+      systemPromptCache = null;
+    } catch {
+      winningSubjectsCache = [];
+      winningSubjectsCacheMtime = mtimeMs;
+    }
+  }
+
+  // Lazy refresh: if the file is older than 30 days, fire off a background
+  // regeneration. Caller still gets whatever's in the file today.
+  if (Date.now() - mtimeMs > WINNERS_MAX_AGE_MS) {
+    triggerBackgroundRefresh();
+  }
+
+  return winningSubjectsCache!;
+}
+
+/**
+ * Fire-and-forget — never throw, never block. Klaviyo failures get
+ * logged but don't surface to the request path. Single-flight guard
+ * means N concurrent generations → 1 refresh.
+ */
+function triggerBackgroundRefresh(): void {
+  if (backgroundRefreshInFlight) return;
+  if (!process.env.KLAVIYO_API_KEY) return; // no creds → no refresh
+  backgroundRefreshInFlight = import(
+    "@/modules/klaviyo/services/winners-sync"
+  )
+    .then(({ syncWinningSubjects }) => syncWinningSubjects())
+    .then((result) => {
+      console.log(
+        `[winners-refresh] regenerated ${result.path} ` +
+          `(${result.winnersWritten} winners from ${result.campaignsScanned} campaigns)`,
+      );
+    })
+    .catch((err) => {
+      console.warn(
+        "[winners-refresh] failed (cached file still served):",
+        err instanceof Error ? err.message : String(err),
+      );
+    })
+    .finally(() => {
+      backgroundRefreshInFlight = null;
+    });
 }
 
 // ─── System prompt (stable → cacheable) ─────────────────────────────────────
@@ -294,5 +361,6 @@ export function __resetPromptCaches(): void {
   brandGuideCache = null;
   fewShotCache = null;
   winningSubjectsCache = null;
+  winningSubjectsCacheMtime = null;
   systemPromptCache = null;
 }
