@@ -53,11 +53,15 @@ export function CampaignList({ groups, emptyState }: CampaignListProps) {
 
 function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
   const archived = campaign.archivedAt !== null;
+  // The menu lives as a sibling of the Link, not inside it — nesting a
+  // <button> inside an <a> is invalid HTML and causes the parent link
+  // to navigate even after the menu's click handlers stopPropagate
+  // (the popover opens, the route change unmounts it, you see a flicker).
   return (
     <li className="group relative">
       <Link
         href={`/campaigns/${campaign.id}`}
-        className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 pr-2 shadow-sm transition-colors hover:bg-muted/40"
+        className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 pr-24 shadow-sm transition-colors hover:bg-muted/40"
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -77,10 +81,12 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <StatusBadgeWithTooltip status={campaign.status} />
-          <CampaignRowMenu campaignId={campaign.id} archived={archived} />
           <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground" />
         </div>
       </Link>
+      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+        <CampaignRowMenu campaignId={campaign.id} archived={archived} />
+      </div>
     </li>
   );
 }

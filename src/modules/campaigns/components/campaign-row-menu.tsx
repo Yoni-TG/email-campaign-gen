@@ -66,12 +66,6 @@ export function CampaignRowMenu({ campaignId, archived }: Props) {
             type="button"
             aria-label="Campaign actions"
             disabled={pending}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              props.onClick?.(e);
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50"
           >
             <MoreHorizontal className="h-4 w-4" />
@@ -79,21 +73,11 @@ export function CampaignRowMenu({ campaignId, archived }: Props) {
         )}
       />
       <DropdownMenuContent align="end" sideOffset={4} className="min-w-44">
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            void copyLink();
-          }}
-        >
+        <DropdownMenuItem onClick={() => void copyLink()}>
           <LinkIcon className="h-3.5 w-3.5" />
           Copy link
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            void toggleArchive();
-          }}
-        >
+        <DropdownMenuItem onClick={() => void toggleArchive()}>
           {archived ? (
             <>
               <ArchiveRestore className="h-3.5 w-3.5" />
