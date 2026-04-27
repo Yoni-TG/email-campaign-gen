@@ -60,5 +60,6 @@ export function parseCampaign(row: DbCampaign): Campaign {
       ? (JSON.parse(row.renderResult) as FinalRenderResult)
       : null,
     error: row.error,
+    archivedAt: row.archivedAt,
   };
 }

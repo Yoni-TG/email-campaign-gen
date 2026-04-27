@@ -54,5 +54,11 @@ model Campaign {
 
   error             String?
 
+  // Soft-archive timestamp. Null = active (shown in the default list);
+  // non-null = archived (hidden until the operator switches to the
+  // archived view). Archive is a UI affordance — the row remains
+  // editable / openable / re-renderable; it just gets out of the way.
+  archivedAt        DateTime? @map("archived_at")
+
   @@map("campaigns")
 }

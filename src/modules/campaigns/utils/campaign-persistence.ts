@@ -31,6 +31,8 @@ export interface CampaignWrite {
   chosenSkeletonId?: string | null;
   renderResult?: FinalRenderResult | null;
   error?: string | null;
+  /** Pass a Date to archive, null to unarchive. */
+  archivedAt?: Date | null;
 }
 
 export function serializeForDb(
@@ -46,6 +48,7 @@ export function serializeForDb(
   if (data.chosenSkeletonId !== undefined)
     out.chosenSkeletonId = data.chosenSkeletonId;
   if (data.error !== undefined) out.error = data.error;
+  if (data.archivedAt !== undefined) out.archivedAt = data.archivedAt;
 
   if (data.seed !== undefined) out.seed = JSON.stringify(data.seed);
   if (data.generatedCopy !== undefined)
@@ -123,10 +126,27 @@ export interface CampaignSummary {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+  archivedAt: Date | null;
 }
 
-export async function listCampaignSummaries(): Promise<CampaignSummary[]> {
+export type ListScope = "active" | "archived" | "all";
+
+// `archivedAt` is the only DB-side filter the list cares about. The
+// rest (search / type / status / sort direction) are applied in-memory
+// against the returned summaries — at human-team scale (low thousands)
+// the round-trip + JSON parse cost dwarfs any client-side iteration,
+// and keeping it server-component-friendly avoids two query paths.
+export async function listCampaignSummaries(
+  scope: ListScope = "active",
+): Promise<CampaignSummary[]> {
+  const where =
+    scope === "active"
+      ? { archivedAt: null }
+      : scope === "archived"
+        ? { NOT: { archivedAt: null } }
+        : {};
   const rows = await prisma.campaign.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -136,6 +156,7 @@ export async function listCampaignSummaries(): Promise<CampaignSummary[]> {
       createdBy: true,
       createdAt: true,
       updatedAt: true,
+      archivedAt: true,
     },
   });
   return rows.map((row) => ({

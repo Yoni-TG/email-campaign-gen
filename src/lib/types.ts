@@ -397,4 +397,6 @@ export interface Campaign {
   /** Final HTML render produced after asset_upload. Served at /campaigns/[id]/preview/[variantId]. */
   renderResult: FinalRenderResult | null;
   error: string | null;
+  /** Soft-archive timestamp. Null = active. */
+  archivedAt: Date | null;
 }
