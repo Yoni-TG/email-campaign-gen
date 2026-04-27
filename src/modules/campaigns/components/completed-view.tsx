@@ -14,6 +14,7 @@ import type {
   FinalRenderResult,
   ProductSnapshot,
 } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   formatPrice,
@@ -27,12 +28,12 @@ import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 import { EditableEmailFrame } from "./editable-email-frame";
 
-// Email-first layout. The rendered email is the page's hero — full-width,
-// dominant — with all action affordances (Copy HTML, sharable preview)
-// pinned to its top toolbar. Brief / approved copy / products are
-// collapsed into a single Reference section below the email, default
-// closed. The campaign name + status already live in the page header
-// (app/campaigns/[id]/page.tsx) so we don't repeat them here.
+// Email-first layout. The rendered email is the page's hero — pinned to
+// its real ~640px width inside a tinted "inbox" backdrop so it reads as a
+// rendered email, not a stretched white box. Toolbar above the email:
+// editing-state chip + skeleton id on the left, secondary Preview link
+// + primary Copy HTML on the right. Brief / approved copy / products
+// collapse into a single Reference section below, default closed.
 
 function variantSlug(skeletonId: string): string {
   return skeletonId.replace(/\//g, "__");
@@ -88,57 +89,58 @@ function FinalEmailCard({
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-      <header className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Final Email
-          </p>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <h2 className="text-sm font-semibold text-foreground">Final email</h2>
           {editableHtml ? (
-            <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800 ring-1 ring-inset ring-emerald-200">
               <Pencil className="h-3 w-3" />
-              Click any image, headline, body or CTA to fine-tune
-            </p>
-          ) : (
-            <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground">
-              {render.skeletonId} · rendered{" "}
-              {new Date(render.renderedAt).toLocaleString()}
-            </p>
-          )}
+              Editing enabled
+            </span>
+          ) : null}
+          <span
+            className="hidden truncate font-mono text-[11px] text-muted-foreground sm:inline"
+            title={`Rendered ${new Date(render.renderedAt).toLocaleString()}`}
+          >
+            {render.skeletonId}
+          </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href={`/campaigns/${campaign.id}/preview/${variantSlug(render.skeletonId)}`}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            title="Open sharable preview in a new tab"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            Sharable preview
+            Preview
           </Link>
           <CopyHtmlButton html={render.html} />
         </div>
       </header>
-      <div className="p-4">
-        {editableHtml ? (
-          <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
-        ) : (
-          <AutoSizeIframe
-            title={`final-${render.skeletonId}`}
-            srcDoc={render.html}
-            className="w-full rounded border border-border/60"
-            minHeight={900}
-          />
-        )}
+      <div className="bg-muted/40 px-4 py-8 sm:px-8 sm:py-10">
+        <div className="mx-auto max-w-[680px]">
+          {editableHtml ? (
+            <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
+          ) : (
+            <AutoSizeIframe
+              title={`final-${render.skeletonId}`}
+              srcDoc={render.html}
+              className="block w-full rounded-lg border border-border/60 bg-white shadow-sm"
+              minHeight={900}
+            />
+          )}
+        </div>
       </div>
     </section>
   );
 }
 
-// ─── Reference (collapsible + tabs) ─────────────────────────────
+// ─── Reference (collapsible + segmented tabs) ───────────────────
 //
-// Single accordion with three tabs inside — Brief / Approved Copy /
-// Products. Tabs solve the "everything packed together" problem of a
-// flat stack: only one section paints at a time, giving each its own
-// breathing room. Default closed so the page lands clean on the
-// email; the operator opens it on demand.
+// Single accordion with a segmented control inside — Brief / Approved
+// Copy / Products. Default closed so the page lands clean on the email;
+// the operator opens it on demand. The segmented control reads as
+// "switch view" more clearly than a flat tab-bar.
 
 type ReferenceTab = "brief" | "copy" | "products";
 
@@ -158,51 +160,49 @@ function ReferenceSection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/40"
+        className="flex w-full items-center gap-2.5 px-5 py-3 text-left hover:bg-muted/40"
         aria-expanded={open}
       >
-        <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Reference
-          </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Brief · approved copy · {approvedProducts.length} products
-          </p>
-        </div>
         <ChevronDown
           className={cn(
-            "h-4 w-4 text-muted-foreground transition-transform",
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
             open && "rotate-180",
           )}
           aria-hidden
         />
+        <span className="text-sm font-semibold text-foreground">Reference</span>
+        <span className="truncate text-sm text-muted-foreground">
+          Brief · Approved copy · {approvedProducts.length} products
+        </span>
       </button>
       {open && (
         <div className="border-t border-border/60">
-          <nav
-            role="tablist"
-            className="flex gap-1 border-b border-border/60 px-4 pt-3"
-          >
-            <TabButton
-              active={tab === "brief"}
-              onClick={() => setTab("brief")}
+          <div className="px-5 pt-4">
+            <div
+              role="tablist"
+              className="inline-flex rounded-lg bg-muted p-1 text-sm"
             >
-              Brief
-            </TabButton>
-            <TabButton
-              active={tab === "copy"}
-              onClick={() => setTab("copy")}
-            >
-              Approved Copy
-            </TabButton>
-            <TabButton
-              active={tab === "products"}
-              onClick={() => setTab("products")}
-            >
-              Products · {approvedProducts.length}
-            </TabButton>
-          </nav>
-          <div className="p-6">
+              <SegmentButton
+                active={tab === "brief"}
+                onClick={() => setTab("brief")}
+              >
+                Brief
+              </SegmentButton>
+              <SegmentButton
+                active={tab === "copy"}
+                onClick={() => setTab("copy")}
+              >
+                Approved copy
+              </SegmentButton>
+              <SegmentButton
+                active={tab === "products"}
+                onClick={() => setTab("products")}
+              >
+                Products · {approvedProducts.length}
+              </SegmentButton>
+            </div>
+          </div>
+          <div className="px-5 pb-6 pt-5">
             {tab === "brief" && <BriefBlock campaign={campaign} />}
             {tab === "copy" && <CopyBlock copy={approvedCopy} />}
             {tab === "products" && (
@@ -218,7 +218,7 @@ function ReferenceSection({
   );
 }
 
-function TabButton({
+function SegmentButton({
   active,
   onClick,
   children,
@@ -234,10 +234,10 @@ function TabButton({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
         active
-          ? "border-primary text-foreground"
-          : "border-transparent text-muted-foreground hover:text-foreground",
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
       {children}
