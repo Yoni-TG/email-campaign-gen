@@ -147,11 +147,85 @@ describe("ensureFeedLoaded", () => {
     expect(productFeed.getCachedProducts()).toHaveLength(2);
   });
 
-  it("does not reload when cache is already populated", async () => {
+  it("does not reload when cache is fresh", async () => {
     await productFeed.refreshFeed();
     const firstLoadedAt = productFeed.getFeedLastLoadedAt();
+    const fetchSpy = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+    fetchSpy.mockClear();
     await productFeed.ensureFeedLoaded();
     expect(productFeed.getFeedLastLoadedAt()).toBe(firstLoadedAt);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("re-fetches when the cache is older than FEED_TTL_MS", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-04-01T00:00:00Z"));
+      await productFeed.refreshFeed();
+      const firstLoadedAt = productFeed.getFeedLastLoadedAt()!;
+
+      const fetchSpy = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+      fetchSpy.mockClear();
+
+      // Advance past the TTL.
+      vi.advanceTimersByTime(productFeed.FEED_TTL_MS + 1000);
+
+      await productFeed.ensureFeedLoaded();
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(productFeed.getFeedLastLoadedAt()!.getTime()).toBeGreaterThan(
+        firstLoadedAt.getTime(),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("collapses concurrent calls into a single fetch (single-flight)", async () => {
+    let resolveFetch: ((value: unknown) => void) | undefined;
+    const fetchSpy = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = () =>
+            resolve({
+              ok: true,
+              status: 200,
+              statusText: "OK",
+              json: async () => MOCK_RAW_FEED,
+            });
+        }),
+    );
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    const a = productFeed.ensureFeedLoaded();
+    const b = productFeed.ensureFeedLoaded();
+    const c = productFeed.refreshFeed();
+
+    expect(resolveFetch).toBeDefined();
+    resolveFetch!(undefined);
+
+    await Promise.all([a, b, c]);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getFeedExpiresAt", () => {
+  it("returns null before the first load", () => {
+    expect(productFeed.getFeedExpiresAt()).toBeNull();
+  });
+
+  it("returns lastLoadedAt + FEED_TTL_MS after a load", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-04-01T00:00:00Z"));
+      await productFeed.refreshFeed();
+      const expiresAt = productFeed.getFeedExpiresAt();
+      const loadedAt = productFeed.getFeedLastLoadedAt()!;
+      expect(expiresAt!.getTime() - loadedAt.getTime()).toBe(
+        productFeed.FEED_TTL_MS,
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
