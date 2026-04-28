@@ -1,6 +1,6 @@
 "use client";
 
-import type { Campaign } from "@/lib/types";
+import { CAMPAIGN_STATUS_LABELS, type Campaign } from "@/lib/types";
 import { GeneratingView } from "./generating-view";
 import { ReviewView } from "./review-view";
 import { RenderingCandidatesView } from "./rendering-candidates-view";
@@ -17,7 +17,7 @@ interface Props {
   editableHtml: string | null;
 }
 
-export function CampaignDetail({ campaign, editableHtml }: Props) {
+function renderView(campaign: Campaign, editableHtml: string | null) {
   switch (campaign.status) {
     case "draft":
     case "generating":
@@ -33,8 +33,21 @@ export function CampaignDetail({ campaign, editableHtml }: Props) {
     case "rendering_final":
       return <RenderingFinalView campaign={campaign} />;
     case "completed":
-      return (
-        <CompletedView campaign={campaign} editableHtml={editableHtml} />
-      );
+      return <CompletedView campaign={campaign} editableHtml={editableHtml} />;
   }
+}
+
+export function CampaignDetail({ campaign, editableHtml }: Props) {
+  return (
+    <>
+      {/* Off-screen live region — screen readers announce the new status
+          label whenever the polling hook refreshes the page and pushes us
+          into a new view. Sighted users see the StatusBadge inside each
+          view; this is purely additive for assistive tech. */}
+      <div role="status" aria-live="polite" className="sr-only">
+        Campaign status: {CAMPAIGN_STATUS_LABELS[campaign.status]}
+      </div>
+      {renderView(campaign, editableHtml)}
+    </>
+  );
 }

@@ -2,6 +2,7 @@
 
 import {
   DndContext,
+  KeyboardSensor,
   PointerSensor,
   closestCenter,
   useSensor,
@@ -12,6 +13,7 @@ import {
   SortableContext,
   arrayMove,
   rectSortingStrategy,
+  sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -98,7 +100,15 @@ function SortableProductCard({
 }
 
 export function ProductGrid({ products, onChange }: ProductGridProps) {
-  const sensors = useSensors(useSensor(PointerSensor));
+  // Keyboard sensor: focus the drag handle and use Space to pick up + arrow
+  // keys to move + Space again to drop. dnd-kit handles announcements via
+  // its own aria-live region, so screen readers describe the move.
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
