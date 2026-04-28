@@ -2,6 +2,9 @@ import { generateCopy } from "@/modules/copy-generation/services/copy-generation
 import { selectProducts } from "@/modules/products/services/product-selection";
 import type { Campaign } from "@/lib/types";
 import { updateCampaign } from "@/modules/campaigns/utils/campaign-persistence";
+import { withTimeout } from "@/lib/retry";
+
+const GENERATION_TIMEOUT_MS = 60_000;
 
 export interface GenerateResult {
   status: "review";
@@ -15,8 +18,28 @@ export async function runGeneration(campaign: Campaign): Promise<GenerateResult>
 
   try {
     const [generatedCopy, generatedProducts] = await Promise.all([
-      generateCopy(campaign.id, campaign.seed, campaign.campaignType),
-      selectProducts(campaign.seed, campaign.campaignType),
+      withTimeout(
+        (signal) =>
+          generateCopy(
+            campaign.id,
+            campaign.seed,
+            campaign.campaignType,
+            { signal },
+          ),
+        GENERATION_TIMEOUT_MS,
+        "Copy generation timed out — click Retry.",
+      ),
+      withTimeout(
+        (signal) =>
+          selectProducts(
+            campaign.seed,
+            campaign.campaignType,
+            10,
+            { signal },
+          ),
+        GENERATION_TIMEOUT_MS,
+        "Product selection timed out — click Retry.",
+      ),
     ]);
 
     await updateCampaign(campaign.id, {

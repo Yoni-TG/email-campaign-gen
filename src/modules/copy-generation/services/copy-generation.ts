@@ -8,6 +8,7 @@ import {
   buildCopySystemPrompt,
   buildCopyUserPrompt,
 } from "@/modules/copy-generation/utils/copy-prompt";
+import { withRetry } from "@/lib/retry";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 2048;
@@ -131,25 +132,33 @@ export async function generateCopy(
   campaignId: string,
   seed: CreativeSeed,
   campaignType: CampaignType,
+  options?: { signal?: AbortSignal },
 ): Promise<GeneratedCopy> {
   const client = getAnthropic();
 
-  const response = await client.messages.create({
-    model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: [
-      {
-        type: "text",
-        text: buildCopySystemPrompt(),
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    tools: [COPY_TOOL],
-    tool_choice: { type: "tool", name: COPY_TOOL.name },
-    messages: [
-      { role: "user", content: buildCopyUserPrompt(seed, campaignType) },
-    ],
-  });
+  const response = await withRetry(
+    () =>
+      client.messages.create(
+        {
+          model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
+          max_tokens: MAX_TOKENS,
+          system: [
+            {
+              type: "text",
+              text: buildCopySystemPrompt(),
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          tools: [COPY_TOOL],
+          tool_choice: { type: "tool", name: COPY_TOOL.name },
+          messages: [
+            { role: "user", content: buildCopyUserPrompt(seed, campaignType) },
+          ],
+        },
+        { signal: options?.signal },
+      ),
+    { signal: options?.signal },
+  );
 
   const toolUse = response.content.find((block) => block.type === "tool_use");
   if (!toolUse || toolUse.type !== "tool_use") {
