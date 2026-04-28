@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { renderFinal } from "@/modules/campaigns/actions/render-final";
+import { handleRouteError } from "@/lib/errors";
 
 export async function POST(
   _request: NextRequest,
@@ -14,7 +15,6 @@ export async function POST(
     const out = await renderFinal(result.campaign);
     return NextResponse.json(out);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Final render failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleRouteError(err, "Final render failed", 500);
   }
 }

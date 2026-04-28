@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { runGeneration } from "@/modules/campaigns/actions/generate-campaign";
+import { handleRouteError } from "@/lib/errors";
 
 export async function POST(
   _request: NextRequest,
@@ -14,7 +15,6 @@ export async function POST(
     const out = await runGeneration(result.campaign);
     return NextResponse.json(out);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Generation failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleRouteError(err, "Generation failed", 500);
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { selectVariant } from "@/modules/campaigns/actions/select-variant";
+import { handleRouteError } from "@/lib/errors";
 
 interface SelectVariantBody {
   skeletonId?: string;
@@ -26,8 +27,6 @@ export async function POST(
     const out = await selectVariant(result.campaign, body.skeletonId);
     return NextResponse.json(out);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Variant selection failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Variant selection failed");
   }
 }
