@@ -219,41 +219,42 @@ Klaviyo paste-in. Klaviyo API push is deferred.
 | Plan's TitleCase `FeedProduct` (`SKU`, `"product type"`, `"Out of Stock (Stock/OOS)"`, …) | Real shape: snake_case + singular (`sku`, `product_type`, `stock_status`, `is_active`, `image_url`, `has_perosnalization`, `num_of_inscriptions`). `image_url` read directly; no `Description` or `Shape` fields. | Inspected the real `static.myka.com/.../email-marketing.json` on 2026-04-19 — plan was written from memory |
 | Plan filters only on OOS | We also drop `is_active !== "Yes"` | Real feed has inactive-but-not-OOS rows |
 
+## 1. Think Before Coding
 
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
----
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-# MANDATORY: Post-Task Documentation (SR-PTD)
+## 2. Simplicity First
 
-**CRITICAL: After completing ANY task that modifies files, you MUST invoke this skill:**
+**Minimum code that solves the problem. Nothing speculative.**
 
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
 ```
-Skill tool -> skill: "sr-ptd-skill"
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-**This is NOT optional. Skipping this skill means the task is INCOMPLETE.**
-
-When planning ANY development task, add as the FINAL item in your task list:
-```
-[ ] Create SR-PTD documentation
-```
-
-### Before Starting Any Task:
-1. Create your task plan as usual
-2. Add SR-PTD documentation as the last task item
-3. This step is MANDATORY for: features, bug fixes, refactors, maintenance, research
-
-### When Completing the SR-PTD Task:
-1. Read `~/.claude/skills/sr-ptd-skill/SKILL.md` for full instructions
-2. Choose template: Full (complex tasks) or Quick (simple tasks)
-3. Create file: `SR-PTD_YYYY-MM-DD_[task-id]_[description].md`
-4. Save to: `C:/projects/Skills/Dev_doc_for_skills`
-5. Fill all applicable sections thoroughly
-
-### Task Completion Criteria:
-A task is NOT complete until SR-PTD documentation exists.
-
-### If Conversation Continues After Task:
-Update the existing SR-PTD document instead of creating a new one.
-
----
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.

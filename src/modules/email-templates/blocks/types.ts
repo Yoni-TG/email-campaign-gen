@@ -79,14 +79,9 @@ export interface HeroTypographyProps {
 }
 
 export interface HeroTileGraphicProps {
-  subLabel?: string;
-  headline: string;
-  tiles: Array<{ label: string }>;
-  urgency?: string;
-  body?: string;
-  ctaLabel?: string;
+  /** Operator-uploaded GIF or image (600 × 310 px recommended, 2:1 ratio). */
+  imageUrl: string;
   ctaHref?: string;
-  background?: BlockBackground;
   editTargets?: EditTargets;
 }
 
@@ -150,9 +145,36 @@ export interface ClosingBlockProps {
   editTargets?: EditTargets;
 }
 
+/**
+ * One persistent footer used across every Theo Grace email. Six
+ * vertical strips:
+ *   1. "The Theo Grace Experience" composite (title + 4 USP icons)
+ *   2. "As Seen On" composite (title + 6 press logos)
+ *   3. Social icon row (Facebook / Instagram / TikTok / Pinterest)
+ *   4. Optional disclaimer (limited-time / promo terms)
+ *   5. theo grace wordmark
+ *   6. Unsubscribe + Privacy + Copyright + address
+ *
+ * All strips render in the same component because the operator never
+ * needs to compose them differently on a per-campaign basis. The
+ * Experience and As-Seen-On strips are rendered from single brand-
+ * supplied composite images (see src/modules/email-templates/assets/),
+ * so the title text + icons + labels all live in the asset rather
+ * than as separate React elements.
+ */
 export interface FooterProps {
-  legalText?: string;
-  background?: BlockBackground;
+  /** Path / URL to the Experience composite image. */
+  experienceImageUrl?: string;
+  /** Path / URL to the As Seen On composite image. */
+  pressLogosImageUrl?: string;
+  /** Limited-time-offer disclaimer. Pass null to hide the strip. */
+  disclaimer?: string | null;
+  /** Optional Theo Grace wordmark image. Falls back to text rendered in FONTS.display. */
+  logoImageUrl?: string;
+  /** Privacy Policy link target. Defaults to https://theograce.com/privacy. */
+  privacyHref?: string;
+  /** Postal address shown in the legal strip. */
+  address?: string;
   editTargets?: EditTargets;
 }
 
@@ -170,6 +192,8 @@ export interface BlockPropsMap {
   product_grid_3x2: ProductGridProps;
   product_grid_4x1: ProductGridProps;
   product_grid_magazine: ProductGridProps;
+  product_grid_split: ProductGridProps;
+  product_grid_best_sellers: ProductGridProps;
   nicky_quote_module: NickyQuoteModuleProps;
   cta_button: CtaButtonProps;
   section_label: SectionLabelProps;

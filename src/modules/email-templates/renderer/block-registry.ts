@@ -18,6 +18,8 @@ import {
   ProductGrid3x2,
   ProductGrid4x1,
   ProductGridMagazine,
+  ProductGridSplit,
+  ProductGridBestSellers,
   SectionLabel,
   TextBlockCentered,
 } from "../blocks";
@@ -38,6 +40,8 @@ export const blockRegistry: BlockRegistry = {
   product_grid_3x2: ProductGrid3x2,
   product_grid_4x1: ProductGrid4x1,
   product_grid_magazine: ProductGridMagazine,
+  product_grid_split: ProductGridSplit,
+  product_grid_best_sellers: ProductGridBestSellers,
   nicky_quote_module: NickyQuoteModule,
   cta_button: CtaButton,
   section_label: SectionLabel,

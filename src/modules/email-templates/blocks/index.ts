@@ -11,6 +11,8 @@ export { ProductGrid2x2 } from "./product-grid-2x2";
 export { ProductGrid3x2 } from "./product-grid-3x2";
 export { ProductGrid4x1 } from "./product-grid-4x1";
 export { ProductGridMagazine } from "./product-grid-magazine";
+export { ProductGridSplit } from "./product-grid-split";
+export { ProductGridBestSellers } from "./product-grid-best-sellers";
 export { NickyQuoteModule } from "./nicky-quote-module";
 export { CtaButton } from "./cta-button";
 export { SectionLabel } from "./section-label";

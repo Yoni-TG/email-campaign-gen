@@ -13,7 +13,7 @@ import type { ProductGridProps } from "./types";
 
 const BIG_HEIGHT = 280;
 const SMALL_HEIGHT = 134;
-const GAP = 6;
+const GAP = 4;
 
 function ImageCell({
   product,

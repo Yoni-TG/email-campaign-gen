@@ -1,7 +1,14 @@
 import * as React from "react";
-import { Section, Text } from "@react-email/components";
-import { COLORS, FONTS, bgColor } from "./theme";
+import { Img, Section } from "@react-email/components";
+import { bgColor } from "./theme";
 import type { LogoHeaderProps } from "./types";
+
+function asset(path: string): string {
+  const base = process.env.NEXT_PUBLIC_EMAIL_ASSETS_BASE_URL ?? "";
+  return `${base}${path}`;
+}
+
+const DEFAULT_LOGO_IMAGE = asset("/email-assets/tgr-logo.png");
 
 // Brand default is baby-blue per the wireframes — the logo bar is the visual
 // anchor that signals Theo Grace before any copy. Pass `background="white"`
@@ -20,17 +27,12 @@ export function LogoHeader({
         textAlign: "center",
       }}
     >
-      <Text
-        style={{
-          margin: 0,
-          fontFamily: FONTS.display,
-          fontSize: "22px",
-          color: COLORS.black,
-          letterSpacing: "0.02em",
-        }}
-      >
-        theo grace
-      </Text>
+      <Img
+        src={DEFAULT_LOGO_IMAGE}
+        alt="Theo Grace"
+        height={36}
+        style={{ display: "block", margin: "0 auto" }}
+      />
     </Section>
   );
 }
