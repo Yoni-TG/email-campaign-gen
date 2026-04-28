@@ -110,6 +110,17 @@ function ChipWithTooltip({
   );
 }
 
+function FieldError({
+  show,
+  message,
+}: {
+  show: boolean;
+  message: string | null;
+}) {
+  if (!show || !message) return null;
+  return <p className="text-xs text-destructive">{message}</p>;
+}
+
 export function CreativeSeedForm() {
   const {
     state,
@@ -118,8 +129,10 @@ export function CreativeSeedForm() {
     togglePersonality,
     categories,
     isCategoriesLoading,
-    isValid,
     isSubmitting,
+    errors,
+    touched,
+    markTouched,
     submit,
   } = useCreativeSeedForm();
 
@@ -140,9 +153,11 @@ export function CreativeSeedForm() {
             id="name"
             value={state.name}
             onChange={(e) => setField("name", e.target.value)}
+            onBlur={() => markTouched("name")}
             placeholder="e.g. Mother's Day 2026"
-            required
+            aria-invalid={touched.name && !!errors.name}
           />
+          <FieldError show={touched.name} message={errors.name} />
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -241,9 +256,11 @@ export function CreativeSeedForm() {
             id="mainMessage"
             value={state.mainMessage}
             onChange={(e) => setField("mainMessage", e.target.value)}
+            onBlur={() => markTouched("mainMessage")}
             placeholder="Core theme or angle for the campaign"
-            required
+            aria-invalid={touched.mainMessage && !!errors.mainMessage}
           />
+          <FieldError show={touched.mainMessage} message={errors.mainMessage} />
         </div>
 
         <div className="space-y-1.5">
@@ -318,6 +335,10 @@ export function CreativeSeedForm() {
               />
             ))}
           </div>
+          <FieldError
+            show={touched.leadPersonalities}
+            message={errors.leadPersonalities}
+          />
         </div>
       </FormSection>
 
@@ -346,6 +367,10 @@ export function CreativeSeedForm() {
               </button>
             ))}
           </div>
+          <FieldError
+            show={touched.targetCategories}
+            message={errors.targetCategories}
+          />
         </div>
 
         <div className="space-y-2">
@@ -361,7 +386,7 @@ export function CreativeSeedForm() {
       </FormSection>
 
       <div className="flex justify-end border-t border-border pt-6">
-        <Button type="submit" disabled={!isValid || isSubmitting} size="lg">
+        <Button type="submit" disabled={isSubmitting} size="lg">
           {isSubmitting ? "Creating…" : "Create Campaign"}
         </Button>
       </div>

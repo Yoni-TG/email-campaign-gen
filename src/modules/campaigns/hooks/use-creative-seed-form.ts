@@ -29,6 +29,15 @@ export interface CreativeSeedFormState {
   market: Market;
 }
 
+export type CreativeSeedFieldKey =
+  | "name"
+  | "mainMessage"
+  | "targetCategories"
+  | "leadPersonalities";
+
+export type CreativeSeedErrors = Record<CreativeSeedFieldKey, string | null>;
+export type CreativeSeedTouched = Record<CreativeSeedFieldKey, boolean>;
+
 export interface UseCreativeSeedFormResult {
   state: CreativeSeedFormState;
   setField: <K extends keyof CreativeSeedFormState>(
@@ -41,6 +50,9 @@ export interface UseCreativeSeedFormResult {
   isCategoriesLoading: boolean;
   isValid: boolean;
   isSubmitting: boolean;
+  errors: CreativeSeedErrors;
+  touched: CreativeSeedTouched;
+  markTouched: (key: CreativeSeedFieldKey) => void;
   submit: () => Promise<void>;
 }
 
@@ -60,8 +72,33 @@ const EMPTY: CreativeSeedFormState = {
   market: "us",
 };
 
+const EMPTY_TOUCHED: CreativeSeedTouched = {
+  name: false,
+  mainMessage: false,
+  targetCategories: false,
+  leadPersonalities: false,
+};
+
 function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
+}
+
+function computeErrors(state: CreativeSeedFormState): CreativeSeedErrors {
+  return {
+    name: state.name.trim().length > 0 ? null : "Give the campaign a name.",
+    mainMessage:
+      state.mainMessage.trim().length > 0
+        ? null
+        : "Describe the core theme or angle.",
+    targetCategories:
+      state.targetCategories.length > 0
+        ? null
+        : "Pick at least one category.",
+    leadPersonalities:
+      state.leadPersonalities.length > 0
+        ? null
+        : "Pick at least one personality.",
+  };
 }
 
 function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
@@ -88,6 +125,7 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
   const [categories, setCategories] = useState<string[]>([]);
   const [isCategoriesLoading, setCategoriesLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [touched, setTouched] = useState<CreativeSeedTouched>(EMPTY_TOUCHED);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +154,7 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
       ...prev,
       targetCategories: toggle(prev.targetCategories, cat),
     }));
+    setTouched((prev) => ({ ...prev, targetCategories: true }));
   };
 
   const togglePersonality = (p: LeadPersonality) => {
@@ -123,16 +162,27 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
       ...prev,
       leadPersonalities: toggle(prev.leadPersonalities, p),
     }));
+    setTouched((prev) => ({ ...prev, leadPersonalities: true }));
   };
 
-  const isValid =
-    state.name.trim().length > 0 &&
-    state.mainMessage.trim().length > 0 &&
-    state.targetCategories.length > 0 &&
-    state.leadPersonalities.length > 0;
+  const markTouched = (key: CreativeSeedFieldKey) => {
+    setTouched((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  };
+
+  const errors = computeErrors(state);
+  const isValid = Object.values(errors).every((e) => e === null);
 
   const submit = async () => {
-    if (!isValid || isSubmitting) return;
+    if (isSubmitting) return;
+    if (!isValid) {
+      setTouched({
+        name: true,
+        mainMessage: true,
+        targetCategories: true,
+        leadPersonalities: true,
+      });
+      return;
+    }
     setSubmitting(true);
     try {
       const createRes = await fetch("/api/campaigns", {
@@ -174,6 +224,9 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
     isCategoriesLoading,
     isValid,
     isSubmitting,
+    errors,
+    touched,
+    markTouched,
     submit,
   };
 }
