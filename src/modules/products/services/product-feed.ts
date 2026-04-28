@@ -7,9 +7,14 @@ export type FeedSource = "remote" | "local";
 
 const DEFAULT_LOCAL_PATH = "data/product-feed.fixture.json";
 
+// Quartz writes the CDN file ~daily; refreshing twice a day keeps the
+// in-memory digest cache aligned without hammering the bucket.
+export const FEED_TTL_MS = 12 * 60 * 60 * 1000;
+
 let cachedProducts: DigestedProduct[] = [];
 let lastLoadedAt: Date | null = null;
 let lastLoadedFrom: FeedSource | null = null;
+let inFlight: Promise<DigestedProduct[]> | null = null;
 
 export function resolveFeedSource(): FeedSource {
   const explicit = process.env.PRODUCT_FEED_SOURCE?.toLowerCase();
@@ -57,17 +62,28 @@ async function readLocalFeed(): Promise<FeedProduct[]> {
 }
 
 /**
- * Fetches + digests + caches. Call once daily or on manual refresh.
+ * Fetches + digests + caches. Single-flight: overlapping callers share
+ * the same in-flight promise so we never double-fetch the CDN.
  */
 export async function refreshFeed(): Promise<DigestedProduct[]> {
-  const source = resolveFeedSource();
-  const raw =
-    source === "remote" ? await fetchRemoteFeed() : await readLocalFeed();
+  if (inFlight) return inFlight;
 
-  cachedProducts = digestFeed(raw);
-  lastLoadedAt = new Date();
-  lastLoadedFrom = source;
-  return cachedProducts;
+  inFlight = (async () => {
+    try {
+      const source = resolveFeedSource();
+      const raw =
+        source === "remote" ? await fetchRemoteFeed() : await readLocalFeed();
+
+      cachedProducts = digestFeed(raw);
+      lastLoadedAt = new Date();
+      lastLoadedFrom = source;
+      return cachedProducts;
+    } finally {
+      inFlight = null;
+    }
+  })();
+
+  return inFlight;
 }
 
 export function getCachedProducts(): DigestedProduct[] {
@@ -82,13 +98,24 @@ export function getFeedLastLoadedFrom(): FeedSource | null {
   return lastLoadedFrom;
 }
 
+function isStale(): boolean {
+  if (!lastLoadedAt) return true;
+  return Date.now() - lastLoadedAt.getTime() > FEED_TTL_MS;
+}
+
 /**
- * Ensures the feed is loaded. Call before any product operation.
+ * Ensures the feed is loaded and fresh. Call before any product operation.
+ * Refreshes when the cache is empty or older than FEED_TTL_MS.
  */
 export async function ensureFeedLoaded(): Promise<void> {
-  if (cachedProducts.length === 0) {
+  if (isStale()) {
     await refreshFeed();
   }
+}
+
+export function getFeedExpiresAt(): Date | null {
+  if (!lastLoadedAt) return null;
+  return new Date(lastLoadedAt.getTime() + FEED_TTL_MS);
 }
 
 export function getDistinctCategories(): string[] {

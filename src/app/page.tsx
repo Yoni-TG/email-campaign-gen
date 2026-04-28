@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CampaignFilterBar } from "@/modules/campaigns/components/campaign-filter-bar";
 import { CampaignList } from "@/modules/campaigns/components/campaign-list";
+import { RefreshFeedButton } from "@/modules/campaigns/components/refresh-feed-button";
 import { listCampaignSummaries } from "@/modules/campaigns/utils/campaign-persistence";
 import {
   filterCampaigns,
@@ -72,6 +73,7 @@ export default async function HomePage({
           >
             Skeletons
           </Link>
+          <RefreshFeedButton />
           <Link href="/campaigns/new">
             <Button>New Campaign</Button>
           </Link>
