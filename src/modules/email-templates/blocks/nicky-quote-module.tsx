@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Column, Img, Row, Section, Text } from "@react-email/components";
 import { COLORS, FONTS, bgColor } from "./theme";
 import type { NickyQuoteModuleProps } from "./types";

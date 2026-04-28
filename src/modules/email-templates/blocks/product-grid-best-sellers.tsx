@@ -3,7 +3,6 @@
 // Odd rows → image left | text right. Even rows → text left | image right.
 // The `price` field carries the deal label (e.g. "25% off").
 
-import * as React from "react";
 import { Column, Img, Link, Row, Section, Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { ProductGridProps } from "./types";

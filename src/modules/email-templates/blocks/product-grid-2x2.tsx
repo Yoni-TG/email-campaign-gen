@@ -3,7 +3,6 @@
 // Portrait images (roughly 325×415 source) render at full cell width,
 // height auto — preserving aspect ratio without email-client objectFit hacks.
 
-import * as React from "react";
 import { Column, Img, Link, Row, Section } from "@react-email/components";
 import { COLORS } from "./theme";
 import type { ProductGridProps } from "./types";

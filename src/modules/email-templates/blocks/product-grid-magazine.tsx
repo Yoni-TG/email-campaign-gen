@@ -6,7 +6,6 @@
 // the visual mass of the imagery does the talking, so titles + prices live
 // outside this block (typically in a closing_block or section_label below).
 
-import * as React from "react";
 import { Column, Img, Link, Row, Section } from "@react-email/components";
 import { COLORS } from "./theme";
 import type { ProductGridProps } from "./types";
