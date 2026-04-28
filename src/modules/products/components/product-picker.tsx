@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useProductSearch } from "@/modules/products/hooks/use-product-search";
+import { ProductSearchSkeleton } from "./product-search-skeleton";
 import type { ProductSnapshot } from "@/lib/types";
 
 interface ProductPickerProps {
@@ -38,9 +39,7 @@ export function ProductPicker({ selected, onChange }: ProductPickerProps) {
         {query.length >= 2 && (results.length > 0 || isSearching) && (
           <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-popover shadow-lg">
             {isSearching && results.length === 0 && (
-              <div className="p-3 text-sm text-muted-foreground">
-                Searching…
-              </div>
+              <ProductSearchSkeleton />
             )}
             {results.map((product) => (
               <button

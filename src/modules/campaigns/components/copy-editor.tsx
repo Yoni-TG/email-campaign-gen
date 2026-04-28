@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +14,8 @@ import type {
 } from "@/lib/types";
 
 const SMS_MAX_LENGTH = 130;
+// Klaviyo recommendation. Soft target — we surface the count but don't cap.
+const SUBJECT_TARGET_LENGTH = 50;
 
 interface CopyEditorProps {
   generatedCopy: GeneratedCopy;
@@ -37,6 +41,27 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
       i === index ? { ...block, ...partial } : block,
     );
     patch({ body_blocks: next });
+  };
+
+  const moveBlock = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= value.body_blocks.length) return;
+    const next = [...value.body_blocks];
+    [next[index], next[target]] = [next[target], next[index]];
+    patch({ body_blocks: next });
+  };
+
+  const removeBlock = (index: number) => {
+    patch({ body_blocks: value.body_blocks.filter((_, i) => i !== index) });
+  };
+
+  const addBlock = () => {
+    patch({
+      body_blocks: [
+        ...value.body_blocks,
+        { title: null, description: null, cta: null },
+      ],
+    });
   };
 
   const patchNicky = (partial: Partial<NickyQuote>) => {
@@ -80,7 +105,18 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
           </div>
         )}
         <div className="space-y-1.5">
-          <Label className="text-sm">Subject</Label>
+          <div className="flex items-baseline justify-between">
+            <Label className="text-sm">Subject</Label>
+            <span
+              className={`text-xs tabular-nums ${
+                value.subject_variant.subject.length > SUBJECT_TARGET_LENGTH
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {value.subject_variant.subject.length}/{SUBJECT_TARGET_LENGTH}
+            </span>
+          </div>
           <Input
             value={value.subject_variant.subject}
             onChange={(e) =>
@@ -128,9 +164,39 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
             key={i}
             className="space-y-3 rounded-md border border-border/60 bg-muted/40 p-3"
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Block {i + 1}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Block {i + 1}
+              </p>
+              <div className="flex items-center gap-0.5 text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => moveBlock(i, -1)}
+                  disabled={i === 0}
+                  aria-label={`Move block ${i + 1} up`}
+                  className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveBlock(i, 1)}
+                  disabled={i === value.body_blocks.length - 1}
+                  aria-label={`Move block ${i + 1} down`}
+                  className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeBlock(i)}
+                  aria-label={`Remove block ${i + 1}`}
+                  className="ml-1 rounded p-1 hover:bg-muted hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
             <div className="space-y-1.5">
               <Label className="text-sm">Title</Label>
               <Input
@@ -161,6 +227,16 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
             </div>
           </div>
         ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addBlock}
+          className="w-full"
+        >
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          Add block
+        </Button>
       </section>
 
       {(generatedCopy.sms !== null || value.sms !== null) && (

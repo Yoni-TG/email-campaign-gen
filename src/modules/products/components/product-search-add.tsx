@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useProductSearch } from "@/modules/products/hooks/use-product-search";
+import { ProductSearchSkeleton } from "./product-search-skeleton";
 import type { ProductSnapshot } from "@/lib/types";
 
 interface ProductSearchAddProps {
@@ -37,7 +38,7 @@ export function ProductSearchAdd({
       {showDropdown && (
         <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border bg-popover shadow-lg">
           {isSearching && available.length === 0 && (
-            <div className="p-3 text-sm text-muted-foreground">Searching…</div>
+            <ProductSearchSkeleton />
           )}
           {available.map((product) => (
             <button
