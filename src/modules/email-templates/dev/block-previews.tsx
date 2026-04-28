@@ -25,6 +25,8 @@ import {
   ProductGrid3x2,
   ProductGrid4x1,
   ProductGridMagazine,
+  ProductGridSplit,
+  ProductGridBestSellers,
   SectionLabel,
   TextBlockCentered,
 } from "../blocks";
@@ -213,15 +215,10 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
   {
     id: "hero-tile-graphic",
     label: "hero_tile_graphic",
-    height: 480,
+    height: 320,
     jsx: (
       <HeroTileGraphic
-        subLabel="YOUR MOMENT TO SHINE"
-        headline="Mystery Sale"
-        tiles={[{ label: "$" }, { label: "?" }, { label: "%" }]}
-        urgency="TODAY ONLY"
-        body="Treat yourself to the ultimate secret surprise. A special offer waiting just for you."
-        ctaLabel="Reveal your offer"
+        imageUrl={SAMPLE_HERO_URL}
         ctaHref="#"
       />
     ),
@@ -314,6 +311,18 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     label: "product_grid_magazine",
     height: 620,
     jsx: <ProductGridMagazine products={SAMPLE_PRODUCTS} />,
+  },
+  {
+    id: "product-grid-split",
+    label: "product_grid_split",
+    height: 720,
+    jsx: <ProductGridSplit products={SAMPLE_PRODUCTS} />,
+  },
+  {
+    id: "product-grid-best-sellers",
+    label: "product_grid_best_sellers",
+    height: 960,
+    jsx: <ProductGridBestSellers products={SAMPLE_PRODUCTS} />,
   },
   {
     id: "nicky-quote-with-portrait",

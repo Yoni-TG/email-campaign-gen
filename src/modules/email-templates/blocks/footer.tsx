@@ -20,6 +20,7 @@ function asset(path: string): string {
 
 const DEFAULT_EXPERIENCE_IMAGE = asset("/email-assets/tgr-experience.png");
 const DEFAULT_PRESS_LOGOS_IMAGE = asset("/email-assets/footer-as-seen.png");
+const DEFAULT_LOGO_IMAGE = asset("/email-assets/tgr-logo.png");
 
 // ─── Static brand text ─────────────────────────────────────────────────────
 
@@ -71,7 +72,7 @@ export function Footer({
   experienceImageUrl = DEFAULT_EXPERIENCE_IMAGE,
   pressLogosImageUrl = DEFAULT_PRESS_LOGOS_IMAGE,
   disclaimer = DEFAULT_DISCLAIMER,
-  logoImageUrl,
+  logoImageUrl = DEFAULT_LOGO_IMAGE,
   privacyHref = "https://theograce.com/privacy",
   address = DEFAULT_ADDRESS,
   editTargets,
@@ -233,28 +234,12 @@ export function Footer({
           textAlign: "center",
         }}
       >
-        {logoImageUrl ? (
-          <Img
-            src={logoImageUrl}
-            alt="Theo Grace"
-            height={40}
-            style={{ display: "block", margin: "0 auto" }}
-          />
-        ) : (
-          <Text
-            style={{
-              margin: 0,
-              fontFamily: FONTS.display,
-              fontSize: "20px",
-              color: COLORS.black,
-              letterSpacing: "0.04em",
-              textAlign: "center",
-              fontStyle: "italic",
-            }}
-          >
-            theo grace
-          </Text>
-        )}
+        <Img
+          src={logoImageUrl}
+          alt="Theo Grace"
+          height={40}
+          style={{ display: "block", margin: "0 auto" }}
+        />
       </Section>
 
       {/* 6. Legal strip — pale blue */}

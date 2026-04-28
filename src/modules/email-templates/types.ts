@@ -24,6 +24,8 @@ export const BLOCK_TYPES = [
   "product_grid_3x2",
   "product_grid_4x1",
   "product_grid_magazine",
+  "product_grid_split",
+  "product_grid_best_sellers",
   "nicky_quote_module",
   "cta_button",
   "section_label",

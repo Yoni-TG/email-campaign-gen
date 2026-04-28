@@ -3,8 +3,9 @@
   "name": "Mystery Tiles",
   "campaignTypes": ["sale_promo"],
   "tags": ["urgent", "graphic-led", "mystery", "today-only"],
-  "description": "Three-tile $/?/% graphic hero with urgency banner and short body. Best for time-bound mystery sales and reveal-on-click promos. Hero is graphic — no operator-uploaded image needed.",
+  "description": "Full-width mystery-sale graphic (GIF or image) with a 2x2 product grid below. Operator uploads the graphic; no copy generation needed for the hero.",
   "requiredAssets": [
+    { "key": "mystery", "label": "Mystery sale graphic (600 × 310 px GIF or image)", "required": true },
     { "key": "closing", "label": "Closing image", "required": false }
   ],
   "blocks": [
@@ -13,12 +14,7 @@
     {
       "type": "hero_tile_graphic",
       "bind": {
-        "subLabel": "literal:YOUR MOMENT TO SHINE",
-        "headline": "body_blocks[0].title",
-        "tiles": [{ "label": "$" }, { "label": "?" }, { "label": "%" }],
-        "urgency": "literal:TODAY ONLY",
-        "body": "body_blocks[0].description",
-        "ctaLabel": "body_blocks[0].cta",
+        "imageUrl": "assets.mystery",
         "ctaHref": "literal:#"
       }
     },
@@ -27,9 +23,9 @@
       "type": "closing_block",
       "bind": {
         "imageUrl": "assets.closing",
-        "headline": "body_blocks[1].title",
-        "body": "body_blocks[1].description",
-        "ctaLabel": "body_blocks[1].cta",
+        "headline": "body_blocks[0].title",
+        "body": "body_blocks[0].description",
+        "ctaLabel": "body_blocks[0].cta",
         "ctaHref": "literal:#"
       }
     },

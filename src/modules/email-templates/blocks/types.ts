@@ -79,14 +79,9 @@ export interface HeroTypographyProps {
 }
 
 export interface HeroTileGraphicProps {
-  subLabel?: string;
-  headline: string;
-  tiles: Array<{ label: string }>;
-  urgency?: string;
-  body?: string;
-  ctaLabel?: string;
+  /** Operator-uploaded GIF or image (600 × 310 px recommended, 2:1 ratio). */
+  imageUrl: string;
   ctaHref?: string;
-  background?: BlockBackground;
   editTargets?: EditTargets;
 }
 
@@ -197,6 +192,8 @@ export interface BlockPropsMap {
   product_grid_3x2: ProductGridProps;
   product_grid_4x1: ProductGridProps;
   product_grid_magazine: ProductGridProps;
+  product_grid_split: ProductGridProps;
+  product_grid_best_sellers: ProductGridProps;
   nicky_quote_module: NickyQuoteModuleProps;
   cta_button: CtaButtonProps;
   section_label: SectionLabelProps;
