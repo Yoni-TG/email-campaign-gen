@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { checkUploadSize } from "@/lib/uploads";
 
 export interface UseHeroUploadResult {
   file: File | null;
@@ -29,6 +30,13 @@ export function useHeroUpload(campaignId: string): UseHeroUploadResult {
   const previewRef = useRef<string | null>(null);
 
   const setFile = (next: File | null) => {
+    if (next) {
+      const tooBig = checkUploadSize(next);
+      if (tooBig) {
+        toast.error(tooBig);
+        return;
+      }
+    }
     setFileState(next);
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     const nextUrl = next ? URL.createObjectURL(next) : null;
