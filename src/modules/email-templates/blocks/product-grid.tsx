@@ -1,7 +1,6 @@
 // Shared grid renderer used by product_grid_2x2, _3x2, _4x1.
 // Not exposed as a BlockType — the public blocks are the named arities.
 
-import * as React from "react";
 import { Column, Img, Link, Row, Section, Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { BlueprintProduct } from "./types";

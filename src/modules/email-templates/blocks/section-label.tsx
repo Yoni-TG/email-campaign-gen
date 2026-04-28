@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { SectionLabelProps } from "./types";
