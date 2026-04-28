@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { updateBlockBackground } from "@/modules/campaigns/actions/update-block-background";
 import type { BlockBackground } from "@/modules/email-templates/blocks/theme";
+import { handleRouteError } from "@/lib/errors";
 
 interface UpdateBlockBgBody {
   blockIndex?: number;
@@ -32,8 +33,6 @@ export async function POST(
     );
     return NextResponse.json(out);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Block background update failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Block background update failed");
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { renderCandidates } from "@/modules/campaigns/actions/render-candidates";
+import { handleRouteError } from "@/lib/errors";
 
 export async function POST(
   _request: NextRequest,
@@ -14,8 +15,6 @@ export async function POST(
     const out = await renderCandidates(result.campaign);
     return NextResponse.json(out);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Candidate render failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleRouteError(err, "Candidate render failed", 500);
   }
 }

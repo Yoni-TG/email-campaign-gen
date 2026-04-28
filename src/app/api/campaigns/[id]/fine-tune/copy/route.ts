@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { updateCopy } from "@/modules/campaigns/actions/update-copy";
 import type { ApprovedCopy } from "@/lib/types";
+import { handleRouteError } from "@/lib/errors";
 
 interface UpdateCopyBody {
   approvedCopy?: Omit<ApprovedCopy, "campaign_id">;
@@ -27,7 +28,6 @@ export async function POST(
     const out = await updateCopy(result.campaign, body.approvedCopy);
     return NextResponse.json(out);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Copy update failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Copy update failed");
   }
 }

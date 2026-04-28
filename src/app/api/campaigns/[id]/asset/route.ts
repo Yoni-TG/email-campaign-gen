@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { uploadAsset } from "@/modules/campaigns/actions/upload-asset";
+import { handleRouteError } from "@/lib/errors";
 
 export async function POST(
   request: NextRequest,
@@ -37,7 +38,6 @@ export async function POST(
     const out = await uploadAsset(result.campaign, slotKey, file);
     return NextResponse.json(out);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Asset upload failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Asset upload failed");
   }
 }

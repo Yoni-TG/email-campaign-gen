@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { replaceAsset } from "@/modules/campaigns/actions/replace-asset";
+import { handleRouteError } from "@/lib/errors";
 
 // Fine-tune: replace an asset on a completed campaign and re-render.
 // Distinct from the initial /asset endpoint (which requires asset_upload
@@ -34,7 +35,6 @@ export async function POST(
     const out = await replaceAsset(result.campaign, slotKey, file);
     return NextResponse.json(out);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Asset replace failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Asset replace failed");
   }
 }

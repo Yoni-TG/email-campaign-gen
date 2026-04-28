@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCampaign } from "@/modules/campaigns/utils/campaign-guard";
 import { replaceProductImage } from "@/modules/campaigns/actions/replace-product-image";
+import { handleRouteError } from "@/lib/errors";
 
 export async function POST(
   request: NextRequest,
@@ -31,8 +32,6 @@ export async function POST(
     const out = await replaceProductImage(result.campaign, sku, file);
     return NextResponse.json(out);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Product image replace failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleRouteError(err, "Product image replace failed");
   }
 }
