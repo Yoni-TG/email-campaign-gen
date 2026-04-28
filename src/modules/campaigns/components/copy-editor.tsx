@@ -11,6 +11,8 @@ import type {
   SubjectVariant,
 } from "@/lib/types";
 
+const SMS_MAX_LENGTH = 130;
+
 interface CopyEditorProps {
   generatedCopy: GeneratedCopy;
   value: ApprovedCopy;
@@ -163,14 +165,26 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
 
       {(generatedCopy.sms !== null || value.sms !== null) && (
         <section className="space-y-1.5">
-          <Label className="text-base font-semibold">SMS</Label>
+          <div className="flex items-baseline justify-between">
+            <Label className="text-base font-semibold">SMS</Label>
+            <span
+              className={`text-xs tabular-nums ${
+                (value.sms?.length ?? 0) >= SMS_MAX_LENGTH
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {value.sms?.length ?? 0}/{SMS_MAX_LENGTH}
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground">
-            ≤130 chars. Use <code>{"{link}"}</code> as the URL placeholder.
+            ≤{SMS_MAX_LENGTH} chars. Use <code>{"{link}"}</code> as the URL placeholder.
           </p>
           <Textarea
             value={nullToEmpty(value.sms)}
             onChange={(e) => patch({ sms: emptyToNull(e.target.value) })}
             rows={2}
+            maxLength={SMS_MAX_LENGTH}
           />
         </section>
       )}

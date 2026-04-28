@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { checkUploadSize } from "@/lib/uploads";
 
 interface SlotState {
   file: File | null;
@@ -39,6 +40,13 @@ export function useAssetUpload(
   const previewUrlsRef = useRef<Set<string>>(new Set());
 
   const setFile = (slotKey: string, next: File | null) => {
+    if (next) {
+      const tooBig = checkUploadSize(next);
+      if (tooBig) {
+        toast.error(tooBig);
+        return;
+      }
+    }
     setSlots((prev) => {
       const previous = prev[slotKey];
       if (previous?.preview) {

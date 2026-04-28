@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type {
@@ -40,21 +40,47 @@ export function useReviewForm({
   generatedProducts,
 }: UseReviewFormInput): UseReviewFormResult {
   const router = useRouter();
-  const [approvedCopy, setApprovedCopy] = useState<ApprovedCopy>(() =>
+  const [approvedCopy, setApprovedCopyState] = useState<ApprovedCopy>(() =>
     initApprovedCopy(generatedCopy),
   );
-  const [products, setProducts] =
+  const [products, setProductsState] =
     useState<ProductSnapshot[]>(generatedProducts);
   const [isApproving, setIsApproving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  // Browser-level navigation guard. Next.js client-side navigation does not
+  // fire beforeunload, so this only catches reload / tab-close — good enough
+  // for the "you have unsaved review edits" warning.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  const setApprovedCopy = (copy: ApprovedCopy) => {
+    setApprovedCopyState(copy);
+    setDirty(true);
+  };
+
+  const setProducts = (next: ProductSnapshot[]) => {
+    setProductsState(next);
+    setDirty(true);
+  };
 
   const addProduct = (product: ProductSnapshot) => {
-    setProducts((prev) =>
+    setProductsState((prev) =>
       prev.some((p) => p.sku === product.sku) ? prev : [...prev, product],
     );
+    setDirty(true);
   };
 
   const removeProduct = (sku: string) => {
-    setProducts((prev) => prev.filter((p) => p.sku !== sku));
+    setProductsState((prev) => prev.filter((p) => p.sku !== sku));
+    setDirty(true);
   };
 
   const approve = async () => {
@@ -73,6 +99,7 @@ export function useReviewForm({
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error ?? "Approval failed");
       }
+      setDirty(false);
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Approval failed";
