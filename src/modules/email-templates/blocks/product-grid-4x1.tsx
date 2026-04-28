@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ProductGridInternal } from "./product-grid";
 import type { ProductGridProps } from "./types";
 

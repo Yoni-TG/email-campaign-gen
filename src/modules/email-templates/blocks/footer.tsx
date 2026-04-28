@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Hr, Img, Link, Section, Text } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { FooterProps } from "./types";

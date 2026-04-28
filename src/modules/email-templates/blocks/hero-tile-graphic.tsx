@@ -1,7 +1,6 @@
 // Mystery-sale graphic hero — operator uploads a GIF or image (600 × 310 px,
 // 2:1 ratio). The whole image is click-through to ctaHref when provided.
 
-import * as React from "react";
 import { Img, Link, Section } from "@react-email/components";
 import { COLORS } from "./theme";
 import type { HeroTileGraphicProps } from "./types";

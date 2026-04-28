@@ -8,7 +8,6 @@
 // Outlook desktop; Theo Grace's audience (Gmail / Apple Mail / mobile) handles
 // it correctly.
 
-import * as React from "react";
 import { Column, Img, Link, Row, Section } from "@react-email/components";
 import { COLORS } from "./theme";
 import type { ProductGridProps } from "./types";

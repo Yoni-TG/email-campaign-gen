@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Img, Section } from "@react-email/components";
 import { bgColor } from "./theme";
 import type { LogoHeaderProps } from "./types";

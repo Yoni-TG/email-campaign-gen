@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Button, Section } from "@react-email/components";
 import { COLORS, FONTS } from "./theme";
 import type { CtaButtonProps } from "./types";
