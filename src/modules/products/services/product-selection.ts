@@ -16,6 +16,7 @@ import {
   buildRerankSystemPrompt,
   buildRerankUserPrompt,
 } from "@/modules/products/utils/product-rerank-prompt";
+import { withRetry } from "@/lib/retry";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const RERANK_MAX_TOKENS = 2048;
@@ -51,29 +52,42 @@ async function rerankWithLLM(
   seed: CreativeSeed,
   campaignType: CampaignType,
   count: number,
+  options?: { signal?: AbortSignal },
 ): Promise<string[]> {
   const client = getAnthropic();
 
-  const response = await client.messages.create({
-    model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
-    max_tokens: RERANK_MAX_TOKENS,
-    system: [
-      {
-        type: "text",
-        text: buildRerankSystemPrompt(),
-        // Stable prefix → cache across campaigns for repeated re-rank calls.
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    tools: [RANK_TOOL],
-    tool_choice: { type: "tool", name: RANK_TOOL.name },
-    messages: [
-      {
-        role: "user",
-        content: buildRerankUserPrompt(seed, campaignType, candidates, count),
-      },
-    ],
-  });
+  const response = await withRetry(
+    () =>
+      client.messages.create(
+        {
+          model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
+          max_tokens: RERANK_MAX_TOKENS,
+          system: [
+            {
+              type: "text",
+              text: buildRerankSystemPrompt(),
+              // Stable prefix → cache across campaigns for repeated re-rank calls.
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          tools: [RANK_TOOL],
+          tool_choice: { type: "tool", name: RANK_TOOL.name },
+          messages: [
+            {
+              role: "user",
+              content: buildRerankUserPrompt(
+                seed,
+                campaignType,
+                candidates,
+                count,
+              ),
+            },
+          ],
+        },
+        { signal: options?.signal },
+      ),
+    { signal: options?.signal },
+  );
 
   const toolUse = response.content.find((block) => block.type === "tool_use");
   if (toolUse && toolUse.type === "tool_use") {
@@ -97,6 +111,7 @@ export async function selectProducts(
   seed: CreativeSeed,
   campaignType: CampaignType,
   count: number = 10,
+  options?: { signal?: AbortSignal },
 ): Promise<ProductSnapshot[]> {
   await ensureFeedLoaded();
   const allProducts = getCachedProducts();
@@ -110,7 +125,7 @@ export async function selectProducts(
   const selectedSkus =
     candidates.length <= count
       ? candidates.map((p) => p.sku)
-      : await rerankWithLLM(candidates, seed, campaignType, count);
+      : await rerankWithLLM(candidates, seed, campaignType, count, options);
 
   const pinnedSkus = seed.pinnedSkus ?? [];
   const pinnedSet = new Set(pinnedSkus);
