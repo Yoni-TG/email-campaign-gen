@@ -6,6 +6,7 @@ import type {
   PrimaryLanguage,
 } from "@/lib/types";
 import { getProductImageUrl } from "@/modules/products/utils/image-url";
+import { canonicalizeCategories } from "@/modules/products/utils/category-curation";
 
 const INSCRIPTION_COUNT = /(\d+)\s*Inscription/i;
 
@@ -113,7 +114,7 @@ export function digestProduct(raw: FeedProduct): DigestedProduct | null {
     sku: raw.sku,
     name: raw.name,
     description: "",
-    productType: raw.product_type ?? [],
+    productType: canonicalizeCategories(raw.product_type ?? []),
     shopFor: raw.shop_for ?? [],
     occasion: raw.occasion ?? [],
     collection,
