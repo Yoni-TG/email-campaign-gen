@@ -24,6 +24,7 @@ import {
   loadSkeletonById,
   maxProductsRendered,
 } from "@/modules/email-templates";
+import { variantSlug } from "@/modules/campaigns/utils/variant-slug";
 import { AutoSizeIframe } from "./auto-size-iframe";
 import { CopyHtmlButton } from "./copy-html-button";
 import { EditableEmailFrame } from "./editable-email-frame";
@@ -34,10 +35,6 @@ import { EditableEmailFrame } from "./editable-email-frame";
 // editing-state chip + skeleton id on the left, secondary Preview link
 // + primary Copy HTML on the right. Brief / approved copy / products
 // collapse into a single Reference section below, default closed.
-
-function variantSlug(skeletonId: string): string {
-  return skeletonId.replace(/\//g, "__");
-}
 
 interface CompletedViewProps {
   campaign: Campaign;
