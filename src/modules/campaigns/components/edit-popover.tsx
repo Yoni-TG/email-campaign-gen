@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { ApprovedCopy, Campaign } from "@/lib/types";
+import {
+  readPath,
+  writePath,
+  stripCampaignId,
+  pathIsMultiline,
+} from "./edit-fields/path-helpers";
+import { shortError } from "./edit-fields/short-error";
 
 // Floating contextual editor anchored to the clicked element on the
 // EditableEmailFrame iframe. One popover at a time — a fresh click on
@@ -285,114 +292,6 @@ function TextEditor({
       </div>
     </div>
   );
-}
-
-// Heuristic: paths whose value is typically a sentence or paragraph want
-// a textarea; short labels like subject / preheader / cta want a single-
-// line input that submits on Enter.
-function pathIsMultiline(path: string): boolean {
-  return (
-    path.endsWith(".description") ||
-    path === "nicky_quote.quote" ||
-    path === "sms"
-  );
-}
-
-// ─── Path read/write helpers ────────────────────────────────────
-//
-// approvedCopy paths follow the same dotted/array language as the
-// renderer's bind paths: subject_variant.subject, body_blocks[0].title,
-// nicky_quote.quote, etc. These helpers walk the JSON shape and produce
-// a new copy with one field patched.
-
-type Path =
-  | "subject_variant.subject"
-  | "subject_variant.preheader"
-  | "free_top_text"
-  | "sms"
-  | "nicky_quote.quote"
-  | "nicky_quote.response"
-  | string;
-
-function readPath(copy: ApprovedCopy | null, path: Path): string | null {
-  if (!copy) return null;
-  if (path === "subject_variant.subject") return copy.subject_variant.subject;
-  if (path === "subject_variant.preheader") return copy.subject_variant.preheader;
-  if (path === "free_top_text") return copy.free_top_text;
-  if (path === "sms") return copy.sms;
-  if (path === "nicky_quote.quote") return copy.nicky_quote?.quote ?? null;
-  if (path === "nicky_quote.response") return copy.nicky_quote?.response ?? null;
-  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta)$/);
-  if (m) {
-    const i = parseInt(m[1], 10);
-    const field = m[2] as "title" | "description" | "cta";
-    return copy.body_blocks[i]?.[field] ?? null;
-  }
-  return null;
-}
-
-function writePath(
-  copy: ApprovedCopy,
-  path: Path,
-  value: string | null,
-): ApprovedCopy {
-  const v = value ?? null;
-  if (path === "subject_variant.subject") {
-    return {
-      ...copy,
-      subject_variant: { ...copy.subject_variant, subject: v ?? "" },
-    };
-  }
-  if (path === "subject_variant.preheader") {
-    return {
-      ...copy,
-      subject_variant: { ...copy.subject_variant, preheader: v ?? "" },
-    };
-  }
-  if (path === "free_top_text") return { ...copy, free_top_text: v };
-  if (path === "sms") return { ...copy, sms: v };
-  if (path === "nicky_quote.quote") {
-    if (!v) return { ...copy, nicky_quote: null };
-    return {
-      ...copy,
-      nicky_quote: { quote: v, response: copy.nicky_quote?.response ?? null },
-    };
-  }
-  if (path === "nicky_quote.response") {
-    if (!copy.nicky_quote) return copy;
-    return {
-      ...copy,
-      nicky_quote: { ...copy.nicky_quote, response: v },
-    };
-  }
-  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta)$/);
-  if (m) {
-    const i = parseInt(m[1], 10);
-    const field = m[2] as "title" | "description" | "cta";
-    return {
-      ...copy,
-      body_blocks: copy.body_blocks.map((b, idx) =>
-        idx === i ? { ...b, [field]: v } : b,
-      ),
-    };
-  }
-  return copy;
-}
-
-function stripCampaignId(copy: ApprovedCopy): Omit<ApprovedCopy, "campaign_id"> {
-  const { campaign_id: _ignored, ...rest } = copy;
-  void _ignored;
-  return rest;
-}
-
-// Server errors can be huge (Prisma stack traces ramble). Clip to one
-// line so the toast doesn't dominate the screen — the full payload is
-// still visible in the network tab if the operator needs to forward it.
-function shortError(err: unknown, fallback: string): string {
-  const raw = err instanceof Error ? err.message : fallback;
-  const firstLine = raw.split("\n")[0] ?? raw;
-  if (firstLine.length <= 140) return firstLine;
-  return firstLine.slice(0, 140) + "…";
 }
 
 // ─── Background editor ──────────────────────────────────────────
