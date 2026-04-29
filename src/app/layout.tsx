@@ -1,17 +1,30 @@
 import type { Metadata } from "next";
-import { Lato } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-// Lato is the brand body font (matches theograce.com — see the
-// `--font-family-main-*` CSS tokens on production). Big Caslon is the
-// display font but proprietary; we keep the Georgia-class fallback chain
-// in blocks/theme.ts and component CSS until a self-hosted Big Caslon
-// licence lands.
-const lato = Lato({
+// Inter for UI, Instrument Serif for display headlines, JetBrains Mono for
+// technical fields (filenames, urls). See globals.css `@theme inline` for
+// how these CSS variables become Tailwind `font-sans / font-display /
+// font-mono` utilities.
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-lato",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -26,13 +39,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={lato.variable}>
-      <body className={lato.className}>
-        <main className="min-h-screen bg-background">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            {children}
-          </div>
-        </main>
+    <html
+      lang="en"
+      className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
+    >
+      <body>
+        <main className="min-h-screen bg-background">{children}</main>
         <Toaster />
       </body>
     </html>

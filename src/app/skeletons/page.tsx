@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppTopNav } from "@/modules/campaigns/components/app-top-nav";
 import {
   loadAllSkeletons,
   renderSkeleton,
@@ -55,8 +56,10 @@ export default async function SkeletonsPage() {
   }
 
   return (
-    <div>
-      <header className="mb-8">
+    <>
+      <AppTopNav />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <header className="mb-8">
         <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
           Email-templates dev catalog
         </p>
@@ -114,6 +117,7 @@ export default async function SkeletonsPage() {
           </section>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
