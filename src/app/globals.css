@@ -80,8 +80,8 @@
   --ink-2: #4a4540;
   --ink-3: #8a847a;
   --ink-4: #b5ac9f;
-  --brand: #c96442;
-  --brand-soft: #f4ede1;
+  --brand: #7e3a52;
+  --brand-soft: #f1e6ec;
   --green: #4a7c59;
   --amber: #b88636;
   --blue: #4a6b8a;
@@ -138,8 +138,8 @@
   --ink-2: oklch(0.85 0 0);
   --ink-3: oklch(0.65 0 0);
   --ink-4: oklch(0.45 0 0);
-  --brand: #d97a5a;
-  --brand-soft: oklch(0.3 0.05 40);
+  --brand: #b56a87;
+  --brand-soft: oklch(0.3 0.04 350);
   --green: #74a98a;
   --amber: #d9a155;
   --blue: #779bbe;
