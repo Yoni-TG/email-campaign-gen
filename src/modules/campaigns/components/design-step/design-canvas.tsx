@@ -50,7 +50,8 @@ export function DesignCanvas({
       if (!data || data.type !== "theograce:edit") return;
       const r = data.rect as CanvasRect | undefined;
       if (!r) return;
-      onBlockSelect(data.target as string, r);
+      if (typeof data.target !== "string") return;
+      onBlockSelect(data.target, r);
     }
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);

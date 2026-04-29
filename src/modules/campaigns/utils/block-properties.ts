@@ -2,6 +2,7 @@ import type {
   BlockType,
   SkeletonManifest,
 } from "@/modules/email-templates/types";
+import { pathIsMultiline } from "@/modules/campaigns/components/edit-fields/path-helpers";
 
 export type PropField =
   | {
@@ -67,18 +68,8 @@ export function propLabel(propName: string): string {
 const TEXT_PATH_PATTERN =
   /^(body_blocks\[\d+\]\.(title|description|cta)|free_top_text|nicky_quote\.(quote|response)|subject_variant\.(subject|preheader)|sms)$/;
 
-const MULTILINE_PATTERNS: RegExp[] = [
-  /\.description$/,
-  /^nicky_quote\.quote$/,
-  /^sms$/,
-];
-
 function isTextPath(path: string): boolean {
   return TEXT_PATH_PATTERN.test(path);
-}
-
-function isMultilinePath(path: string): boolean {
-  return MULTILINE_PATTERNS.some((p) => p.test(path));
 }
 
 /**
@@ -149,7 +140,7 @@ export function resolveBlockProperties(
         propName,
         label: propLabel(propName),
         path: bindValue,
-        multiline: isMultilinePath(bindValue),
+        multiline: pathIsMultiline(bindValue),
       });
     }
   }
