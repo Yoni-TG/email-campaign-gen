@@ -92,6 +92,7 @@ export function DesignStepView({ campaign, skeleton, editableHtml }: Props) {
         campaignId={campaign.id}
         skeletonId={skeleton.id}
         savingState={savingState}
+        html={campaign.renderResult?.html ?? ""}
       />
     </div>
   );

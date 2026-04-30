@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, Check, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { variantSlug } from "@/modules/campaigns/utils/variant-slug";
+import { CopyHtmlButton } from "../copy-html-button";
 
 export type SavingState = "idle" | "saving" | "saved";
 
@@ -13,12 +14,16 @@ interface Props {
   campaignId: string;
   skeletonId: string;
   savingState: SavingState;
+  /** Final rendered HTML for the Copy HTML button. Klaviyo paste-in is
+   *  the v1 hand-off; the API push is deferred. */
+  html: string;
 }
 
 // Sticky footer for Step 5. Three regions: Back (left), saving pill
-// (center), Send test + Preview (right). Send for approval is
-// intentionally absent per product direction.
-export function DesignActionBar({ campaignId, skeletonId, savingState }: Props) {
+// (center), Send test / Preview / Copy HTML / Done (right). "Done" is
+// not "Send" — sending is Klaviyo's job. Done just exits the wizard
+// back to the campaigns list.
+export function DesignActionBar({ campaignId, skeletonId, savingState, html }: Props) {
   return (
     <footer className="sticky bottom-0 z-20 border-t border-border bg-surface">
       <div className="mx-auto flex h-14 max-w-7xl items-center px-6 sm:px-8">
@@ -50,6 +55,14 @@ export function DesignActionBar({ campaignId, skeletonId, savingState }: Props) 
           >
             <ExternalLink className="size-3.5" />
             Preview
+          </Link>
+          <CopyHtmlButton html={html} size="sm" variant="outline" />
+          <Link
+            href="/"
+            className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
+          >
+            <Check className="size-3.5" />
+            Done
           </Link>
         </div>
       </div>
