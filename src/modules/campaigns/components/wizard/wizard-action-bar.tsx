@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
+import { SaveStatusPill } from "@/components/save-status-pill";
+import type { AutoSaveStatus } from "@/lib/use-auto-save";
 
 interface Props {
   /** Where the ghost Back link points. Past wizard step's route. */
@@ -9,12 +11,24 @@ interface Props {
   primary: ReactNode;
   /** Optional helper text rendered between back and primary (right-aligned). */
   helper?: ReactNode;
+  /** Auto-save status pill rendered centered between Back and primary.
+   *  Steps without a save loop (e.g. step 1 where the campaign doesn't
+   *  exist yet) omit these and the slot collapses. */
+  saveStatus?: AutoSaveStatus;
+  saveSavedAt?: Date | null;
 }
 
 // Sticky bottom action bar shared across wizard steps. Left: Back. Right:
 // the step's primary CTA, with optional helper text (e.g. "X of Y uploaded
-// · M will use placeholders") floated next to it.
-export function WizardActionBar({ backHref, primary, helper }: Props) {
+// · M will use placeholders") floated next to it. Center: save-status pill
+// when the step opted in.
+export function WizardActionBar({
+  backHref,
+  primary,
+  helper,
+  saveStatus,
+  saveSavedAt,
+}: Props) {
   return (
     <div className="sticky bottom-0 z-30 border-t border-border bg-surface">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6 sm:px-8">
@@ -25,6 +39,14 @@ export function WizardActionBar({ backHref, primary, helper }: Props) {
           <ArrowLeft className="size-3.5" />
           Back
         </Link>
+        {saveStatus && (
+          <div className="mx-auto">
+            <SaveStatusPill
+              status={saveStatus}
+              savedAt={saveSavedAt ?? null}
+            />
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-4">
           {helper && <span className="text-sm text-ink-3">{helper}</span>}
           {primary}

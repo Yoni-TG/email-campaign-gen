@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, GripVertical, Plus, Sparkles, X } from "lucide-react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductSearchAdd } from "@/modules/products/components/product-search-add";
 import { useReviewForm } from "@/modules/campaigns/hooks/use-review-form";
+import { useAutoSave } from "@/lib/use-auto-save";
 import { cn } from "@/lib/utils";
 import { SMS_HARD_CAP, smsRenderedLength } from "@/lib/sms";
 import type {
@@ -53,6 +54,34 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
   const preheader = approvedCopy.subject_variant.preheader;
   const subjectOver = subject.length > SUBJECT_TARGET;
   const existingSkus = new Set(products.map((p) => p.sku));
+
+  // 800ms-debounced background save. Hits the generic PATCH endpoint —
+  // no state transition, no re-render — so the operator's edits are
+  // durable even if they close the tab before clicking "Generate
+  // layouts →". The CTA still POSTs /approve, which both persists and
+  // transitions; the autosave just covers the in-between.
+  const formSnapshot = useMemo(
+    () => ({ approvedCopy, products }),
+    [approvedCopy, products],
+  );
+  const persist = useCallback(
+    async ({
+      approvedCopy: copy,
+      products: prods,
+    }: {
+      approvedCopy: ApprovedCopy;
+      products: ProductSnapshot[];
+    }) => {
+      const res = await fetch(`/api/campaigns/${campaign.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approvedCopy: copy, approvedProducts: prods }),
+      });
+      if (!res.ok) throw new Error("autosave failed");
+    },
+    [campaign.id],
+  );
+  const { status: saveStatus, savedAt } = useAutoSave(formSnapshot, persist);
 
   const patch = (partial: Partial<ApprovedCopy>) =>
     setApprovedCopy({ ...approvedCopy, ...partial });
@@ -115,6 +144,8 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
 
       <WizardActionBar
         backHref={`/campaigns/${campaign.id}`}
+        saveStatus={saveStatus}
+        saveSavedAt={savedAt}
         primary={
           <button
             type="button"

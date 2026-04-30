@@ -28,3 +28,18 @@ function startOfDay(d: Date): Date {
   out.setHours(0, 0, 0, 0);
   return out;
 }
+
+// Sub-minute precision for save indicators ("just now", "12s ago", "3m ago").
+// Drops to "Xh ago" for older timestamps. Returns "" when date is null/undefined
+// so the pill can render nothing without branching at the call site.
+export function formatRelativeTime(date: Date | null, now: Date = new Date()): string {
+  if (!date) return "";
+  const diffMs = now.getTime() - date.getTime();
+  const seconds = Math.max(0, Math.round(diffMs / 1000));
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  return `${hours}h ago`;
+}
