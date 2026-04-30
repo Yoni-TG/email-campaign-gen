@@ -171,6 +171,11 @@ export interface BodyBlock {
   title: string | null;
   description: string | null;
   cta: string | null;
+  /** Destination URL the CTA button links to. Renderer falls back to
+   *  "#" when null so the button still renders without a dangling
+   *  href. Optional in the type for backward-compat with rows written
+   *  before the field existed. */
+  cta_href?: string | null;
 }
 
 // Brand-guide §7 Nicky Hilton rule: when a claim about Theo Grace would
@@ -390,6 +395,13 @@ export interface Campaign {
    * grow as more block-level overrides are exposed.
    */
   blockOverrides: Record<number, Record<string, unknown>> | null;
+  /**
+   * Display order of skeleton blocks when the operator has reordered
+   * the layers panel in step 5. Array of manifest-index numbers in
+   * render order (e.g. `[2, 0, 1]` renders block-2 first, then block-0,
+   * then block-1). Null = use the manifest's natural order.
+   */
+  blockOrder: number[] | null;
   /** The 3 candidate variants rendered after CP1 approval. */
   candidateVariants: CandidateVariant[] | null;
   /** Skeleton id the operator picked at variant_selection. */

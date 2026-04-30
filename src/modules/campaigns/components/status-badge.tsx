@@ -2,87 +2,62 @@ import type { CampaignStatus } from "@/lib/types";
 import { CAMPAIGN_STATUS_LABELS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+// Tone palette is small on purpose — neutral / info / warning / success
+// covers every state without colour-soup. Pulse only on truly in-flight
+// states so it stays meaningful.
+type Tone = "neutral" | "info" | "warning" | "success";
+
 interface StatusStyle {
-  bg: string;
-  text: string;
-  ring: string;
-  dot: string;
-  /** Whether the dot should pulse — reserve for "AI is working" states. */
+  tone: Tone;
   pulse?: boolean;
 }
 
-// Bookends neutral/green. Automated-in-progress cool (sky/violet). User-
-// action warm (amber/rose/indigo). All pairs are ≥4.5:1 on white.
 const STATUS_STYLES: Record<CampaignStatus, StatusStyle> = {
-  draft: {
-    bg: "bg-stone-100",
-    text: "text-stone-700",
-    ring: "ring-stone-200",
-    dot: "bg-stone-400",
-  },
-  generating: {
-    bg: "bg-sky-50",
-    text: "text-sky-800",
-    ring: "ring-sky-200",
-    dot: "bg-sky-500",
-    pulse: true,
-  },
-  review: {
-    bg: "bg-amber-50",
-    text: "text-amber-900",
-    ring: "ring-amber-200",
-    dot: "bg-amber-500",
-  },
-  rendering_candidates: {
-    bg: "bg-violet-50",
-    text: "text-violet-800",
-    ring: "ring-violet-200",
-    dot: "bg-violet-500",
-    pulse: true,
-  },
-  variant_selection: {
-    bg: "bg-indigo-50",
-    text: "text-indigo-800",
-    ring: "ring-indigo-200",
-    dot: "bg-indigo-500",
-  },
-  asset_upload: {
-    bg: "bg-rose-50",
-    text: "text-rose-800",
-    ring: "ring-rose-200",
-    dot: "bg-rose-500",
-  },
-  rendering_final: {
-    bg: "bg-violet-50",
-    text: "text-violet-800",
-    ring: "ring-violet-200",
-    dot: "bg-violet-500",
-    pulse: true,
-  },
-  completed: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-800",
-    ring: "ring-emerald-200",
-    dot: "bg-emerald-500",
-  },
+  draft: { tone: "neutral" },
+  generating: { tone: "info", pulse: true },
+  review: { tone: "warning" },
+  rendering_candidates: { tone: "info", pulse: true },
+  variant_selection: { tone: "info" },
+  asset_upload: { tone: "warning" },
+  rendering_final: { tone: "info", pulse: true },
+  completed: { tone: "success" },
 };
 
+const TONE_PILL: Record<Tone, string> = {
+  neutral: "bg-surface-2 text-ink-3",
+  info: "bg-info/10 text-info",
+  warning: "bg-warning/10 text-warning",
+  success: "bg-success/10 text-success",
+};
+
+const TONE_DOT: Record<Tone, string> = {
+  neutral: "bg-ink-4",
+  info: "bg-info",
+  warning: "bg-warning",
+  success: "bg-success",
+};
+
+// Returns the colour family for the row's left status stripe — same tone
+// vocabulary as the pill so the row reads as a single visual unit.
+export function statusStripeClass(status: CampaignStatus): string {
+  const tone = STATUS_STYLES[status].tone;
+  return TONE_DOT[tone];
+}
+
 export function StatusBadge({ status }: { status: CampaignStatus }) {
-  const s = STATUS_STYLES[status];
+  const style = STATUS_STYLES[status];
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap",
-        s.bg,
-        s.text,
-        s.ring,
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+        TONE_PILL[style.tone],
       )}
     >
       <span
         className={cn(
-          "h-1.5 w-1.5 rounded-full",
-          s.dot,
-          s.pulse && "animate-pulse",
+          "size-1.5 rounded-full",
+          TONE_DOT[style.tone],
+          style.pulse && "animate-pulse",
         )}
         aria-hidden
       />

@@ -27,6 +27,7 @@ export interface CampaignWrite {
   heroImagePath?: string | null;
   assetPaths?: Record<string, string> | null;
   blockOverrides?: Record<number, Record<string, unknown>> | null;
+  blockOrder?: number[] | null;
   candidateVariants?: CandidateVariant[] | null;
   chosenSkeletonId?: string | null;
   renderResult?: FinalRenderResult | null;
@@ -75,6 +76,8 @@ export function serializeForDb(
     out.blockOverrides = data.blockOverrides
       ? JSON.stringify(data.blockOverrides)
       : null;
+  if (data.blockOrder !== undefined)
+    out.blockOrder = data.blockOrder ? JSON.stringify(data.blockOrder) : null;
   if (data.candidateVariants !== undefined)
     out.candidateVariants = data.candidateVariants
       ? JSON.stringify(data.candidateVariants)
@@ -116,8 +119,11 @@ export async function listCampaigns(): Promise<Campaign[]> {
   return rows.map(parseCampaign);
 }
 
-// Row shape for list views — skips the heavy JSON blobs (seed, generatedCopy,
-// products, figma) that the home page doesn't need to render.
+// Row shape for list views — skips the heaviest JSON blobs (generatedCopy,
+// approvedCopy, products, render artefacts) that the home page doesn't need
+// to render. We do load `seed` so the row can show the operator-written
+// `mainMessage` as a one-line teaser; seed is small so the cost is fine at
+// human-team scale.
 export interface CampaignSummary {
   id: string;
   name: string;
@@ -127,6 +133,8 @@ export interface CampaignSummary {
   createdAt: Date;
   updatedAt: Date;
   archivedAt: Date | null;
+  /** First-line teaser pulled from seed.mainMessage. Empty string when missing. */
+  teaser: string;
 }
 
 export type ListScope = "active" | "archived" | "all";
@@ -157,13 +165,27 @@ export async function listCampaignSummaries(
       createdAt: true,
       updatedAt: true,
       archivedAt: true,
+      seed: true,
     },
   });
-  return rows.map((row) => ({
+  return rows.map(({ seed, ...row }) => ({
     ...row,
     status: row.status as CampaignStatus,
     campaignType: row.campaignType as CampaignType,
+    teaser: extractTeaser(seed),
   }));
+}
+
+// Pulls the operator's `mainMessage` out of the JSON-stringified seed
+// blob. Defensive: a malformed or missing seed yields an empty teaser
+// rather than throwing — list rendering must never fail on one bad row.
+function extractTeaser(seed: string): string {
+  try {
+    const parsed = JSON.parse(seed) as { mainMessage?: unknown };
+    return typeof parsed.mainMessage === "string" ? parsed.mainMessage : "";
+  } catch {
+    return "";
+  }
 }
 
 export async function getCampaign(id: string): Promise<Campaign | null> {

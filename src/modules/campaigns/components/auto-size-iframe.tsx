@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Self-resizing iframe for srcDoc-driven email previews. srcDoc creates a
 // same-origin document, so we can read body.scrollHeight directly after
@@ -73,6 +73,54 @@ export function AutoSizeIframe({
       // Cross-origin would throw; srcDoc never is, so ignore.
     }
   }, [minHeight]);
+
+  // onLoad fires after HTML is parsed but before remote images / fonts
+  // are fully decoded — by the time the hero image lands, body height
+  // has grown past our initial measurement. Watch the iframe body with
+  // a ResizeObserver so the wrapper keeps up. Also remeasures on each
+  // image load as a defensive backup for browsers that surface image
+  // dimensions outside ResizeObserver's default targets.
+  useEffect(() => {
+    const iframe = ref.current;
+    if (!iframe) return;
+
+    let observer: ResizeObserver | null = null;
+    let imgListeners: (() => void)[] = [];
+
+    const wire = () => {
+      const win = iframe.contentWindow;
+      if (!win) return;
+      const doc = win.document;
+      observer?.disconnect();
+      imgListeners.forEach((off) => off());
+      imgListeners = [];
+
+      observer = new ResizeObserver(measure);
+      observer.observe(doc.documentElement);
+      observer.observe(doc.body);
+
+      for (const img of Array.from(doc.images)) {
+        if (img.complete) continue;
+        const onDone = () => measure();
+        img.addEventListener("load", onDone, { once: true });
+        img.addEventListener("error", onDone, { once: true });
+        imgListeners.push(() => {
+          img.removeEventListener("load", onDone);
+          img.removeEventListener("error", onDone);
+        });
+      }
+      measure();
+    };
+
+    iframe.addEventListener("load", wire);
+    if (iframe.contentDocument?.readyState === "complete") wire();
+
+    return () => {
+      iframe.removeEventListener("load", wire);
+      observer?.disconnect();
+      imgListeners.forEach((off) => off());
+    };
+  }, [measure, srcDoc]);
 
   if (scale && scale > 0 && scale < 1) {
     // Scaled-thumbnail mode: render the iframe at native 640px width inside

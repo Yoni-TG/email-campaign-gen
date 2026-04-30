@@ -75,7 +75,7 @@ export function ClosingBlock({
         {ctaLabel ? (
           <CtaButton
             label={ctaLabel}
-            href={ctaHref}
+            href={ctaHref || "#"}
             editTarget={editTargets?.ctaLabel}
           />
         ) : null}

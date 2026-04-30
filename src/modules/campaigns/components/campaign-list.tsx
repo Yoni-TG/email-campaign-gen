@@ -1,90 +1,104 @@
 import Link from "next/link";
-import { Archive, ChevronRight } from "lucide-react";
+import { Archive } from "lucide-react";
 import { CAMPAIGN_TYPE_LABELS } from "@/lib/types";
 import type { CampaignSummary } from "@/modules/campaigns/utils/campaign-persistence";
-import type { CampaignMonthGroup } from "@/modules/campaigns/utils/filter-campaigns";
+import { formatRelativeDate } from "@/modules/campaigns/utils/relative-date";
+import { cn } from "@/lib/utils";
 import { CampaignRowMenu } from "./campaign-row-menu";
-import { StatusBadgeWithTooltip } from "./status-badge-with-tooltip";
+import { OwnerAvatar } from "./owner-avatar";
+import {
+  StatusBadgeWithTooltip,
+} from "./status-badge-with-tooltip";
+import { statusStripeClass } from "./status-badge";
 
 interface CampaignListProps {
-  groups: CampaignMonthGroup[];
+  campaigns: CampaignSummary[];
   /** Empty-state copy varies by why the list is empty (no campaigns yet,
    *  filters too tight, archived view with nothing in it). The page
    *  decides which message to show. */
   emptyState: { title: string; hint: string };
 }
 
-// Server-renderable — the parent page provides month-grouped summaries.
-// The row's overflow menu is a client component, the status badge is a
-// client component for its hover tooltip; the rest renders on the server.
-export function CampaignList({ groups, emptyState }: CampaignListProps) {
-  if (groups.length === 0) {
+// Dense-table layout. Server-rendered shell with two client islands per row
+// (StatusBadgeWithTooltip + CampaignRowMenu). The whole row is a single
+// <Link> so anywhere outside the menu navigates to the campaign — the
+// menu lives as a sibling of the link, not nested inside it, because a
+// <button> inside an <a> is invalid and produces flicker on click.
+export function CampaignList({ campaigns, emptyState }: CampaignListProps) {
+  if (campaigns.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-card/50 py-16 text-center">
-        <p className="text-sm font-medium text-foreground">
-          {emptyState.title}
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">{emptyState.hint}</p>
+      <div className="rounded-xl border border-dashed border-border-strong bg-surface/40 py-16 text-center">
+        <p className="text-sm font-medium text-ink">{emptyState.title}</p>
+        <p className="mt-1 text-sm text-ink-3">{emptyState.hint}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {groups.map((group) => (
-        <section key={group.key} className="space-y-2">
-          <h3 className="px-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            {group.label}
-            <span className="ml-2 font-normal normal-case tracking-normal text-muted-foreground/70">
-              {group.campaigns.length} campaign
-              {group.campaigns.length === 1 ? "" : "s"}
-            </span>
-          </h3>
-          <ul className="space-y-2">
-            {group.campaigns.map((campaign) => (
-              <CampaignRow key={campaign.id} campaign={campaign} />
-            ))}
-          </ul>
-        </section>
-      ))}
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div
+        role="row"
+        className="grid grid-cols-[8px_minmax(0,1fr)_140px_64px_120px_28px] items-center gap-4 border-b border-border bg-surface-2/50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-ink-3"
+      >
+        <span aria-hidden />
+        <span role="columnheader">Campaign</span>
+        <span role="columnheader">Status</span>
+        <span role="columnheader">Owner</span>
+        <span role="columnheader">Date</span>
+        <span aria-hidden />
+      </div>
+      <ul role="rowgroup">
+        {campaigns.map((c) => (
+          <CampaignRow key={c.id} campaign={c} />
+        ))}
+      </ul>
     </div>
   );
 }
 
 function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
   const archived = campaign.archivedAt !== null;
-  // The menu lives as a sibling of the Link, not inside it — nesting a
-  // <button> inside an <a> is invalid HTML and causes the parent link
-  // to navigate even after the menu's click handlers stopPropagate
-  // (the popover opens, the route change unmounts it, you see a flicker).
+  const teaser =
+    campaign.teaser?.trim() ||
+    CAMPAIGN_TYPE_LABELS[campaign.campaignType];
+
   return (
-    <li className="group relative">
+    <li role="row" className="group relative border-b border-border last:border-b-0">
       <Link
         href={`/campaigns/${campaign.id}`}
-        className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 pr-24 shadow-sm transition-colors hover:bg-muted/40"
+        className="grid grid-cols-[8px_minmax(0,1fr)_140px_64px_120px_28px] items-center gap-4 px-4 py-3 transition-colors hover:bg-surface-2/40"
       >
-        <div className="min-w-0 flex-1">
+        <span
+          className={cn(
+            "h-9 w-1 rounded-full",
+            statusStripeClass(campaign.status),
+          )}
+          aria-hidden
+        />
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="truncate font-medium">{campaign.name}</p>
+            <p className="truncate font-medium text-ink">{campaign.name}</p>
             {archived && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                <Archive className="h-2.5 w-2.5" />
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-ink-3">
+                <Archive className="size-2.5" />
                 Archived
               </span>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">
-            {CAMPAIGN_TYPE_LABELS[campaign.campaignType]} ·{" "}
-            {campaign.createdBy} ·{" "}
-            {campaign.createdAt.toLocaleDateString()}
-          </p>
+          <p className="truncate text-sm text-ink-3">{teaser}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div role="cell">
           <StatusBadgeWithTooltip status={campaign.status} />
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground" />
         </div>
+        <div role="cell">
+          <OwnerAvatar name={campaign.createdBy} />
+        </div>
+        <span role="cell" className="text-sm text-ink-3 tabular-nums">
+          {formatRelativeDate(campaign.createdAt)}
+        </span>
+        <span aria-hidden />
       </Link>
-      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+      <div className="absolute right-3 top-1/2 -translate-y-1/2">
         <CampaignRowMenu campaignId={campaign.id} archived={archived} />
       </div>
     </li>

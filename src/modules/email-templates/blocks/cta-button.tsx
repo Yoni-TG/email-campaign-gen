@@ -1,11 +1,12 @@
 import { Button, Section } from "@react-email/components";
-import { COLORS, FONTS } from "./theme";
+import { COLORS, FONTS, buttonColorHex } from "./theme";
 import type { CtaButtonProps } from "./types";
 
 export function CtaButton({
   label,
   href = "#",
   align = "center",
+  buttonColor = "ink",
   editTarget,
 }: CtaButtonProps) {
   return (
@@ -14,7 +15,7 @@ export function CtaButton({
         href={href}
         data-edit-target={editTarget}
         style={{
-          backgroundColor: COLORS.black,
+          backgroundColor: buttonColorHex(buttonColor),
           color: COLORS.white,
           fontFamily: FONTS.body,
           fontSize: "13px",

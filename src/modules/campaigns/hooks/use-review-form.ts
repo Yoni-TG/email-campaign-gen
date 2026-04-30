@@ -14,6 +14,15 @@ export interface UseReviewFormInput {
   campaignId: string;
   generatedCopy: GeneratedCopy;
   generatedProducts: ProductSnapshot[];
+  /** Initial approved copy / products to seed the form with. Defaults
+   *  derive from `generatedCopy`/`generatedProducts`. Passed in when the
+   *  operator returns to the step after a prior approve, so we don't
+   *  reset their edits. */
+  initialApprovedCopy?: ApprovedCopy | null;
+  initialApprovedProducts?: ProductSnapshot[] | null;
+  /** Override the default `router.refresh()` post-approval. Used by the
+   *  wizard step to `router.push` to the next step instead. */
+  onSuccess?: (router: ReturnType<typeof useRouter>) => void;
 }
 
 export interface UseReviewFormResult {
@@ -27,9 +36,9 @@ export interface UseReviewFormResult {
   approve: () => Promise<void>;
 }
 
-// Drives the review-view state: seeds ApprovedCopy + product list from the
+// Drives the wizard copy step: seeds ApprovedCopy + product list from the
 // generation output, edits them in place, and submits /approve followed by
-// router.refresh so the next stage takes over.
+// router.refresh (or onSuccess) so the next stage takes over.
 //
 // Input is narrowed to non-nullable fields — the caller is responsible for
 // the "has generation data" precondition, so hook calls here are
@@ -38,13 +47,17 @@ export function useReviewForm({
   campaignId,
   generatedCopy,
   generatedProducts,
+  initialApprovedCopy,
+  initialApprovedProducts,
+  onSuccess,
 }: UseReviewFormInput): UseReviewFormResult {
   const router = useRouter();
-  const [approvedCopy, setApprovedCopyState] = useState<ApprovedCopy>(() =>
-    initApprovedCopy(generatedCopy),
+  const [approvedCopy, setApprovedCopyState] = useState<ApprovedCopy>(
+    () => initialApprovedCopy ?? initApprovedCopy(generatedCopy),
   );
-  const [products, setProductsState] =
-    useState<ProductSnapshot[]>(generatedProducts);
+  const [products, setProductsState] = useState<ProductSnapshot[]>(
+    initialApprovedProducts ?? generatedProducts,
+  );
   const [isApproving, setIsApproving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -100,7 +113,11 @@ export function useReviewForm({
         throw new Error(err.error ?? "Approval failed");
       }
       setDirty(false);
-      router.refresh();
+      if (onSuccess) {
+        onSuccess(router);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Approval failed";
       toast.error(message);

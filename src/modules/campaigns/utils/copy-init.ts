@@ -13,7 +13,10 @@ export function initApprovedCopy(generated: GeneratedCopy): ApprovedCopy {
   return {
     campaign_id: generated.campaign_id,
     free_top_text: generated.free_top_text,
-    body_blocks: generated.body_blocks.map((block) => ({ ...block })),
+    body_blocks: generated.body_blocks.map((block) => ({
+      ...block,
+      cta_href: block.cta_href ?? null,
+    })),
     subject_variant: { ...generated.subject_variants[0] },
     sms: generated.sms,
     nicky_quote: generated.nicky_quote ? { ...generated.nicky_quote } : null,

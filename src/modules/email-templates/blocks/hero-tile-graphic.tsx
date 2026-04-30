@@ -24,7 +24,7 @@ export function HeroTileGraphic({ imageUrl, ctaHref, editTargets }: HeroTileGrap
   return (
     <Section style={{ padding: "0" }}>
       {ctaHref ? (
-        <Link href={ctaHref} style={{ display: "block", textDecoration: "none" }}>
+        <Link href={ctaHref || "#"} style={{ display: "block", textDecoration: "none" }}>
           {img}
         </Link>
       ) : (

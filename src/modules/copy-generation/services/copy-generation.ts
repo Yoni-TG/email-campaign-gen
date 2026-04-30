@@ -9,6 +9,7 @@ import {
   buildCopyUserPrompt,
 } from "@/modules/copy-generation/utils/copy-prompt";
 import { withRetry } from "@/lib/retry";
+import { SMS_HARD_CAP, smsRenderedLength } from "@/lib/sms";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 2048;
@@ -48,8 +49,13 @@ const COPY_TOOL: Anthropic.Tool = {
               description:
                 "CTA button label — action + specific outcome (e.g. 'Shop the stack', 'See Nicky's picks'). Never 'Click here', 'Learn more', 'Buy now'. null if the section doesn't need a button.",
             },
+            cta_href: {
+              type: ["string", "null"],
+              description:
+                "Destination URL for the CTA. null when the operator hasn't decided yet — they fill it in during review. Always emit null; do NOT invent URLs.",
+            },
           },
-          required: ["title", "description", "cta"],
+          required: ["title", "description", "cta", "cta_href"],
           additionalProperties: false,
         },
       },
@@ -77,7 +83,7 @@ const COPY_TOOL: Anthropic.Tool = {
       sms: {
         type: ["string", "null"],
         description:
-          "SMS copy ≤130 chars (including spaces and emoji). Use {link} as the URL placeholder. null when SMS isn't requested.",
+          "SMS copy. Use {link} as the URL placeholder — the send system substitutes it with a Klaviyo short link up to 24 characters long. The TOTAL rendered length (with {link} expanded to 24 chars) MUST be ≤130 chars including spaces and emoji. So when the SMS contains {link}, the literal template length must be ≤112; without {link}, ≤130. null when SMS isn't requested.",
       },
       nicky_quote: {
         type: ["object", "null"],
@@ -135,7 +141,62 @@ export async function generateCopy(
   options?: { signal?: AbortSignal },
 ): Promise<GeneratedCopy> {
   const client = getAnthropic();
+  const userPrompt = buildCopyUserPrompt(seed, campaignType);
+  const messages: Anthropic.MessageParam[] = [
+    { role: "user", content: userPrompt },
+  ];
 
+  let llmOutput = await callClaude(client, messages, options);
+
+  // Single self-correction pass: if SMS overshot the rendered cap,
+  // hand the bad output back to Claude with the actual rendered length
+  // and ask it to retry. The model usually complies on round 2.
+  const renderedSmsLen = smsRenderedLength(llmOutput.sms);
+  if (renderedSmsLen > SMS_HARD_CAP) {
+    console.warn(
+      `[copy-generation] sms overshot: rendered ${renderedSmsLen} > ${SMS_HARD_CAP}; retrying once`,
+    );
+    const retryMessages: Anthropic.MessageParam[] = [
+      ...messages,
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "sms_overshoot_retry",
+            name: COPY_TOOL.name,
+            input: llmOutput as unknown as Record<string, unknown>,
+          },
+        ],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "sms_overshoot_retry",
+            content:
+              `SMS exceeded the wire cap. The rendered length (with {link} ` +
+              `expanded to 24 chars) is ${renderedSmsLen}; the hard cap is ` +
+              `${SMS_HARD_CAP}. Re-emit the entire tool call with a shorter ` +
+              `\`sms\` so its rendered length is ≤${SMS_HARD_CAP}. Keep ` +
+              `every other field byte-identical.`,
+            is_error: true,
+          },
+        ],
+      },
+    ];
+    llmOutput = await callClaude(client, retryMessages, options);
+  }
+
+  return { campaign_id: campaignId, ...llmOutput };
+}
+
+async function callClaude(
+  client: Anthropic,
+  messages: Anthropic.MessageParam[],
+  options?: { signal?: AbortSignal },
+): Promise<Omit<GeneratedCopy, "campaign_id">> {
   const response = await withRetry(
     () =>
       client.messages.create(
@@ -151,9 +212,7 @@ export async function generateCopy(
           ],
           tools: [COPY_TOOL],
           tool_choice: { type: "tool", name: COPY_TOOL.name },
-          messages: [
-            { role: "user", content: buildCopyUserPrompt(seed, campaignType) },
-          ],
+          messages,
         },
         { signal: options?.signal },
       ),
@@ -167,7 +226,5 @@ export async function generateCopy(
         "Check that CLAUDE_MODEL is set and the tool schema is valid.",
     );
   }
-
-  const llmOutput = toolUse.input as Omit<GeneratedCopy, "campaign_id">;
-  return { campaign_id: campaignId, ...llmOutput };
+  return toolUse.input as Omit<GeneratedCopy, "campaign_id">;
 }

@@ -46,7 +46,7 @@ export default async function PreviewPage({ params }: PageProps) {
   const variantName = candidateMatch?.name ?? skeletonId;
 
   return (
-    <div>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link
@@ -74,8 +74,8 @@ export default async function PreviewPage({ params }: PageProps) {
       <AutoSizeIframe
         title={`${skeletonId} preview`}
         srcDoc={html}
-        className="block w-full rounded-lg border border-border bg-white"
-        minHeight={900}
+        className="mx-auto block w-[640px] max-w-full bg-white"
+        minHeight={400}
       />
 
       {finalMatch && (

@@ -79,7 +79,7 @@ export function EditorialSplit({
       {ctaLabel ? (
         <CtaButton
           label={ctaLabel}
-          href={ctaHref}
+          href={ctaHref || "#"}
           align="left"
           editTarget={editTargets?.ctaLabel}
         />

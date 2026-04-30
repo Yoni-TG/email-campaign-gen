@@ -35,6 +35,7 @@ export async function renderEditableForCampaign(
     withAssets: true,
     editable: true,
     blockOverrides: campaign.blockOverrides,
+    blockOrder: campaign.blockOrder,
   });
   return html;
 }

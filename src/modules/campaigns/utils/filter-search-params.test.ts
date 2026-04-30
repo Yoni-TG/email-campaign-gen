@@ -12,7 +12,7 @@ describe("parseListSearchParams", () => {
       filters: {
         search: "",
         type: "all",
-        status: "all",
+        bucket: "all",
         sort: "newest",
       },
     });
@@ -23,14 +23,14 @@ describe("parseListSearchParams", () => {
       scope: "archived",
       q: "spring",
       type: "sale_promo",
-      status: "completed",
+      bucket: "completed",
       sort: "name",
     });
     expect(out.scope).toBe("archived");
     expect(out.filters).toEqual({
       search: "spring",
       type: "sale_promo",
-      status: "completed",
+      bucket: "completed",
       sort: "name",
     });
   });
@@ -39,12 +39,12 @@ describe("parseListSearchParams", () => {
     const out = parseListSearchParams({
       scope: "trash",
       type: "made_up_type",
-      status: "made_up_status",
+      bucket: "made_up_bucket",
       sort: "random",
     });
     expect(out.scope).toBe("active");
     expect(out.filters.type).toBe("all");
-    expect(out.filters.status).toBe("all");
+    expect(out.filters.bucket).toBe("all");
     expect(out.filters.sort).toBe("newest");
   });
 
@@ -63,7 +63,7 @@ describe("serializeListQuery", () => {
         filters: {
           search: "",
           type: "all",
-          status: "all",
+          bucket: "all",
           sort: "newest",
         },
       }),
@@ -76,7 +76,7 @@ describe("serializeListQuery", () => {
       filters: {
         search: "spring",
         type: "sale_promo",
-        status: "all",
+        bucket: "all",
         sort: "name",
       },
     });
@@ -84,7 +84,20 @@ describe("serializeListQuery", () => {
     expect(params.get("scope")).toBe("archived");
     expect(params.get("q")).toBe("spring");
     expect(params.get("type")).toBe("sale_promo");
-    expect(params.get("status")).toBeNull();
+    expect(params.get("bucket")).toBeNull();
     expect(params.get("sort")).toBe("name");
+  });
+
+  it("emits the bucket key when non-default", () => {
+    const qs = serializeListQuery({
+      scope: "active",
+      filters: {
+        search: "",
+        type: "all",
+        bucket: "in_progress",
+        sort: "newest",
+      },
+    });
+    expect(new URLSearchParams(qs).get("bucket")).toBe("in_progress");
   });
 });

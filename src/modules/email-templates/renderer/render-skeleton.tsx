@@ -104,7 +104,7 @@ function pathToEditTarget(path: string): string | null {
   }
   if (path === "products") return "products";
   if (
-    /^body_blocks\[\d+\]\.(title|description|cta)$/.test(path) ||
+    /^body_blocks\[\d+\]\.(title|description|cta|cta_href)$/.test(path) ||
     path === "subject_variant.subject" ||
     path === "subject_variant.preheader" ||
     path === "free_top_text" ||
@@ -182,6 +182,14 @@ export async function renderSkeleton(
      * skeleton manifest.
      */
     blockOverrides?: Record<number, Record<string, unknown>> | null;
+    /**
+     * Operator-supplied display order for the manifest's blocks. Array of
+     * manifest-index numbers in render order. When provided, drives the
+     * order of `blockElements`; overrides remain keyed by manifest index
+     * so they stay attached to block identity, not display position.
+     * Falls back to manifest order when null/undefined.
+     */
+    blockOrder?: number[] | null;
   },
 ): Promise<RenderResult> {
   const missingAssets: string[] = [];
@@ -219,6 +227,16 @@ export async function renderSkeleton(
     }
     return <Component key={index} {...props} />;
   });
+
+  // Apply operator-supplied reorder, dropping any indices that fall
+  // outside the manifest (defensive — a stale blockOrder shouldn't
+  // crash the render).
+  const orderedElements =
+    opts.blockOrder && opts.blockOrder.length > 0
+      ? opts.blockOrder
+          .filter((i) => i >= 0 && i < blockElements.length)
+          .map((i) => blockElements[i])
+      : blockElements;
 
   const tree = (
     <Html>
@@ -259,7 +277,7 @@ export async function renderSkeleton(
             backgroundColor: COLORS.white,
           }}
         >
-          {blockElements}
+          {orderedElements}
         </Container>
       </Body>
     </Html>

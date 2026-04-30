@@ -43,6 +43,7 @@ export async function updateCopy(
   const { html } = await renderSkeleton(skeleton, blueprint, {
     withAssets: true,
     blockOverrides: campaign.blockOverrides,
+    blockOrder: campaign.blockOrder,
   });
   const renderResult: FinalRenderResult = {
     skeletonId: skeleton.id,

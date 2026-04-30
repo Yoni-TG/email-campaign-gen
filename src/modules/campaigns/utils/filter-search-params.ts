@@ -1,17 +1,24 @@
-import { CAMPAIGN_STATUSES, CAMPAIGN_TYPES } from "@/lib/types";
-import type { CampaignStatus, CampaignType } from "@/lib/types";
+import { CAMPAIGN_TYPES } from "@/lib/types";
+import type { CampaignType } from "@/lib/types";
 import type { ListScope } from "./campaign-persistence";
 import {
   CAMPAIGN_SORTS,
   DEFAULT_FILTERS,
+  STATUS_BUCKETS,
   type CampaignFilters,
   type CampaignSort,
+  type StatusBucket,
 } from "./filter-campaigns";
 
-const VALID_SCOPES: ListScope[] = ["active", "archived"];
+// The URL only ever toggles between active and archived — "all" is a
+// query helper for callers of `listCampaignSummaries`, never a UI state.
+// Narrowing here keeps downstream consumers from having to handle the
+// impossible "all" case.
+export type UiScope = Exclude<ListScope, "all">;
+const VALID_SCOPES: UiScope[] = ["active", "archived"];
 
 export interface ParsedListQuery {
-  scope: ListScope;
+  scope: UiScope;
   filters: CampaignFilters;
 }
 
@@ -25,7 +32,7 @@ export function parseListSearchParams(
     filters: {
       search: parseString(raw.q),
       type: parseEnum(raw.type, CAMPAIGN_TYPES) ?? "all",
-      status: parseEnum(raw.status, CAMPAIGN_STATUSES) ?? "all",
+      bucket: parseEnum(raw.bucket, STATUS_BUCKETS) ?? "all",
       sort: parseEnum(raw.sort, CAMPAIGN_SORTS) ?? DEFAULT_FILTERS.sort,
     },
   };
@@ -39,8 +46,7 @@ export function serializeListQuery(query: ParsedListQuery): string {
   if (query.scope !== "active") params.set("scope", query.scope);
   if (query.filters.search) params.set("q", query.filters.search);
   if (query.filters.type !== "all") params.set("type", query.filters.type);
-  if (query.filters.status !== "all")
-    params.set("status", query.filters.status);
+  if (query.filters.bucket !== "all") params.set("bucket", query.filters.bucket);
   if (query.filters.sort !== DEFAULT_FILTERS.sort)
     params.set("sort", query.filters.sort);
   return params.toString();
@@ -51,9 +57,9 @@ function parseString(v: string | string[] | undefined): string {
   return "";
 }
 
-function parseScope(v: string | string[] | undefined): ListScope {
+function parseScope(v: string | string[] | undefined): UiScope {
   return typeof v === "string" && (VALID_SCOPES as string[]).includes(v)
-    ? (v as ListScope)
+    ? (v as UiScope)
     : "active";
 }
 
@@ -66,5 +72,5 @@ function parseEnum<T extends string>(
 }
 
 // Re-exports for convenience at call sites.
-export type { CampaignFilters, CampaignSort };
-export type { CampaignStatus, CampaignType };
+export type { CampaignFilters, CampaignSort, StatusBucket };
+export type { CampaignType };

@@ -65,7 +65,7 @@ export function HeroProduct({
           {ctaLabel ? (
             <CtaButton
               label={ctaLabel}
-              href={ctaHref}
+              href={ctaHref || "#"}
               align="left"
               editTarget={editTargets?.ctaLabel}
             />

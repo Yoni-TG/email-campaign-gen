@@ -2,7 +2,7 @@
 // component's prop shape. The renderer uses BlockPropsMap to resolve a
 // manifest's bind paths into typed props for each component.
 
-import type { BlockBackground } from "./theme";
+import type { BlockAlignment, BlockBackground, ButtonColor } from "./theme";
 
 // When the renderer runs in editable mode it derives a map from each
 // bindable prop to a `data-edit-target` string and passes it to the
@@ -92,6 +92,8 @@ export interface TextBlockCenteredProps {
   ctaLabel?: string;
   ctaHref?: string;
   background?: BlockBackground;
+  align?: BlockAlignment;
+  buttonColor?: ButtonColor;
   editTargets?: EditTargets;
 }
 
@@ -123,7 +125,8 @@ export interface NickyQuoteModuleProps {
 export interface CtaButtonProps {
   label: string;
   href?: string;
-  align?: "left" | "center";
+  align?: BlockAlignment;
+  buttonColor?: ButtonColor;
   /** Optional click-to-edit target. When set, the button becomes
    *  editable on the in-app editing surface. */
   editTarget?: string;
