@@ -23,12 +23,18 @@ export default async function CampaignPage({
   const campaign = await getCampaign(id);
   if (!campaign) notFound();
 
-  // Wizard hand-off: when generation finishes the operator should land
-  // on the new per-step routes, not the legacy side-by-side dispatcher
-  // views. Each branch is gated on the data the wizard step needs, so
-  // we never bounce mid-redirect.
+  // Wizard hand-off: every interactive AND in-flight status routes to
+  // its corresponding per-step page so the operator stays inside the
+  // wizard chrome (top progress + bottom action bar). Each step page
+  // owns its own "still loading" treatment — no full-page replacement.
+  if (campaign.status === "draft" || campaign.status === "generating") {
+    redirect(`/campaigns/${id}/copy`);
+  }
   if (campaign.status === "review" && campaign.generatedCopy && campaign.generatedProducts) {
     redirect(`/campaigns/${id}/copy`);
+  }
+  if (campaign.status === "rendering_candidates") {
+    redirect(`/campaigns/${id}/layout`);
   }
   if (
     campaign.status === "variant_selection" &&
@@ -38,6 +44,9 @@ export default async function CampaignPage({
   }
   if (campaign.status === "asset_upload" && campaign.chosenSkeletonId) {
     redirect(`/campaigns/${id}/images`);
+  }
+  if (campaign.status === "rendering_final") {
+    redirect(`/campaigns/${id}/design`);
   }
 
   // Only completed campaigns get an editable render — everywhere else

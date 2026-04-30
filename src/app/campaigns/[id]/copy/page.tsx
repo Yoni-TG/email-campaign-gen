@@ -1,12 +1,14 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CopyEditView } from "@/modules/campaigns/components/wizard/copy-edit-view";
+import { GeneratingView } from "@/modules/campaigns/components/generating-view";
 import { WizardChrome } from "@/modules/campaigns/components/wizard/wizard-chrome";
 import { getCampaign } from "@/modules/campaigns/utils/campaign-persistence";
 
-// Step 2 (Copy). Available once `generate-campaign` has populated
-// generatedCopy + generatedProducts — anything earlier in the flow gets
-// bounced back to the status-driven detail page so the operator sees
-// the right "still generating" view.
+// Step 2 (Copy). Owns two states inside the wizard chrome:
+//   - draft / generating → GeneratingView (skeleton + poll)
+//   - review (with copy + products) → CopyEditView
+// Anything later in the flow is redirected to its own step page by
+// `[id]/page.tsx` before this route runs.
 export const dynamic = "force-dynamic";
 
 export default async function CopyStepPage({
@@ -18,9 +20,8 @@ export default async function CopyStepPage({
   const campaign = await getCampaign(id);
   if (!campaign) notFound();
 
-  if (!campaign.generatedCopy || !campaign.generatedProducts) {
-    redirect(`/campaigns/${id}`);
-  }
+  const isGenerating =
+    campaign.status === "draft" || campaign.status === "generating";
 
   return (
     <>
@@ -29,11 +30,15 @@ export default async function CopyStepPage({
         currentStep={2}
         campaignId={campaign.id}
       />
-      <CopyEditView
-        campaign={campaign}
-        generatedCopy={campaign.generatedCopy}
-        generatedProducts={campaign.generatedProducts}
-      />
+      {isGenerating || !campaign.generatedCopy || !campaign.generatedProducts ? (
+        <GeneratingView campaignId={campaign.id} error={campaign.error} />
+      ) : (
+        <CopyEditView
+          campaign={campaign}
+          generatedCopy={campaign.generatedCopy}
+          generatedProducts={campaign.generatedProducts}
+        />
+      )}
     </>
   );
 }
