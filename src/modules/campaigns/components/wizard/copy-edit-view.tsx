@@ -79,9 +79,24 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
             subjectOver={subjectOver}
           />
 
+          <FreeTopTextSection
+            value={approvedCopy.free_top_text}
+            onChange={(next) => patch({ free_top_text: next })}
+          />
+
           <BlocksSection
             blocks={approvedCopy.body_blocks}
             onChange={(next) => patch({ body_blocks: next })}
+          />
+
+          <SmsSection
+            value={approvedCopy.sms}
+            onChange={(next) => patch({ sms: next })}
+          />
+
+          <NickyQuoteSection
+            value={approvedCopy.nicky_quote}
+            onChange={(next) => patch({ nicky_quote: next })}
           />
 
           <ProductsSection
@@ -89,11 +104,6 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
             existingSkus={existingSkus}
             onChange={setProducts}
             onAdd={addProduct}
-          />
-
-          <AdvancedSection
-            value={approvedCopy}
-            onChange={setApprovedCopy}
           />
         </main>
 
@@ -418,106 +428,105 @@ function ProductsSection({
   );
 }
 
-// ─── Advanced (free top text, SMS, Nicky quote) ───
+// ─── Free top text (banner above hero) ───
 
-function AdvancedSection({
+function FreeTopTextSection({
   value,
   onChange,
 }: {
-  value: ApprovedCopy;
-  onChange: (next: ApprovedCopy) => void;
+  value: string | null;
+  onChange: (next: string | null) => void;
 }) {
-  const patch = (partial: Partial<ApprovedCopy>) =>
-    onChange({ ...value, ...partial });
-
-  const smsLength = value.sms?.length ?? 0;
-
   return (
-    <details className="group rounded-md border border-border bg-surface">
-      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-ink-2 hover:text-ink">
-        <span className="inline-flex items-center gap-1.5">
-          <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" />
-          Advanced
-        </span>
-        <span className="ml-2 text-xs text-ink-3">
-          Free top text, SMS, Nicky quote
-        </span>
-      </summary>
-      <div className="space-y-6 border-t border-border px-4 py-5">
-        <div className="space-y-2">
-          <FieldLabel>Free top text</FieldLabel>
-          <input
-            type="text"
-            value={value.free_top_text ?? ""}
-            onChange={(e) =>
-              patch({ free_top_text: emptyToNull(e.target.value) })
-            }
-            placeholder="Optional banner above the hero"
-            className={inputClass}
-          />
-        </div>
+    <section className="space-y-2">
+      <FieldLabel>Free top text</FieldLabel>
+      <input
+        type="text"
+        value={value ?? ""}
+        onChange={(e) => onChange(emptyToNull(e.target.value))}
+        placeholder="Optional banner above the hero"
+        className={inputClass}
+      />
+    </section>
+  );
+}
 
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between">
-            <FieldLabel>SMS</FieldLabel>
-            <span
-              className={cn(
-                "text-xs tabular-nums",
-                smsLength >= SMS_MAX ? "text-destructive" : "text-ink-3",
-              )}
-            >
-              {smsLength} / {SMS_MAX}
-            </span>
-          </div>
-          <textarea
-            value={value.sms ?? ""}
-            onChange={(e) => patch({ sms: emptyToNull(e.target.value) })}
-            rows={2}
-            maxLength={SMS_MAX}
-            placeholder="Use {link} as the URL placeholder"
-            className={cn(inputClass, "resize-none")}
-          />
-        </div>
+// ─── SMS companion ───
 
-        <div className="space-y-2">
-          <FieldLabel>Nicky quote</FieldLabel>
-          <textarea
-            value={value.nicky_quote?.quote ?? ""}
-            onChange={(e) => {
-              const quote = e.target.value;
-              patch({
-                nicky_quote: quote.trim().length
-                  ? {
-                      quote,
-                      response: value.nicky_quote?.response ?? null,
-                    }
-                  : null,
-              });
-            }}
-            rows={2}
-            placeholder="Brand-guide §7 — clear to omit"
-            className={cn(inputClass, "resize-none")}
-          />
-          <input
-            type="text"
-            value={value.nicky_quote?.response ?? ""}
-            disabled={!value.nicky_quote}
-            onChange={(e) =>
-              patch({
-                nicky_quote: value.nicky_quote
-                  ? {
-                      ...value.nicky_quote,
-                      response: emptyToNull(e.target.value),
-                    }
-                  : null,
-              })
-            }
-            placeholder='e.g. "Thank you Nicky!"'
-            className={cn(inputClass, "disabled:opacity-50")}
-          />
-        </div>
-      </div>
-    </details>
+function SmsSection({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const length = value?.length ?? 0;
+  return (
+    <section className="space-y-2">
+      <header className="flex items-baseline justify-between">
+        <FieldLabel>SMS</FieldLabel>
+        <span
+          className={cn(
+            "text-xs tabular-nums",
+            length >= SMS_MAX ? "text-destructive" : "text-ink-3",
+          )}
+        >
+          {length} / {SMS_MAX}
+        </span>
+      </header>
+      <textarea
+        value={value ?? ""}
+        onChange={(e) => onChange(emptyToNull(e.target.value))}
+        rows={2}
+        maxLength={SMS_MAX}
+        placeholder="Use {link} as the URL placeholder"
+        className={cn(inputClass, "resize-none")}
+      />
+    </section>
+  );
+}
+
+// ─── Nicky quote (brand-guide §7) ───
+
+function NickyQuoteSection({
+  value,
+  onChange,
+}: {
+  value: ApprovedCopy["nicky_quote"];
+  onChange: (next: ApprovedCopy["nicky_quote"]) => void;
+}) {
+  return (
+    <section className="space-y-2">
+      <FieldLabel>Nicky quote</FieldLabel>
+      <textarea
+        value={value?.quote ?? ""}
+        onChange={(e) => {
+          const quote = e.target.value;
+          onChange(
+            quote.trim().length
+              ? { quote, response: value?.response ?? null }
+              : null,
+          );
+        }}
+        rows={2}
+        placeholder="Brand-guide §7 — clear to omit"
+        className={cn(inputClass, "resize-none")}
+      />
+      <input
+        type="text"
+        value={value?.response ?? ""}
+        disabled={!value}
+        onChange={(e) =>
+          onChange(
+            value
+              ? { ...value, response: emptyToNull(e.target.value) }
+              : null,
+          )
+        }
+        placeholder='e.g. "Thank you Nicky!"'
+        className={cn(inputClass, "disabled:opacity-50")}
+      />
+    </section>
   );
 }
 
