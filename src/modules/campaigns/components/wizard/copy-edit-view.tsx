@@ -65,7 +65,7 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
   return (
     <div className="flex min-h-[calc(100vh-4rem-4rem)] flex-col bg-surface-2">
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_320px]">
-        <main className="space-y-10 px-6 py-10 sm:px-10">
+        <main className="space-y-5 px-6 py-10 sm:px-10">
           <SubjectSection
             subject={subject}
             preheader={preheader}
