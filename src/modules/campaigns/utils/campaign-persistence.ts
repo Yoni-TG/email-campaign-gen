@@ -27,6 +27,7 @@ export interface CampaignWrite {
   heroImagePath?: string | null;
   assetPaths?: Record<string, string> | null;
   blockOverrides?: Record<number, Record<string, unknown>> | null;
+  blockOrder?: number[] | null;
   candidateVariants?: CandidateVariant[] | null;
   chosenSkeletonId?: string | null;
   renderResult?: FinalRenderResult | null;
@@ -75,6 +76,8 @@ export function serializeForDb(
     out.blockOverrides = data.blockOverrides
       ? JSON.stringify(data.blockOverrides)
       : null;
+  if (data.blockOrder !== undefined)
+    out.blockOrder = data.blockOrder ? JSON.stringify(data.blockOrder) : null;
   if (data.candidateVariants !== undefined)
     out.candidateVariants = data.candidateVariants
       ? JSON.stringify(data.candidateVariants)

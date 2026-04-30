@@ -395,6 +395,13 @@ export interface Campaign {
    * grow as more block-level overrides are exposed.
    */
   blockOverrides: Record<number, Record<string, unknown>> | null;
+  /**
+   * Display order of skeleton blocks when the operator has reordered
+   * the layers panel in step 5. Array of manifest-index numbers in
+   * render order (e.g. `[2, 0, 1]` renders block-2 first, then block-0,
+   * then block-1). Null = use the manifest's natural order.
+   */
+  blockOrder: number[] | null;
   /** The 3 candidate variants rendered after CP1 approval. */
   candidateVariants: CandidateVariant[] | null;
   /** Skeleton id the operator picked at variant_selection. */

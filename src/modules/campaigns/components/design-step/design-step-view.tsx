@@ -73,9 +73,13 @@ export function DesignStepView({ campaign, skeleton, editableHtml }: Props) {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <div className="flex flex-1">
         <LayersPanel
+          campaignId={campaign.id}
           skeleton={skeleton}
+          blockOrder={campaign.blockOrder}
           selectedIndex={selected?.kind === "block" ? selected.index : null}
           onSelect={handleLayerSelect}
+          onSaving={handleSaving}
+          onSaved={handleSaved}
         />
         <DesignCanvas
           campaignId={campaign.id}

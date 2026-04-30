@@ -52,6 +52,12 @@ model Campaign {
   // background colour fine-tuning; may grow over time.
   blockOverrides    String?  @map("block_overrides")
 
+  // Display order of skeleton blocks, when the operator has reordered
+  // the layers panel in step 5. Stored as a JSON array of manifest-index
+  // numbers (e.g. [2, 0, 1] means render block-2 first, then block-0,
+  // then block-1). Null = use the manifest's natural order.
+  blockOrder        String?  @map("block_order")
+
   error             String?
 
   // Soft-archive timestamp. Null = active (shown in the default list);

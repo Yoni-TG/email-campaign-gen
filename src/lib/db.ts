@@ -52,6 +52,9 @@ export function parseCampaign(row: DbCampaign): Campaign {
           Record<string, unknown>
         >)
       : null,
+    blockOrder: row.blockOrder
+      ? (JSON.parse(row.blockOrder) as number[])
+      : null,
     candidateVariants: row.candidateVariants
       ? (JSON.parse(row.candidateVariants) as CandidateVariant[])
       : null,
