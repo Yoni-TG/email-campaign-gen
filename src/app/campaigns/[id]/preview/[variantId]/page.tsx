@@ -74,8 +74,8 @@ export default async function PreviewPage({ params }: PageProps) {
       <AutoSizeIframe
         title={`${skeletonId} preview`}
         srcDoc={html}
-        className="block w-full rounded-lg border border-border bg-white"
-        minHeight={900}
+        className="mx-auto block w-[640px] max-w-full bg-white"
+        minHeight={400}
       />
 
       {finalMatch && (
