@@ -12,8 +12,8 @@ import type {
   NickyQuote,
   SubjectVariant,
 } from "@/lib/types";
+import { SMS_HARD_CAP, smsRenderedLength } from "@/lib/sms";
 
-const SMS_MAX_LENGTH = 130;
 // Klaviyo recommendation. Soft target — we surface the count but don't cap.
 const SUBJECT_TARGET_LENGTH = 50;
 
@@ -243,24 +243,29 @@ export function CopyEditor({ generatedCopy, value, onChange }: CopyEditorProps) 
         <section className="space-y-1.5">
           <div className="flex items-baseline justify-between">
             <Label className="text-base font-semibold">SMS</Label>
-            <span
-              className={`text-xs tabular-nums ${
-                (value.sms?.length ?? 0) >= SMS_MAX_LENGTH
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {value.sms?.length ?? 0}/{SMS_MAX_LENGTH}
-            </span>
+            {(() => {
+              const rendered = smsRenderedLength(value.sms);
+              const over = rendered > SMS_HARD_CAP;
+              return (
+                <span
+                  className={`text-xs tabular-nums ${
+                    over ? "text-destructive" : "text-muted-foreground"
+                  }`}
+                >
+                  {rendered}/{SMS_HARD_CAP}
+                </span>
+              );
+            })()}
           </div>
           <p className="text-xs text-muted-foreground">
-            ≤{SMS_MAX_LENGTH} chars. Use <code>{"{link}"}</code> as the URL placeholder.
+            ≤{SMS_HARD_CAP} rendered chars. Use <code>{"{link}"}</code> as the
+            URL placeholder — counts as 24 chars (substituted Klaviyo short
+            URL).
           </p>
           <Textarea
             value={nullToEmpty(value.sms)}
             onChange={(e) => patch({ sms: emptyToNull(e.target.value) })}
             rows={2}
-            maxLength={SMS_MAX_LENGTH}
           />
         </section>
       )}

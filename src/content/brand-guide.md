@@ -241,7 +241,7 @@ The wireframe agent consumes your output. Return **structured JSON** matching th
       "preheader": "string — sentence case; extends or contrasts the subject; see §10"
     }
   ],
-  "sms": "string | null — ≤130 chars including spaces. Include {link} placeholder where the CTA URL will be injected."
+  "sms": "string | null — rendered length ≤130 chars including spaces and emoji. Include {link} placeholder where the CTA URL will be injected — count {link} as 24 chars (the substituted short URL). With {link} present, literal template ≤112 chars; without it, ≤130."
 }
 ```
 
@@ -249,7 +249,7 @@ Rules:
 - `body_blocks` is the email body in reading order: index 0 is the first section under the hero, index 1 is the next, and so on.
 - 1–3 body blocks is typical. Any field on a block may be `null` if the campaign doesn't need it (e.g. an image-only section can have `title: null, description: null`). Never return an entirely empty block.
 - Provide 1–2 `subject_variants` for A/B testing. Don't repeat copy between the subject and the preheader — they should extend each other.
-- SMS is capped at **130 characters** (including spaces and emoji). Use `{link}` as the URL placeholder — the send system substitutes it. Return `null` when SMS isn't needed.
+- SMS rendered length is capped at **130 characters** (Klaviyo wire cap, including spaces and emoji). Use `{link}` as the URL placeholder — the send system substitutes it with a Klaviyo short link up to 24 chars. So when the SMS contains `{link}`, the literal template must be ≤112 chars; without it, ≤130. Return `null` when SMS isn't needed.
 - Don't invent product names, prices, or image paths — leave those to the wireframe/asset agent.
 
 ---
@@ -267,7 +267,7 @@ In order:
 7. Does spelling match the target market? *(§8.6)*
 8. Does the CTA say something specific? *(§10.)*
 9. Is the output valid JSON matching §11? *(If no → fix.)*
-10. Is `sms` ≤130 chars when provided? *(If no → trim.)*
+10. Is `sms` ≤130 rendered chars when provided? Treat `{link}` as 24 chars when counting. With `{link}` present, literal template must be ≤112. *(If no → trim.)*
 11. Are all `body_blocks` entries non-empty (at least one of title / description / cta filled)? *(If no → merge or drop.)*
 
 Revise before returning if any check fails.

@@ -176,7 +176,7 @@ const FORBIDDEN_WORDS =
 const CRITICAL_RULES =
   `## Critical Rules\n` +
   `- Call the \`generate_campaign_copy\` tool; do not write prose outside the tool call.\n` +
-  `- Obey §11 Output Contract exactly — body_blocks ordered top-to-bottom, SMS ≤130 chars, subject <50 chars preferred.\n` +
+  `- Obey §11 Output Contract exactly — body_blocks ordered top-to-bottom, SMS rendered ≤130 chars (treat {link} as 24 chars when counting), subject <50 chars preferred.\n` +
   `- NEVER use these words: ${FORBIDDEN_WORDS}. They are MYKA-relics or generic marketing filler.\n` +
   `- Match the voice to the lead_value + lead_personalities combination supplied in the brief.\n` +
   `- Match the energy to the campaign type (a sale has different energy than an editorial).\n` +
@@ -192,7 +192,7 @@ const CRITICAL_RULES =
   `  7. Does spelling match the target market? (US vs UK — §8.6.)\n` +
   `  8. Does every CTA say something specific?\n` +
   `  9. Is the output valid JSON matching §11?\n` +
-  ` 10. Is \`sms\` ≤130 chars when provided?\n` +
+  ` 10. Is \`sms\` ≤130 rendered chars when provided? Count {link} as 24 chars (its substituted Klaviyo short URL). When {link} is present, literal template length must be ≤112.\n` +
   ` 11. Are all body_blocks non-empty (at least one of title / description / cta filled)?`;
 
 const OUTPUT_FORMAT =
@@ -207,8 +207,10 @@ const OUTPUT_FORMAT =
   `read together — don't repeat the subject inside the preheader.\n` +
   `- free_top_text is the optional banner text above the hero; null when the ` +
   `campaign doesn't need one.\n` +
-  `- sms is optional and capped at 130 characters (including spaces and emoji). ` +
-  `Use the \`{link}\` placeholder for the CTA URL.\n` +
+  `- sms is optional. The recipient sees ≤130 chars total (Klaviyo wire cap). ` +
+  `Use the \`{link}\` placeholder for the CTA URL — at send time it gets ` +
+  `substituted with a real short link up to 24 chars, so when the SMS ` +
+  `contains \`{link}\` your template must be ≤112 literal chars.\n` +
   `- nicky_quote is optional. Use it only when a claim about Theo Grace would ` +
   `sound boastful in our own voice (brand-guide §7). Max one per email. The ` +
   `quote must sound like a real person (short, specific, on-persona); the ` +
@@ -343,7 +345,7 @@ export function buildCopyUserPrompt(
   }
   lines.push(
     seed.includeSms
-      ? `- Include SMS copy (short, punchy, with \`{link}\` placeholder — ≤130 chars)`
+      ? `- Include SMS copy (short, punchy, with \`{link}\` placeholder). Hard limit: rendered length ≤130 chars (Klaviyo wire cap). The {link} token expands to a real URL up to 24 chars, so when the SMS contains {link} keep the literal template ≤112 chars; without {link} keep it ≤130.`
       : `- No SMS copy needed`,
   );
   lines.push(

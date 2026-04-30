@@ -6,6 +6,7 @@ import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductSearchAdd } from "@/modules/products/components/product-search-add";
 import { useReviewForm } from "@/modules/campaigns/hooks/use-review-form";
 import { cn } from "@/lib/utils";
+import { SMS_HARD_CAP, smsRenderedLength } from "@/lib/sms";
 import type {
   ApprovedCopy,
   BodyBlock,
@@ -18,7 +19,6 @@ import { BriefRail } from "./brief-rail";
 import { WizardActionBar } from "./wizard-action-bar";
 
 const SUBJECT_TARGET = 50;
-const SMS_MAX = 130;
 
 interface Props {
   campaign: Campaign;
@@ -460,7 +460,11 @@ function SmsSection({
   value: string | null;
   onChange: (next: string | null) => void;
 }) {
-  const length = value?.length ?? 0;
+  // Rendered length, not literal — `{link}` substitutes to a Klaviyo
+  // short URL up to 24 chars at send time. We show the recipient-side
+  // count so it matches the wire cap.
+  const rendered = smsRenderedLength(value);
+  const over = rendered > SMS_HARD_CAP;
   return (
     <section className="space-y-2">
       <header className="flex items-baseline justify-between">
@@ -468,17 +472,16 @@ function SmsSection({
         <span
           className={cn(
             "text-xs tabular-nums",
-            length >= SMS_MAX ? "text-destructive" : "text-ink-3",
+            over ? "text-destructive" : "text-ink-3",
           )}
         >
-          {length} / {SMS_MAX}
+          {rendered} / {SMS_HARD_CAP}
         </span>
       </header>
       <textarea
         value={value ?? ""}
         onChange={(e) => onChange(emptyToNull(e.target.value))}
         rows={2}
-        maxLength={SMS_MAX}
         placeholder="Use {link} as the URL placeholder"
         className={cn(inputClass, "resize-none")}
       />
