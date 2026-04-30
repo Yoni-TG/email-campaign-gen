@@ -56,6 +56,19 @@ export interface UseCreativeSeedFormResult {
   submit: () => Promise<void>;
 }
 
+export type CreativeSeedFormMode =
+  | { kind: "create" }
+  | { kind: "edit"; campaignId: string };
+
+export interface UseCreativeSeedFormInput {
+  /** Defaults to create mode. Edit mode swaps the submit fn for a PATCH
+   *  against the existing campaign and routes back to /copy on success. */
+  mode?: CreativeSeedFormMode;
+  /** Pre-fills form state. Used in edit mode to seed the form with the
+   *  campaign's existing values. */
+  initial?: Partial<CreativeSeedFormState>;
+}
+
 const EMPTY: CreativeSeedFormState = {
   name: "",
   campaignType: "product_launch",
@@ -79,6 +92,11 @@ const EMPTY_TOUCHED: CreativeSeedTouched = {
   leadPersonalities: false,
 };
 
+// Brief specifies "1–3" voices. Lower bound lives in computeErrors,
+// upper bound is enforced in togglePersonality so attempts past the cap
+// no-op rather than silently grow the array.
+export const MAX_LEAD_PERSONALITIES = 3;
+
 function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
@@ -101,6 +119,54 @@ function computeErrors(state: CreativeSeedFormState): CreativeSeedErrors {
   };
 }
 
+async function submitCreate(
+  state: CreativeSeedFormState,
+  router: ReturnType<typeof useRouter>,
+): Promise<void> {
+  const createRes = await fetch("/api/campaigns", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: state.name.trim(),
+      campaignType: state.campaignType,
+      createdBy: "team",
+      seed: stateToSeed(state),
+    }),
+  });
+  if (!createRes.ok) {
+    const err = await createRes.json().catch(() => ({}));
+    throw new Error(err.error ?? "Failed to create campaign");
+  }
+  const campaign = (await createRes.json()) as Campaign;
+  // Fire-and-forget generation — the detail page polls for status.
+  void fetch(`/api/campaigns/${campaign.id}/generate`, { method: "POST" });
+  router.push(`/campaigns/${campaign.id}`);
+}
+
+async function submitEdit(
+  state: CreativeSeedFormState,
+  campaignId: string,
+  router: ReturnType<typeof useRouter>,
+): Promise<void> {
+  const res = await fetch(`/api/campaigns/${campaignId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: state.name.trim(),
+      campaignType: state.campaignType,
+      seed: stateToSeed(state),
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? "Failed to update campaign");
+  }
+  // Brief edits don't re-trigger generation in v1 — the operator can
+  // tweak copy directly on /copy. Land them back there.
+  router.push(`/campaigns/${campaignId}/copy`);
+  router.refresh();
+}
+
 function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
   return {
     targetCategories: state.targetCategories,
@@ -119,9 +185,19 @@ function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
 
 // Wraps the new-campaign form: state, validation, categories fetch, and the
 // create+generate+redirect submit flow. Keeps the form component a thin view.
-export function useCreativeSeedForm(): UseCreativeSeedFormResult {
+//
+// In edit mode (mode.kind === "edit") the same form drives a PATCH against
+// the existing campaign: same fields, same validators, only the submit
+// behaviour differs.
+export function useCreativeSeedForm(
+  input: UseCreativeSeedFormInput = {},
+): UseCreativeSeedFormResult {
+  const mode = input.mode ?? { kind: "create" };
   const router = useRouter();
-  const [state, setState] = useState<CreativeSeedFormState>(EMPTY);
+  const [state, setState] = useState<CreativeSeedFormState>(() => ({
+    ...EMPTY,
+    ...input.initial,
+  }));
   const [categories, setCategories] = useState<string[]>([]);
   const [isCategoriesLoading, setCategoriesLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -158,10 +234,16 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
   };
 
   const togglePersonality = (p: LeadPersonality) => {
-    setState((prev) => ({
-      ...prev,
-      leadPersonalities: toggle(prev.leadPersonalities, p),
-    }));
+    setState((prev) => {
+      const isSelected = prev.leadPersonalities.includes(p);
+      if (!isSelected && prev.leadPersonalities.length >= MAX_LEAD_PERSONALITIES) {
+        return prev;
+      }
+      return {
+        ...prev,
+        leadPersonalities: toggle(prev.leadPersonalities, p),
+      };
+    });
     setTouched((prev) => ({ ...prev, leadPersonalities: true }));
   };
 
@@ -185,31 +267,18 @@ export function useCreativeSeedForm(): UseCreativeSeedFormResult {
     }
     setSubmitting(true);
     try {
-      const createRes = await fetch("/api/campaigns", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: state.name.trim(),
-          campaignType: state.campaignType,
-          createdBy: "team",
-          seed: stateToSeed(state),
-        }),
-      });
-
-      if (!createRes.ok) {
-        const err = await createRes.json().catch(() => ({}));
-        throw new Error(err.error ?? "Failed to create campaign");
+      if (mode.kind === "create") {
+        await submitCreate(state, router);
+      } else {
+        await submitEdit(state, mode.campaignId, router);
       }
-
-      const campaign = (await createRes.json()) as Campaign;
-
-      // Fire-and-forget generation — the detail page polls for status.
-      void fetch(`/api/campaigns/${campaign.id}/generate`, { method: "POST" });
-
-      router.push(`/campaigns/${campaign.id}`);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to create campaign";
+        err instanceof Error
+          ? err.message
+          : mode.kind === "create"
+            ? "Failed to create campaign"
+            : "Failed to update campaign";
       toast.error(message);
       setSubmitting(false);
     }

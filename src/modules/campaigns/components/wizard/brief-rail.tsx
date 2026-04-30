@@ -7,8 +7,7 @@ import type { CreativeSeed } from "@/lib/types";
 
 interface Props {
   seed: CreativeSeed;
-  /** Where the "Edit brief" link points. Step 1's per-step route once it
-   *  ships — falls back to the status dispatcher in the meantime. */
+  /** Where the "Edit brief" link points — step 1 in edit mode. */
   editHref: string;
 }
 

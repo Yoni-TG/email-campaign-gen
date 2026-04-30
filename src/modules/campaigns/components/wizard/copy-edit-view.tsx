@@ -138,7 +138,7 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
 
         <BriefRail
           seed={campaign.seed}
-          editHref={`/campaigns/${campaign.id}`}
+          editHref={`/campaigns/${campaign.id}/brief`}
         />
       </div>
 

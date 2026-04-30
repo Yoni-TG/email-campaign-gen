@@ -27,7 +27,13 @@ import type {
   LeadValue,
   Market,
 } from "@/lib/types";
-import { useCreativeSeedForm } from "@/modules/campaigns/hooks/use-creative-seed-form";
+import {
+  MAX_LEAD_PERSONALITIES,
+  useCreativeSeedForm,
+  type CreativeSeedFormMode,
+  type CreativeSeedFormState,
+} from "@/modules/campaigns/hooks/use-creative-seed-form";
+import { useAutoGrowTextarea } from "@/lib/use-auto-grow-textarea";
 import { cn } from "@/lib/utils";
 
 // Brief view (Step 1 of the wizard). All schema-backed fields are still
@@ -36,7 +42,15 @@ import { cn } from "@/lib/utils";
 // CTA, ink chips for voice picks. Hovers darken borders rather than
 // shifting bg, since the page sits on surface-2 and a `bg-surface-2`
 // hover would blend the field into the page.
-export function CreativeSeedForm() {
+interface CreativeSeedFormProps {
+  /** Defaults to create mode. Edit mode pre-fills state from `initial`,
+   *  swaps the header/CTA copy, and PATCHes the existing campaign. */
+  mode?: CreativeSeedFormMode;
+  initial?: Partial<CreativeSeedFormState>;
+}
+
+export function CreativeSeedForm({ mode, initial }: CreativeSeedFormProps = {}) {
+  const isEdit = mode?.kind === "edit";
   const {
     state,
     setField,
@@ -49,7 +63,8 @@ export function CreativeSeedForm() {
     touched,
     markTouched,
     submit,
-  } = useCreativeSeedForm();
+  } = useCreativeSeedForm({ mode, initial });
+  const mainMessageRef = useAutoGrowTextarea(state.mainMessage);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -64,10 +79,12 @@ export function CreativeSeedForm() {
       >
         <header>
           <h1 className="font-display text-4xl leading-tight text-ink">
-            Tell us about the campaign
+            {isEdit ? "Edit the brief" : "Tell us about the campaign"}
           </h1>
           <p className="mt-3 text-sm text-ink-3">
-            We&apos;ll generate copy from this. Edit anything later.
+            {isEdit
+              ? "Updates apply on save. Existing copy and products stay as they are."
+              : "We'll generate copy from this. Edit anything later."}
           </p>
         </header>
 
@@ -181,15 +198,17 @@ export function CreativeSeedForm() {
           >
             <textarea
               id="mainMessage"
+              ref={mainMessageRef}
               rows={3}
               value={state.mainMessage}
               onChange={(e) => setField("mainMessage", e.target.value)}
               onBlur={() => markTouched("mainMessage")}
               placeholder="Core theme or angle for the campaign"
               aria-invalid={touched.mainMessage && !!errors.mainMessage}
+              style={{ overflow: "hidden" }}
               className={cn(
                 textInputClass,
-                "min-h-[96px] resize-y leading-relaxed",
+                "min-h-[96px] resize-none leading-relaxed",
               )}
             />
           </Field>
@@ -248,19 +267,25 @@ export function CreativeSeedForm() {
           <FieldGroup
             label="Lead personalities"
             required
-            hint="Pick one or more — they stack to shape voice and layout mood."
+            hint="Pick 1–3 — they stack to shape voice and layout mood."
             error={touched.leadPersonalities ? errors.leadPersonalities : null}
           >
             <div className="flex flex-wrap gap-2">
-              {LEAD_PERSONALITIES.map((p) => (
-                <ChipWithTooltip
-                  key={p}
-                  active={state.leadPersonalities.includes(p)}
-                  onClick={() => togglePersonality(p as LeadPersonality)}
-                  label={LEAD_PERSONALITY_LABELS[p]}
-                  tooltip={LEAD_PERSONALITY_DESCRIPTIONS[p]}
-                />
-              ))}
+              {LEAD_PERSONALITIES.map((p) => {
+                const active = state.leadPersonalities.includes(p);
+                const atCap =
+                  state.leadPersonalities.length >= MAX_LEAD_PERSONALITIES;
+                return (
+                  <ChipWithTooltip
+                    key={p}
+                    active={active}
+                    disabled={!active && atCap}
+                    onClick={() => togglePersonality(p as LeadPersonality)}
+                    label={LEAD_PERSONALITY_LABELS[p]}
+                    tooltip={LEAD_PERSONALITY_DESCRIPTIONS[p]}
+                  />
+                );
+              })}
             </div>
           </FieldGroup>
         </Section>
@@ -304,13 +329,19 @@ export function CreativeSeedForm() {
         </Section>
 
         <div className="flex items-center justify-end gap-4 pt-2">
-          <span className="text-xs text-ink-3">~10 sec</span>
+          {!isEdit && <span className="text-xs text-ink-3">~10 sec</span>}
           <button
             type="submit"
             disabled={isSubmitting}
             className="inline-flex h-11 items-center gap-2 rounded-md bg-brand px-5 text-sm font-medium text-surface shadow-sm transition-colors hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-2 disabled:opacity-60"
           >
-            {isSubmitting ? "Generating…" : "Generate copy"}
+            {isSubmitting
+              ? isEdit
+                ? "Saving…"
+                : "Generating…"
+              : isEdit
+                ? "Save brief"
+                : "Generate copy"}
             {!isSubmitting && <ArrowRight className="size-4" aria-hidden />}
           </button>
         </div>
@@ -469,11 +500,13 @@ function ChipWithTooltip({
   onClick,
   label,
   tooltip,
+  disabled,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   tooltip: string;
+  disabled?: boolean;
 }) {
   return (
     <Tooltip>
@@ -482,11 +515,14 @@ function ChipWithTooltip({
           <button
             type="button"
             aria-pressed={active}
+            disabled={disabled}
             className={cn(
               "rounded-full px-4 py-1.5 text-sm transition-colors",
               active
                 ? "bg-ink text-surface hover:bg-ink-2"
                 : "border border-border bg-surface text-ink-2 hover:border-border-strong hover:text-ink",
+              disabled &&
+                "cursor-not-allowed opacity-40 hover:border-border hover:text-ink-2",
             )}
             {...props}
             onClick={(event) => {
