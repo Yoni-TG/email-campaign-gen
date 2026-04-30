@@ -363,7 +363,7 @@ function BlockCard({
           className="w-full resize-none bg-transparent text-sm leading-6 text-ink-2 outline-none placeholder:text-ink-4"
         />
         <div className="flex items-baseline gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+          <span className="w-10 text-xs font-medium uppercase tracking-wide text-ink-3">
             CTA
           </span>
           <input
@@ -372,6 +372,18 @@ function BlockCard({
             onChange={(e) => onPatch({ cta: emptyToNull(e.target.value) })}
             placeholder="e.g. Shop holiday gifts"
             className="grow bg-transparent text-sm font-medium text-ink outline-none placeholder:text-ink-4"
+          />
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="w-10 text-xs font-medium uppercase tracking-wide text-ink-3">
+            Link
+          </span>
+          <input
+            type="url"
+            value={block.cta_href ?? ""}
+            onChange={(e) => onPatch({ cta_href: emptyToNull(e.target.value) })}
+            placeholder="https://… (optional)"
+            className="grow bg-transparent font-mono text-xs text-ink-2 outline-none placeholder:text-ink-4"
           />
         </div>
       </div>

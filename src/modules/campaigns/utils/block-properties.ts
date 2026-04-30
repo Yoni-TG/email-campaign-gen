@@ -51,6 +51,8 @@ const PROP_LABELS: Record<string, string> = {
   subLabel: "Sub-label",
   cta: "CTA label",
   ctaLabel: "CTA label",
+  ctaHref: "CTA link",
+  cta_href: "CTA link",
   imageUrl: "Image",
   portraitUrl: "Image",
   quote: "Quote",
@@ -66,7 +68,7 @@ export function propLabel(propName: string): string {
 }
 
 const TEXT_PATH_PATTERN =
-  /^(body_blocks\[\d+\]\.(title|description|cta)|free_top_text|nicky_quote\.(quote|response)|subject_variant\.(subject|preheader)|sms)$/;
+  /^(body_blocks\[\d+\]\.(title|description|cta|cta_href)|free_top_text|nicky_quote\.(quote|response)|subject_variant\.(subject|preheader)|sms)$/;
 
 function isTextPath(path: string): boolean {
   return TEXT_PATH_PATTERN.test(path);

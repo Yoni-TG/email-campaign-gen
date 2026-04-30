@@ -83,7 +83,7 @@ export function HeroFramed({
       {ctaLabel ? (
         <CtaButton
           label={ctaLabel}
-          href={ctaHref}
+          href={ctaHref || "#"}
           editTarget={editTargets?.ctaLabel}
         />
       ) : null}

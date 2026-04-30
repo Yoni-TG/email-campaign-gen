@@ -232,7 +232,8 @@ The wireframe agent consumes your output. Return **structured JSON** matching th
     {
       "title": "string | null — short H1 or sub-label (§10). Block 0 sits directly under the hero; block N sits beneath block N-1.",
       "description": "string | null — body paragraph(s) (§10). Short, human, rhythmic.",
-      "cta": "string | null — CTA button label (§10). Action + outcome."
+      "cta": "string | null — CTA button label (§10). Action + outcome.",
+      "cta_href": "string | null — Destination URL for the CTA. Always emit null; the operator fills it in during review. Never invent URLs."
     }
   ],
   "subject_variants": [

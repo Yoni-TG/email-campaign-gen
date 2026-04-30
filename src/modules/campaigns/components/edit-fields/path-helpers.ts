@@ -22,10 +22,10 @@ export function readPath(copy: ApprovedCopy | null, path: Path): string | null {
   if (path === "sms") return copy.sms;
   if (path === "nicky_quote.quote") return copy.nicky_quote?.quote ?? null;
   if (path === "nicky_quote.response") return copy.nicky_quote?.response ?? null;
-  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta)$/);
+  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta|cta_href)$/);
   if (m) {
     const i = parseInt(m[1], 10);
-    const field = m[2] as "title" | "description" | "cta";
+    const field = m[2] as "title" | "description" | "cta" | "cta_href";
     return copy.body_blocks[i]?.[field] ?? null;
   }
   return null;
@@ -65,10 +65,10 @@ export function writePath(
       nicky_quote: { ...copy.nicky_quote, response: v },
     };
   }
-  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta)$/);
+  const m = path.match(/^body_blocks\[(\d+)\]\.(title|description|cta|cta_href)$/);
   if (m) {
     const i = parseInt(m[1], 10);
-    const field = m[2] as "title" | "description" | "cta";
+    const field = m[2] as "title" | "description" | "cta" | "cta_href";
     return {
       ...copy,
       body_blocks: copy.body_blocks.map((b, idx) =>
@@ -88,8 +88,8 @@ export function stripCampaignId(
 }
 
 // Heuristic: paths whose value is typically a sentence or paragraph want
-// a textarea; short labels like subject / preheader / cta want a single-
-// line input that submits on Enter.
+// a textarea; short labels like subject / preheader / cta / cta_href
+// want a single-line input that submits on Enter.
 export function pathIsMultiline(path: string): boolean {
   return (
     path.endsWith(".description") ||

@@ -104,7 +104,7 @@ function pathToEditTarget(path: string): string | null {
   }
   if (path === "products") return "products";
   if (
-    /^body_blocks\[\d+\]\.(title|description|cta)$/.test(path) ||
+    /^body_blocks\[\d+\]\.(title|description|cta|cta_href)$/.test(path) ||
     path === "subject_variant.subject" ||
     path === "subject_variant.preheader" ||
     path === "free_top_text" ||

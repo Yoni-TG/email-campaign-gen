@@ -171,6 +171,11 @@ export interface BodyBlock {
   title: string | null;
   description: string | null;
   cta: string | null;
+  /** Destination URL the CTA button links to. Renderer falls back to
+   *  "#" when null so the button still renders without a dangling
+   *  href. Optional in the type for backward-compat with rows written
+   *  before the field existed. */
+  cta_href?: string | null;
 }
 
 // Brand-guide §7 Nicky Hilton rule: when a claim about Theo Grace would

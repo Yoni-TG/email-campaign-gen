@@ -29,7 +29,7 @@
         "headline": "body_blocks[1].title",
         "body": "body_blocks[1].description",
         "ctaLabel": "body_blocks[1].cta",
-        "ctaHref": "literal:#"
+        "ctaHref": "body_blocks[1].cta_href"
       }
     },
     { "type": "footer", "bind": {} }

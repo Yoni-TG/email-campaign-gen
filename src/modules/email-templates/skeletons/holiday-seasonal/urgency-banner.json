@@ -15,7 +15,7 @@
         "headline": "body_blocks[0].title",
         "subhead": "body_blocks[0].description",
         "ctaLabel": "body_blocks[0].cta",
-        "ctaHref": "literal:#",
+        "ctaHref": "body_blocks[0].cta_href",
         "background": "literal:white"
       }
     },
@@ -34,7 +34,7 @@
         "headline": "body_blocks[2].title",
         "body": "body_blocks[2].description",
         "ctaLabel": "body_blocks[2].cta",
-        "ctaHref": "literal:#"
+        "ctaHref": "body_blocks[2].cta_href"
       }
     },
     { "type": "footer", "bind": {} }

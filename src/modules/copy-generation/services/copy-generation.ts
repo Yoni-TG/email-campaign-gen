@@ -49,8 +49,13 @@ const COPY_TOOL: Anthropic.Tool = {
               description:
                 "CTA button label — action + specific outcome (e.g. 'Shop the stack', 'See Nicky's picks'). Never 'Click here', 'Learn more', 'Buy now'. null if the section doesn't need a button.",
             },
+            cta_href: {
+              type: ["string", "null"],
+              description:
+                "Destination URL for the CTA. null when the operator hasn't decided yet — they fill it in during review. Always emit null; do NOT invent URLs.",
+            },
           },
-          required: ["title", "description", "cta"],
+          required: ["title", "description", "cta", "cta_href"],
           additionalProperties: false,
         },
       },

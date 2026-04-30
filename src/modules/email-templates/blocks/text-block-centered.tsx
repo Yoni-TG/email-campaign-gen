@@ -57,7 +57,7 @@ export function TextBlockCentered({
         {ctaLabel ? (
           <CtaButton
             label={ctaLabel}
-            href={ctaHref}
+            href={ctaHref || "#"}
             editTarget={editTargets?.ctaLabel}
           />
         ) : null}
