@@ -63,7 +63,6 @@ export function TextEditor({
 
   return (
     <div>
-      <p className="mb-3 pr-6 font-mono text-xs text-muted-foreground">{path}</p>
       {isMultiline ? (
         <Textarea
           autoFocus
