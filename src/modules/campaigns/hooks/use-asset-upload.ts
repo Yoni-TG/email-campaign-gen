@@ -10,6 +10,12 @@ interface SlotState {
   preview: string | null;
 }
 
+export interface UseAssetUploadOptions {
+  /** Override the default `router.refresh()` after uploadAll succeeds.
+   *  Used by the wizard step to `router.push` on to step 5. */
+  onSuccess?: (router: ReturnType<typeof useRouter>) => void;
+}
+
 export interface UseAssetUploadResult {
   /** Per-slot file + object-URL preview state. */
   slots: Record<string, SlotState>;
@@ -31,6 +37,7 @@ export interface UseAssetUploadResult {
 export function useAssetUpload(
   campaignId: string,
   slotKeys: string[],
+  options: UseAssetUploadOptions = {},
 ): UseAssetUploadResult {
   const router = useRouter();
   const [slots, setSlots] = useState<Record<string, SlotState>>(() =>
@@ -101,7 +108,11 @@ export function useAssetUpload(
           method: "POST",
         });
       }
-      router.refresh();
+      if (options.onSuccess) {
+        options.onSuccess(router);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       toast.error(message);
