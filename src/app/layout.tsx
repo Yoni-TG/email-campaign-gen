@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { DesktopOnlyGate } from "@/components/desktop-only-gate";
 import "./globals.css";
 
 // Inter for UI, Instrument Serif for display headlines, JetBrains Mono for
@@ -44,7 +45,9 @@ export default function RootLayout({
       className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        <main className="min-h-screen bg-background">{children}</main>
+        <DesktopOnlyGate>
+          <main className="min-h-screen bg-background">{children}</main>
+        </DesktopOnlyGate>
         <Toaster />
       </body>
     </html>
