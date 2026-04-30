@@ -2,10 +2,7 @@
 
 import { CAMPAIGN_STATUS_LABELS, type Campaign } from "@/lib/types";
 import { GeneratingView } from "./generating-view";
-import { ReviewView } from "./review-view";
 import { RenderingCandidatesView } from "./rendering-candidates-view";
-import { VariantSelectionView } from "./variant-selection-view";
-import { AssetUploadView } from "./asset-upload-view";
 import { RenderingFinalView } from "./rendering-final-view";
 import { CompletedView } from "./completed-view";
 
@@ -17,23 +14,27 @@ interface Props {
   editableHtml: string | null;
 }
 
+// The wizard owns the interactive statuses (review / variant_selection /
+// asset_upload) — `[id]/page.tsx` redirects them to /copy, /layout, and
+// /images before this component ever renders. What's left here is the
+// fallback for the in-flight + completed states: generating spinners,
+// the candidate render wait, the final render wait, and the completed
+// preview when an operator visits the URL directly.
 function renderView(campaign: Campaign, editableHtml: string | null) {
   switch (campaign.status) {
     case "draft":
     case "generating":
       return <GeneratingView campaignId={campaign.id} error={campaign.error} />;
-    case "review":
-      return <ReviewView campaign={campaign} />;
     case "rendering_candidates":
       return <RenderingCandidatesView campaign={campaign} />;
-    case "variant_selection":
-      return <VariantSelectionView campaign={campaign} />;
-    case "asset_upload":
-      return <AssetUploadView campaign={campaign} />;
     case "rendering_final":
       return <RenderingFinalView campaign={campaign} />;
     case "completed":
       return <CompletedView campaign={campaign} editableHtml={editableHtml} />;
+    case "review":
+    case "variant_selection":
+    case "asset_upload":
+      return null;
   }
 }
 

@@ -36,9 +36,9 @@ export interface UseReviewFormResult {
   approve: () => Promise<void>;
 }
 
-// Drives the review-view state: seeds ApprovedCopy + product list from the
+// Drives the wizard copy step: seeds ApprovedCopy + product list from the
 // generation output, edits them in place, and submits /approve followed by
-// router.refresh so the next stage takes over.
+// router.refresh (or onSuccess) so the next stage takes over.
 //
 // Input is narrowed to non-nullable fields — the caller is responsible for
 // the "has generation data" precondition, so hook calls here are
