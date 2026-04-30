@@ -18,7 +18,25 @@ export type PropField =
       label: string;
       slotKey: string;
     }
-  | { kind: "bg"; label: string; blockIndex: number };
+  | { kind: "bg"; label: string; blockIndex: number }
+  | { kind: "align"; label: string; blockIndex: number }
+  | { kind: "buttonColor"; label: string; blockIndex: number };
+
+// Block types whose React component currently honours an `align` prop —
+// surfacing the editor anywhere else would persist an override the
+// renderer ignores.
+const ALIGN_CAPABLE: ReadonlySet<BlockType> = new Set([
+  "text_block_centered",
+  "cta_button",
+]);
+
+// Block types whose React component renders a CTA button and accepts a
+// `buttonColor` prop. Same constraint: only surface the editor where
+// the override actually paints.
+const BUTTON_COLOR_CAPABLE: ReadonlySet<BlockType> = new Set([
+  "text_block_centered",
+  "cta_button",
+]);
 
 export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   logo_header: "Logo bar",
@@ -148,6 +166,13 @@ export function resolveBlockProperties(
   }
 
   fields.push({ kind: "bg", label: "Background", blockIndex });
+
+  if (ALIGN_CAPABLE.has(block.type)) {
+    fields.push({ kind: "align", label: "Alignment", blockIndex });
+  }
+  if (BUTTON_COLOR_CAPABLE.has(block.type)) {
+    fields.push({ kind: "buttonColor", label: "Button colour", blockIndex });
+  }
 
   return fields;
 }

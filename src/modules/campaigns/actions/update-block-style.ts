@@ -1,34 +1,47 @@
 import type { Campaign, FinalRenderResult } from "@/lib/types";
 import { renderSkeleton } from "@/modules/email-templates";
 import { loadSkeletonById } from "@/modules/email-templates/skeletons";
-import { BLOCK_BACKGROUNDS } from "@/modules/email-templates/blocks/theme";
-import type { BlockBackground } from "@/modules/email-templates/blocks/theme";
+import {
+  BLOCK_ALIGNMENTS,
+  BLOCK_BACKGROUNDS,
+  BUTTON_COLORS,
+} from "@/modules/email-templates/blocks/theme";
 import { buildBlueprint } from "@/modules/campaigns/utils/build-blueprint";
 import { updateCampaign } from "@/modules/campaigns/utils/campaign-persistence";
 
-export interface UpdateBlockBackgroundResult {
+export const BLOCK_STYLE_KEYS = ["background", "align", "buttonColor"] as const;
+export type BlockStyleKey = (typeof BLOCK_STYLE_KEYS)[number];
+
+export interface UpdateBlockStyleResult {
   status: "completed";
   renderResult: FinalRenderResult;
 }
 
-// Fine-tune action — patch one block's `background` prop on a completed
-// campaign. Persists to Campaign.blockOverrides[blockIndex].background
-// and re-runs renderFinal so the export-ready HTML reflects the change
-// alongside any prior overrides.
-export async function updateBlockBackground(
+const ALLOWED_VALUES: Record<BlockStyleKey, readonly string[]> = {
+  background: BLOCK_BACKGROUNDS,
+  align: BLOCK_ALIGNMENTS,
+  buttonColor: BUTTON_COLORS,
+};
+
+// Fine-tune action — patch one keyed style override on a single block
+// (background, alignment, or button colour). Persists to
+// Campaign.blockOverrides[blockIndex][key] and re-runs renderFinal so
+// the export-ready HTML reflects the change alongside any prior overrides.
+export async function updateBlockStyle(
   campaign: Campaign,
   blockIndex: number,
-  background: BlockBackground,
-): Promise<UpdateBlockBackgroundResult> {
+  key: BlockStyleKey,
+  value: string,
+): Promise<UpdateBlockStyleResult> {
   if (!campaign.chosenSkeletonId) {
     throw new Error("Campaign has no chosenSkeletonId.");
   }
   if (!campaign.approvedCopy || !campaign.approvedProducts) {
     throw new Error("Campaign missing approved copy or products.");
   }
-  if (!BLOCK_BACKGROUNDS.includes(background)) {
+  if (!ALLOWED_VALUES[key].includes(value)) {
     throw new Error(
-      `Unknown background "${background}". Allowed: ${BLOCK_BACKGROUNDS.join(", ")}`,
+      `Invalid ${key} "${value}". Allowed: ${ALLOWED_VALUES[key].join(", ")}`,
     );
   }
   const skeleton = loadSkeletonById(campaign.chosenSkeletonId);
@@ -46,7 +59,7 @@ export async function updateBlockBackground(
     ...existing,
     [blockIndex]: {
       ...(existing[blockIndex] ?? {}),
-      background,
+      [key]: value,
     },
   };
 
@@ -60,6 +73,7 @@ export async function updateBlockBackground(
   const { html } = await renderSkeleton(skeleton, blueprint, {
     withAssets: true,
     blockOverrides,
+    blockOrder: campaign.blockOrder,
   });
   const renderResult: FinalRenderResult = {
     skeletonId: skeleton.id,

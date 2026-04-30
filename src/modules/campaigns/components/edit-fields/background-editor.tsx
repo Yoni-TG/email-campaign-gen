@@ -33,11 +33,15 @@ export function BackgroundEditor({
     setBusy(true);
     try {
       const res = await fetch(
-        `/api/campaigns/${campaignId}/fine-tune/block-bg`,
+        `/api/campaigns/${campaignId}/fine-tune/block-style`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ blockIndex, background }),
+          body: JSON.stringify({
+            blockIndex,
+            key: "background",
+            value: background,
+          }),
         },
       );
       if (!res.ok) {

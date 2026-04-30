@@ -11,6 +11,8 @@ export function TextBlockCentered({
   ctaLabel,
   ctaHref,
   background = "white",
+  align = "center",
+  buttonColor = "ink",
   editTargets,
 }: TextBlockCenteredProps) {
   return (
@@ -19,7 +21,7 @@ export function TextBlockCentered({
       style={{
         backgroundColor: bgColor(background),
         padding: "40px 32px",
-        textAlign: "center",
+        textAlign: align,
       }}
     >
       <Section style={{ maxWidth: "560px", margin: "0 auto" }}>
@@ -58,6 +60,8 @@ export function TextBlockCentered({
           <CtaButton
             label={ctaLabel}
             href={ctaHref || "#"}
+            align={align}
+            buttonColor={buttonColor}
             editTarget={editTargets?.ctaLabel}
           />
         ) : null}

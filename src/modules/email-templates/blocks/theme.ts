@@ -8,6 +8,10 @@ export const COLORS = {
   midBlue: "#76A4C4",
   black: "#1E1E1E",
   white: "#FFFFFF",
+  // Brand-aligned button accents — match the app's plum brand and the
+  // emerald + sapphire button options shown in the design brief.
+  plum: "#7E3A52",
+  emerald: "#4A7C59",
 } as const;
 
 export const FONTS = {
@@ -41,3 +45,27 @@ export function bgColor(background: BlockBackground): string {
       return COLORS.midBlue;
   }
 }
+
+// Button colour tokens for the design step's properties panel — same
+// "constrained palette" idea as backgrounds. The four options match the
+// brief's swatch row (ink / accent / green / blue).
+export const BUTTON_COLORS = ["ink", "accent", "green", "blue"] as const;
+export type ButtonColor = (typeof BUTTON_COLORS)[number];
+
+export function buttonColorHex(color: ButtonColor): string {
+  switch (color) {
+    case "ink":
+      return COLORS.black;
+    case "accent":
+      return COLORS.plum;
+    case "green":
+      return COLORS.emerald;
+    case "blue":
+      return COLORS.midBlue;
+  }
+}
+
+// Text alignment for blocks that surface it (text-only blocks, CTA
+// rows). Three positions, mirrors the brief's L/C/R segmented control.
+export const BLOCK_ALIGNMENTS = ["left", "center", "right"] as const;
+export type BlockAlignment = (typeof BLOCK_ALIGNMENTS)[number];

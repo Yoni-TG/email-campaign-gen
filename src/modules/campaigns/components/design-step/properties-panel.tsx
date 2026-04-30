@@ -7,9 +7,15 @@ import {
   BLOCK_TYPE_LABELS,
   resolveBlockProperties,
 } from "@/modules/campaigns/utils/block-properties";
+import type {
+  BlockAlignment,
+  ButtonColor,
+} from "@/modules/email-templates/blocks/theme";
 import { TextEditor } from "../edit-fields/text-editor";
 import { ImageEditor } from "../edit-fields/image-editor";
 import { BackgroundEditor } from "../edit-fields/background-editor";
+import { AlignmentEditor } from "../edit-fields/alignment-editor";
+import { ButtonColorEditor } from "../edit-fields/button-color-editor";
 
 // Selection state shared with DesignStepView. A block selection drives
 // the layers panel + the bind-walking properties view; a product
@@ -132,6 +138,40 @@ export function PropertiesPanel({
                   campaignId={campaign.id}
                   blockIndex={field.blockIndex}
                   currentBackground={currentBg}
+                  onSaving={onSaving}
+                  onSaved={onSaved}
+                />
+              </FieldGroup>
+            );
+          }
+          if (field.kind === "align") {
+            const currentAlign =
+              (campaign.blockOverrides?.[field.blockIndex]?.align as
+                | BlockAlignment
+                | undefined) ?? "center";
+            return (
+              <FieldGroup key={i} label={field.label}>
+                <AlignmentEditor
+                  campaignId={campaign.id}
+                  blockIndex={field.blockIndex}
+                  current={currentAlign}
+                  onSaving={onSaving}
+                  onSaved={onSaved}
+                />
+              </FieldGroup>
+            );
+          }
+          if (field.kind === "buttonColor") {
+            const currentColor =
+              (campaign.blockOverrides?.[field.blockIndex]?.buttonColor as
+                | ButtonColor
+                | undefined) ?? "ink";
+            return (
+              <FieldGroup key={i} label={field.label}>
+                <ButtonColorEditor
+                  campaignId={campaign.id}
+                  blockIndex={field.blockIndex}
+                  current={currentColor}
                   onSaving={onSaving}
                   onSaved={onSaved}
                 />
