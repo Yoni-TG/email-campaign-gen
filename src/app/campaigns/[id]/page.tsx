@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CAMPAIGN_TYPE_LABELS } from "@/lib/types";
 import { CampaignDetail } from "@/modules/campaigns/components/campaign-detail";
 import { StatusBadge } from "@/modules/campaigns/components/status-badge";
@@ -22,6 +22,23 @@ export default async function CampaignPage({
   const { id } = await params;
   const campaign = await getCampaign(id);
   if (!campaign) notFound();
+
+  // Wizard hand-off: when generation finishes the operator should land
+  // on the new per-step routes, not the legacy side-by-side dispatcher
+  // views. Each branch is gated on the data the wizard step needs, so
+  // we never bounce mid-redirect.
+  if (campaign.status === "review" && campaign.generatedCopy && campaign.generatedProducts) {
+    redirect(`/campaigns/${id}/copy`);
+  }
+  if (
+    campaign.status === "variant_selection" &&
+    (campaign.candidateVariants?.length ?? 0) > 0
+  ) {
+    redirect(`/campaigns/${id}/layout`);
+  }
+  if (campaign.status === "asset_upload" && campaign.chosenSkeletonId) {
+    redirect(`/campaigns/${id}/images`);
+  }
 
   // Only completed campaigns get an editable render — everywhere else
   // the existing flow handles its own iframe needs.
