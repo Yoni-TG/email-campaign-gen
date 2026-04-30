@@ -1,7 +1,25 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, GripVertical, Plus, Sparkles, X } from "lucide-react";
+import { GripVertical, Plus, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductSearchAdd } from "@/modules/products/components/product-search-add";
 import { useReviewForm } from "@/modules/campaigns/hooks/use-review-form";
@@ -114,6 +132,7 @@ export function CopyEditView({ campaign, generatedCopy, generatedProducts }: Pro
           />
 
           <BlocksSection
+            campaignId={campaign.id}
             blocks={approvedCopy.body_blocks}
             onChange={(next) => patch({ body_blocks: next })}
           />
@@ -270,48 +289,77 @@ function VariantSwitcher({
 // ─── Body blocks ───
 
 function BlocksSection({
+  campaignId,
   blocks,
   onChange,
 }: {
+  campaignId: string;
   blocks: BodyBlock[];
   onChange: (next: BodyBlock[]) => void;
 }) {
-  const move = (i: number, dir: -1 | 1) => {
-    const target = i + dir;
-    if (target < 0 || target >= blocks.length) return;
-    const next = [...blocks];
-    [next[i], next[target]] = [next[target], next[i]];
-    onChange(next);
-  };
   const remove = (i: number) =>
     onChange(blocks.filter((_, idx) => idx !== i));
   const patchBlock = (i: number, partial: Partial<BodyBlock>) =>
     onChange(blocks.map((b, idx) => (idx === i ? { ...b, ...partial } : b)));
+  const replaceBlock = (i: number, next: BodyBlock) =>
+    onChange(blocks.map((b, idx) => (idx === i ? next : b)));
   const add = () =>
     onChange([...blocks, { title: null, description: null, cta: null }]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Stable per-position ids. Reorder swaps blocks beneath the same ids,
+  // so transient per-card state (e.g. an in-flight regenerate) sticks to
+  // the slot rather than the block — acceptable for v1; the only stateful
+  // affordance is regenerate, and dragging mid-regenerate is unlikely.
+  const ids = useMemo(
+    () => blocks.map((_, i) => `block-${i}`),
+    [blocks.length],
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = ids.indexOf(active.id as string);
+    const to = ids.indexOf(over.id as string);
+    if (from < 0 || to < 0) return;
+    onChange(arrayMove(blocks, from, to));
+  };
 
   return (
     <section className="space-y-4">
       <header className="flex items-baseline justify-between">
         <FieldLabel>Sections</FieldLabel>
         <span className="text-xs text-ink-3">
-          {blocks.length} block{blocks.length === 1 ? "" : "s"} · use ↑↓ to reorder
+          {blocks.length} block{blocks.length === 1 ? "" : "s"} · drag to reorder
         </span>
       </header>
-      <ul className="space-y-3">
-        {blocks.map((block, i) => (
-          <li key={i}>
-            <BlockCard
-              index={i}
-              total={blocks.length}
-              block={block}
-              onMove={(dir) => move(i, dir)}
-              onRemove={() => remove(i)}
-              onPatch={(partial) => patchBlock(i, partial)}
-            />
-          </li>
-        ))}
-      </ul>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          <ul className="space-y-3">
+            {blocks.map((block, i) => (
+              <SortableBlockCard
+                key={ids[i]}
+                id={ids[i]}
+                campaignId={campaignId}
+                index={i}
+                blocks={blocks}
+                block={block}
+                onRemove={() => remove(i)}
+                onPatch={(partial) => patchBlock(i, partial)}
+                onReplace={(next) => replaceBlock(i, next)}
+              />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
       <button
         type="button"
         onClick={add}
@@ -324,49 +372,136 @@ function BlocksSection({
   );
 }
 
-function BlockCard({
+function SortableBlockCard({
+  id,
+  campaignId,
   index,
-  total,
+  blocks,
   block,
-  onMove,
   onRemove,
   onPatch,
+  onReplace,
 }: {
+  id: string;
+  campaignId: string;
   index: number;
-  total: number;
+  blocks: BodyBlock[];
   block: BodyBlock;
-  onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
   onPatch: (partial: Partial<BodyBlock>) => void;
+  onReplace: (next: BodyBlock) => void;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
   return (
-    <article className="rounded-md border border-border bg-surface p-4">
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={cn(isDragging && "z-10 opacity-80")}
+    >
+      <BlockCard
+        campaignId={campaignId}
+        index={index}
+        blocks={blocks}
+        block={block}
+        onRemove={onRemove}
+        onPatch={onPatch}
+        onReplace={onReplace}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        isDragging={isDragging}
+      />
+    </li>
+  );
+}
+
+function BlockCard({
+  campaignId,
+  index,
+  blocks,
+  block,
+  onRemove,
+  onPatch,
+  onReplace,
+  dragHandleProps,
+  isDragging,
+}: {
+  campaignId: string;
+  index: number;
+  blocks: BodyBlock[];
+  block: BodyBlock;
+  onRemove: () => void;
+  onPatch: (partial: Partial<BodyBlock>) => void;
+  onReplace: (next: BodyBlock) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
+  isDragging?: boolean;
+}) {
+  const [isRegenerating, setRegenerating] = useState(false);
+
+  const regenerate = async () => {
+    if (isRegenerating) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch(
+        `/api/campaigns/${campaignId}/regenerate-block`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ index, blocks }),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Regenerate failed");
+      }
+      const data = (await res.json()) as { block: BodyBlock };
+      onReplace({ ...data.block, cta_href: block.cta_href ?? null });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Regenerate failed";
+      toast.error(message);
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
+  return (
+    <article
+      className={cn(
+        "rounded-md border border-border bg-surface p-4 transition-shadow",
+        isDragging && "shadow-lg",
+      )}
+    >
       <header className="flex items-start gap-3">
-        <span
-          className="mt-1 inline-flex select-none text-ink-4"
-          aria-hidden
-          title="Reorder via the arrow buttons →"
+        <button
+          type="button"
+          aria-label={`Drag block ${index + 1}`}
+          className="mt-0.5 inline-flex cursor-grab touch-none rounded p-1 text-ink-4 transition-colors hover:bg-surface-2 hover:text-ink-3 active:cursor-grabbing"
+          {...dragHandleProps}
         >
-          <GripVertical className="size-4" />
-        </span>
+          <GripVertical className="size-4" aria-hidden />
+        </button>
         <p className="grow text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
           Block {index + 1}
         </p>
+        <button
+          type="button"
+          onClick={() => void regenerate()}
+          disabled={isRegenerating}
+          className="inline-flex items-center gap-1 text-xs text-brand transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Sparkles className="size-3" aria-hidden />
+          {isRegenerating ? "Regenerating…" : "Regenerate"}
+        </button>
         <div className="flex items-center gap-0.5 text-ink-3">
-          <IconButton
-            label={`Move block ${index + 1} up`}
-            disabled={index === 0}
-            onClick={() => onMove(-1)}
-          >
-            <ChevronUp className="size-4" />
-          </IconButton>
-          <IconButton
-            label={`Move block ${index + 1} down`}
-            disabled={index === total - 1}
-            onClick={() => onMove(1)}
-          >
-            <ChevronDown className="size-4" />
-          </IconButton>
           <IconButton
             label={`Remove block ${index + 1}`}
             onClick={onRemove}
