@@ -40,9 +40,13 @@ export function ImageUploadView({ campaign }: Props) {
     campaign.id,
     slotKeys,
     {
-      // Step 5 lives in another worktree; until that route lands, fall
-      // back to the status dispatcher (which lands on RenderingFinalView).
-      onSuccess: (router) => router.push(`/campaigns/${campaign.id}`),
+      // Push to step 5. The /design route currently redirects to the
+      // status dispatcher while renderResult is still null (rendering
+      // in flight), so the operator transiently lands on
+      // RenderingFinalView; once render completes they can navigate to
+      // /design. Tightening this hand-off (poll-on-/design) is a
+      // separate cross-cutting follow-up.
+      onSuccess: (router) => router.push(`/campaigns/${campaign.id}/design`),
     },
   );
 
