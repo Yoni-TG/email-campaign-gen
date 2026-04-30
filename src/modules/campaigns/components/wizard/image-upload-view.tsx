@@ -8,10 +8,12 @@ import {
   type ChangeEvent,
   type DragEvent,
 } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUp, ImagePlus } from "lucide-react";
+import { toast } from "sonner";
 import { useAssetUpload } from "@/modules/campaigns/hooks/use-asset-upload";
 import { loadSkeletonById } from "@/modules/email-templates/skeletons";
-import type { Campaign } from "@/lib/types";
+import type { Campaign, ProductSnapshot } from "@/lib/types";
 import type { AssetSlot } from "@/modules/email-templates";
 import { cn } from "@/lib/utils";
 import { WizardActionBar } from "./wizard-action-bar";
@@ -105,6 +107,13 @@ export function ImageUploadView({ campaign }: Props) {
               </li>
             ))}
           </ul>
+
+          {(campaign.approvedProducts?.length ?? 0) > 0 && (
+            <ProductImagesSection
+              campaignId={campaign.id}
+              products={campaign.approvedProducts!}
+            />
+          )}
 
           <DropHintBanner />
         </main>
@@ -254,6 +263,145 @@ function SlotCard({
   );
 }
 
+// ─── Product images section ───
+//
+// Operator can swap any product's image without leaving step 4. Each
+// card POSTs to the existing product-image fine-tune endpoint (the
+// status guard there now allows asset_upload onwards). The endpoint
+// re-renders too, which is wasted work at step 4 — the upcoming
+// uploadAll → render-final will overwrite renderResult anyway — but
+// it keeps the swap atomic and avoids a deferred-render code path.
+
+function ProductImagesSection({
+  campaignId,
+  products,
+}: {
+  campaignId: string;
+  products: ProductSnapshot[];
+}) {
+  const router = useRouter();
+  return (
+    <section className="mt-10">
+      <header className="flex items-baseline justify-between border-t border-border pt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+          Product images · {products.length}{" "}
+          product{products.length === 1 ? "" : "s"}
+        </p>
+        <p className="text-xs text-ink-4">
+          Catalog photos in place — replace any to override.
+        </p>
+      </header>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {products.map((product) => (
+          <li key={product.sku}>
+            <ProductImageCard
+              campaignId={campaignId}
+              product={product}
+              onReplaced={() => router.refresh()}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ProductImageCard({
+  campaignId,
+  product,
+  onReplaced,
+}: {
+  campaignId: string;
+  product: ProductSnapshot;
+  onReplaced: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("sku", product.sku);
+      fd.append("file", file);
+      const res = await fetch(
+        `/api/campaigns/${campaignId}/fine-tune/product-image`,
+        { method: "POST", body: fd },
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Replace failed");
+      }
+      toast.success(`${product.name} image replaced.`);
+      onReplaced();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Replace failed";
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const isOverridden = product.imageUrl.startsWith("/uploads/");
+
+  return (
+    <article className="flex items-center gap-3 rounded-md border border-border bg-surface p-2.5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={product.imageUrl}
+        alt=""
+        className="size-12 shrink-0 rounded object-cover"
+      />
+      <div className="min-w-0 grow">
+        <p className="truncate text-sm font-medium text-ink">{product.name}</p>
+        <p className="text-xs text-ink-3">
+          {formatPrice(product.price, product.currency)}
+        </p>
+      </div>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
+        className={cn(
+          "text-xs font-medium transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50",
+          isOverridden ? "text-ink-3" : "text-brand",
+        )}
+      >
+        {busy ? "Saving…" : isOverridden ? "Replace" : "Upload"}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={(e) => void onFileChange(e)}
+        className="hidden"
+      />
+    </article>
+  );
+}
+
+function formatPrice(price: string, currency: string): string {
+  // Feed prices arrive as strings (e.g. "59.00"). Render with Intl when
+  // we can parse, otherwise fall through to the raw string so we never
+  // hide a non-numeric value behind a "$NaN".
+  const value = Number.parseFloat(price);
+  if (Number.isFinite(value)) {
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(value);
+    } catch {
+      // Fall through.
+    }
+  }
+  return `${currency} ${price}`;
+}
+
 // ─── Drop hint banner ───
 
 function DropHintBanner() {
@@ -341,10 +489,9 @@ function fillEmptySlotsFromFiles(
 // ─── 0-slot edge case ───
 //
 // Skeletons can declare 0 required assets (e.g. graphic-led mystery-sale).
-// The current backend doesn't auto-advance these — surfacing the state
-// here so the operator at least knows where they are. Bottom-bar
-// Continue points back to the status dispatcher so they can use the
-// legacy AssetUploadView's Continue (which has the same limitation).
+// "Continue" POSTs to /finalize-no-assets, which flips status through
+// rendering_final → completed in one round-trip and lets the operator
+// land on /design with a populated renderResult.
 function ZeroSlotState({
   skeletonName,
   backHref,
@@ -354,6 +501,29 @@ function ZeroSlotState({
   backHref: string;
   campaignId: string;
 }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+
+  const finalize = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch(
+        `/api/campaigns/${campaignId}/finalize-no-assets`,
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Finalize failed");
+      }
+      router.push(`/campaigns/${campaignId}/design`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Finalize failed";
+      toast.error(message);
+      setBusy(false);
+    }
+  };
+
   return (
     <>
       <main className="mx-auto max-w-xl px-6 py-16 text-center">
@@ -367,12 +537,14 @@ function ZeroSlotState({
       <WizardActionBar
         backHref={backHref}
         primary={
-          <a
-            href={`/campaigns/${campaignId}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-brand px-5 text-sm font-medium text-surface transition-opacity hover:opacity-90"
+          <button
+            type="button"
+            onClick={() => void finalize()}
+            disabled={busy}
+            className="inline-flex h-10 items-center gap-2 rounded-md bg-brand px-5 text-sm font-medium text-surface transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Continue →
-          </a>
+            {busy ? "Finalizing…" : "Continue →"}
+          </button>
         }
       />
     </>

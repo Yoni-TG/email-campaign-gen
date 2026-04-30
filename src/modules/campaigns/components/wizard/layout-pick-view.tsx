@@ -28,10 +28,10 @@ export function LayoutPickView({ campaign }: Props) {
   const { selected, setSelected, isSubmitting, confirm } = useVariantSelection(
     campaign.id,
     {
-      // After the API records the pick, route to step 4. Until step 4
-      // ships as its own per-step route, fall back to the campaign
-      // detail page — the status dispatcher will land on AssetUploadView.
-      onSuccess: (router) => router.push(`/campaigns/${campaign.id}`),
+      // After /select-variant flips the campaign to asset_upload, land
+      // the operator directly on step 4 instead of bouncing through
+      // the legacy dispatcher.
+      onSuccess: (router) => router.push(`/campaigns/${campaign.id}/images`),
       // Pre-arm with the previously chosen skeleton so the operator can
       // hit Continue without re-clicking when revisiting this step.
       initialSelected: campaign.chosenSkeletonId,

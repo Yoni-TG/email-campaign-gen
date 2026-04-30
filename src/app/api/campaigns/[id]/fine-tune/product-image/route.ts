@@ -8,7 +8,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const result = await requireCampaign(id, ["completed"]);
+  // Allowed from asset_upload onward — operators may pre-swap a product
+  // image during step 4 (Images) before the first full render. The action
+  // still requires approvedProducts + chosenSkeletonId, both populated by
+  // the time variant_selection has completed, so guarding by status alone
+  // is overly strict.
+  const result = await requireCampaign(id, [
+    "asset_upload",
+    "rendering_final",
+    "completed",
+  ]);
   if (!result.ok) return result.response;
 
   const formData = await request.formData();
