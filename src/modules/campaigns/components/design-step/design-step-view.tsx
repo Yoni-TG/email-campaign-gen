@@ -7,14 +7,8 @@ import type { SkeletonManifest } from "@/modules/email-templates/types";
 import { targetToBlockIndex } from "@/modules/campaigns/utils/block-properties";
 import { LayersPanel } from "./layers-panel";
 import { DesignCanvas, type CanvasRect } from "./design-canvas";
-import { PropertiesPanel } from "./properties-panel";
+import { PropertiesPanel, type Selection } from "./properties-panel";
 import { DesignActionBar, type SavingState } from "./design-action-bar";
-
-interface SelectedBlock {
-  index: number;
-  target: string | null;
-  rect: CanvasRect | null;
-}
 
 interface Props {
   campaign: Campaign;
@@ -24,34 +18,43 @@ interface Props {
 
 export function DesignStepView({ campaign, skeleton, editableHtml }: Props) {
   const router = useRouter();
-  const [selected, setSelected] = useState<SelectedBlock | null>(null);
+  const [selected, setSelected] = useState<Selection | null>(null);
   const [savingState, setSavingState] = useState<SavingState>("saved");
   const lastHtmlRef = useRef(editableHtml);
 
   // The iframe re-mounts when editableHtml changes (after a save). The
   // rect we captured at click time is stale at that point — clear it
-  // (keep the index so the layers/properties panel selection persists)
-  // until the next click.
+  // (keep the index/sku so the panel selection persists) until the
+  // next click.
   useEffect(() => {
     if (lastHtmlRef.current !== editableHtml) {
       lastHtmlRef.current = editableHtml;
-      setSelected((prev) =>
-        prev ? { ...prev, rect: null, target: null } : null,
-      );
+      setSelected((prev) => {
+        if (!prev) return null;
+        if (prev.kind === "block") {
+          return { ...prev, rect: null, target: null };
+        }
+        return { ...prev, rect: null };
+      });
     }
   }, [editableHtml]);
 
   const handleCanvasSelect = useCallback(
     (target: string, rect: CanvasRect) => {
+      if (target.startsWith("image:product:")) {
+        const sku = target.slice("image:product:".length);
+        setSelected({ kind: "product", sku, target, rect });
+        return;
+      }
       const idx = targetToBlockIndex(skeleton, target);
       if (idx === null) return;
-      setSelected({ index: idx, target, rect });
+      setSelected({ kind: "block", index: idx, target, rect });
     },
     [skeleton],
   );
 
   const handleLayerSelect = useCallback((index: number) => {
-    setSelected({ index, target: null, rect: null });
+    setSelected({ kind: "block", index, target: null, rect: null });
   }, []);
 
   const handleSaving = useCallback(() => {
@@ -68,7 +71,7 @@ export function DesignStepView({ campaign, skeleton, editableHtml }: Props) {
       <div className="flex flex-1">
         <LayersPanel
           skeleton={skeleton}
-          selectedIndex={selected?.index ?? null}
+          selectedIndex={selected?.kind === "block" ? selected.index : null}
           onSelect={handleLayerSelect}
         />
         <DesignCanvas
@@ -80,7 +83,7 @@ export function DesignStepView({ campaign, skeleton, editableHtml }: Props) {
         <PropertiesPanel
           campaign={campaign}
           skeleton={skeleton}
-          selectedIndex={selected?.index ?? null}
+          selection={selected}
           onSaving={handleSaving}
           onSaved={handleSaved}
         />

@@ -11,10 +11,28 @@ import { TextEditor } from "../edit-fields/text-editor";
 import { ImageEditor } from "../edit-fields/image-editor";
 import { BackgroundEditor } from "../edit-fields/background-editor";
 
+// Selection state shared with DesignStepView. A block selection drives
+// the layers panel + the bind-walking properties view; a product
+// selection points at a single approvedProducts row for image swap and
+// has no corresponding skeleton block.
+export type Selection =
+  | {
+      kind: "block";
+      index: number;
+      target: string | null;
+      rect: { x: number; y: number; w: number; h: number } | null;
+    }
+  | {
+      kind: "product";
+      sku: string;
+      target: string;
+      rect: { x: number; y: number; w: number; h: number } | null;
+    };
+
 interface Props {
   campaign: Campaign;
   skeleton: SkeletonManifest;
-  selectedIndex: number | null;
+  selection: Selection | null;
   onSaving: () => void;
   onSaved: () => void;
 }
@@ -27,11 +45,11 @@ interface Props {
 export function PropertiesPanel({
   campaign,
   skeleton,
-  selectedIndex,
+  selection,
   onSaving,
   onSaved,
 }: Props) {
-  if (selectedIndex === null) {
+  if (selection === null) {
     return (
       <aside className="w-[240px] shrink-0 border-l border-border bg-surface px-4 py-5">
         <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
@@ -42,9 +60,20 @@ export function PropertiesPanel({
     );
   }
 
-  const block = skeleton.blocks[selectedIndex];
+  if (selection.kind === "product") {
+    return (
+      <ProductPanel
+        campaign={campaign}
+        sku={selection.sku}
+        onSaving={onSaving}
+        onSaved={onSaved}
+      />
+    );
+  }
+
+  const block = skeleton.blocks[selection.index];
   if (!block) return null;
-  const fields = resolveBlockProperties(skeleton, selectedIndex);
+  const fields = resolveBlockProperties(skeleton, selection.index);
 
   return (
     <aside className="w-[240px] shrink-0 border-l border-border bg-surface px-4 py-5">
@@ -137,5 +166,60 @@ function FieldGroup({
       <p className="mb-1.5 text-xs font-medium text-ink-2">{label}</p>
       {children}
     </div>
+  );
+}
+
+// Per-product panel: the operator clicked one cell in a product grid
+// and wants to swap that product's image. Shows current thumbnail +
+// product name, then the same ImageEditor used for asset slots, but
+// pointed at the product-image fine-tune endpoint with the SKU.
+function ProductPanel({
+  campaign,
+  sku,
+  onSaving,
+  onSaved,
+}: {
+  campaign: Campaign;
+  sku: string;
+  onSaving: () => void;
+  onSaved: () => void;
+}) {
+  const product =
+    campaign.approvedProducts?.find((p) => p.sku === sku) ?? null;
+
+  return (
+    <aside className="w-[240px] shrink-0 border-l border-border bg-surface px-4 py-5">
+      <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+        Selected
+      </h2>
+      <p className="mb-4 text-sm font-semibold text-ink">Product</p>
+
+      {product ? (
+        <div className="mb-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="mb-2 h-32 w-full rounded object-cover"
+          />
+          <p className="text-sm font-medium text-ink">{product.name}</p>
+          <p className="font-mono text-[11px] text-ink-3">{product.sku}</p>
+        </div>
+      ) : (
+        <p className="mb-4 text-xs text-destructive">
+          Product {sku} not found in approvedProducts.
+        </p>
+      )}
+
+      <FieldGroup label="Replace image">
+        <ImageEditor
+          title={`Replace · ${sku}`}
+          endpoint={`/api/campaigns/${campaign.id}/fine-tune/product-image`}
+          formData={{ sku }}
+          onSaving={onSaving}
+          onSaved={onSaved}
+        />
+      </FieldGroup>
+    </aside>
   );
 }
