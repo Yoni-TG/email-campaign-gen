@@ -81,7 +81,7 @@ export function EditableEmailFrame({ campaign, editableHtml }: Props) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex justify-center bg-surface-2 px-6 py-10">
       <iframe
         ref={iframeRef}
         title={`editable-${campaign.id}`}
@@ -89,7 +89,7 @@ export function EditableEmailFrame({ campaign, editableHtml }: Props) {
         scrolling="no"
         onLoad={measure}
         style={{ height: `${contentHeight}px`, overflow: "hidden" }}
-        className="block w-full bg-white"
+        className="block w-[640px] bg-white shadow-xl"
       />
       {edit ? (
         <EditPopover

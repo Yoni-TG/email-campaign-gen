@@ -117,12 +117,14 @@ function FinalEmailCard({
       {editableHtml ? (
         <EditableEmailFrame campaign={campaign} editableHtml={editableHtml} />
       ) : (
-        <AutoSizeIframe
-          title={`final-${render.skeletonId}`}
-          srcDoc={render.html}
-          className="block w-full bg-white"
-          minHeight={900}
-        />
+        <div className="flex justify-center bg-surface-2 px-6 py-10">
+          <AutoSizeIframe
+            title={`final-${render.skeletonId}`}
+            srcDoc={render.html}
+            className="block w-[640px] bg-white shadow-xl"
+            minHeight={900}
+          />
+        </div>
       )}
     </section>
   );
