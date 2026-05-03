@@ -84,13 +84,20 @@ describe("buildRerankSystemPrompt", () => {
     expect(system).toMatch(/merchandis/i);
   });
 
-  it("lists the ranking criteria (theme, audience, social proof, price mix, personalization)", () => {
+  it("lists the ranking criteria (theme, social proof, price spread, personalization)", () => {
     const system = buildRerankSystemPrompt();
-    expect(system).toMatch(/theme|message/i);
-    expect(system).toMatch(/audience|shopFor/i);
-    expect(system).toMatch(/reviewTier|social proof/i);
-    expect(system).toMatch(/priceTier|price mix/i);
+    expect(system).toMatch(/theme/i);
+    expect(system).toMatch(/social proof/i);
+    expect(system).toMatch(/price spread|price tier/i);
     expect(system).toMatch(/personalization/i);
+  });
+
+  it("separates hard constraints from soft preferences", () => {
+    const system = buildRerankSystemPrompt();
+    expect(system).toMatch(/hard constraint/i);
+    expect(system).toMatch(/soft preference/i);
+    // Hard constraints must include "must come from candidates"
+    expect(system).toMatch(/MUST.+candidates/i);
   });
 
   it("is stable across calls (cacheability)", () => {
@@ -107,7 +114,16 @@ describe("buildRerankUserPrompt", () => {
     expect(prompt).toContain("20% off with code LOVE");
     expect(prompt).toContain("Keep it warm and personal");
     expect(prompt).toContain("SKU-001");
-    expect(prompt).toMatch(/\b5 most relevant\b/);
+    expect(prompt).toMatch(/Pick the 5 best products/);
+  });
+
+  it("uses XML tags so the model sees structured fields", () => {
+    const prompt = buildRerankUserPrompt(seed, "editorial", [digested], 5);
+    expect(prompt).toContain("<brief>");
+    expect(prompt).toContain("</brief>");
+    expect(prompt).toContain("<candidates>");
+    expect(prompt).toContain("<main_message>Valentine's Day gifts</main_message>");
+    expect(prompt).toContain("<categories>Necklace</categories>");
   });
 
   it("threads lead value and personalities into the brief", () => {
@@ -120,9 +136,28 @@ describe("buildRerankUserPrompt", () => {
       [digested],
       5,
     );
-    expect(prompt).toMatch(/Lead value: Family First/);
+    expect(prompt).toMatch(/<lead_value>Family First/);
     expect(prompt).toMatch(/Warm-hearted/);
     expect(prompt).toMatch(/Joyfully Characterful/);
+  });
+
+  it("emits an audience tag when targetAudience is set", () => {
+    const prompt = buildRerankUserPrompt(
+      makeSeed({ targetAudience: ["Men", "Father"] }),
+      "editorial",
+      [digested],
+      5,
+    );
+    expect(prompt).toContain("<audience>Men, Father</audience>");
+  });
+
+  it("omits the audience tag when targetAudience is empty or undefined", () => {
+    const minimalSeed = makeSeed({
+      targetCategories: ["Ring"],
+      mainMessage: "Anniversary rings",
+    });
+    const prompt = buildRerankUserPrompt(minimalSeed, "editorial", [digested], 3);
+    expect(prompt).not.toContain("<audience>");
   });
 
   it("skips optional fields when absent", () => {
@@ -132,8 +167,8 @@ describe("buildRerankUserPrompt", () => {
     });
     const prompt = buildRerankUserPrompt(minimalSeed, "editorial", [digested], 3);
     expect(prompt).toContain("Anniversary rings");
-    expect(prompt).not.toMatch(/Secondary message:/);
-    expect(prompt).not.toMatch(/Promo details:/);
-    expect(prompt).not.toMatch(/Notes:/);
+    expect(prompt).not.toContain("<secondary_message>");
+    expect(prompt).not.toContain("<promo_details>");
+    expect(prompt).not.toContain("<notes>");
   });
 });

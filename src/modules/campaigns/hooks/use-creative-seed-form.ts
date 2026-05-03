@@ -11,12 +11,14 @@ import type {
   LeadValue,
   Market,
   ProductSnapshot,
+  ShopForAudience,
 } from "@/lib/types";
 
 export interface CreativeSeedFormState {
   name: string;
   campaignType: CampaignType;
   targetCategories: string[];
+  targetAudience: ShopForAudience[];
   promoDetails: string;
   mainMessage: string;
   secondaryMessage: string;
@@ -45,6 +47,7 @@ export interface UseCreativeSeedFormResult {
     value: CreativeSeedFormState[K],
   ) => void;
   toggleCategory: (cat: string) => void;
+  toggleAudience: (a: ShopForAudience) => void;
   togglePersonality: (p: LeadPersonality) => void;
   categories: string[];
   isCategoriesLoading: boolean;
@@ -73,6 +76,7 @@ const EMPTY: CreativeSeedFormState = {
   name: "",
   campaignType: "product_launch",
   targetCategories: [],
+  targetAudience: [],
   promoDetails: "",
   mainMessage: "",
   secondaryMessage: "",
@@ -180,6 +184,8 @@ function stateToSeed(state: CreativeSeedFormState): CreativeSeed {
     leadValue: state.leadValue,
     leadPersonalities: state.leadPersonalities,
     market: state.market,
+    targetAudience:
+      state.targetAudience.length > 0 ? state.targetAudience : undefined,
   };
 }
 
@@ -231,6 +237,13 @@ export function useCreativeSeedForm(
       targetCategories: toggle(prev.targetCategories, cat),
     }));
     setTouched((prev) => ({ ...prev, targetCategories: true }));
+  };
+
+  const toggleAudience = (a: ShopForAudience) => {
+    setState((prev) => ({
+      ...prev,
+      targetAudience: toggle(prev.targetAudience, a),
+    }));
   };
 
   const togglePersonality = (p: LeadPersonality) => {
@@ -288,6 +301,7 @@ export function useCreativeSeedForm(
     state,
     setField,
     toggleCategory,
+    toggleAudience,
     togglePersonality,
     categories,
     isCategoriesLoading,

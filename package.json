@@ -11,6 +11,7 @@
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "report:klaviyo": "tsx scripts/klaviyo-report.ts",
+    "eval:products": "tsx scripts/eval-product-selection.ts",
     "uc:klaviyo": "tsx scripts/klaviyo-universal-content.ts",
     "templates:klaviyo": "tsx scripts/klaviyo-templates.ts"
   },

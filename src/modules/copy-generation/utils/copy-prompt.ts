@@ -334,6 +334,10 @@ export function buildCopyUserPrompt(
     `- Target product categories: ${seed.targetCategories.join(", ")}`,
   ];
 
+  if (seed.targetAudience && seed.targetAudience.length > 0) {
+    lines.push(`- Target audience: ${seed.targetAudience.join(", ")}`);
+  }
+
   if (seed.secondaryMessage) {
     lines.push(`- Secondary message: ${seed.secondaryMessage}`);
   }

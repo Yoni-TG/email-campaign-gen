@@ -20,12 +20,15 @@ import {
   LEAD_VALUES,
   MARKETS,
   MARKET_LABELS,
+  SHOP_FOR_AUDIENCES,
+  SHOP_FOR_AUDIENCE_DESCRIPTIONS,
 } from "@/lib/types";
 import type {
   CampaignType,
   LeadPersonality,
   LeadValue,
   Market,
+  ShopForAudience,
 } from "@/lib/types";
 import {
   MAX_LEAD_PERSONALITIES,
@@ -55,6 +58,7 @@ export function CreativeSeedForm({ mode, initial }: CreativeSeedFormProps = {}) 
     state,
     setField,
     toggleCategory,
+    toggleAudience,
     togglePersonality,
     categories,
     isCategoriesLoading,
@@ -291,6 +295,23 @@ export function CreativeSeedForm({ mode, initial }: CreativeSeedFormProps = {}) 
         </Section>
 
         <Section title="Audience & Products">
+          <FieldGroup
+            label="Target audience"
+            hint="Optional — leave blank for an audience-agnostic campaign. Multi-select stacks: 'Mother + Women' broadens a Mom's-Day pool."
+          >
+            <div className="flex flex-wrap gap-2">
+              {SHOP_FOR_AUDIENCES.map((a) => (
+                <ChipWithTooltip
+                  key={a}
+                  active={state.targetAudience.includes(a)}
+                  onClick={() => toggleAudience(a)}
+                  label={a}
+                  tooltip={SHOP_FOR_AUDIENCE_DESCRIPTIONS[a]}
+                />
+              ))}
+            </div>
+          </FieldGroup>
+
           <FieldGroup
             label="Target categories"
             required

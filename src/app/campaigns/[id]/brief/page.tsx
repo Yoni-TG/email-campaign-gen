@@ -34,6 +34,7 @@ export default async function EditBriefPage({
     name: campaign.name,
     campaignType: campaign.campaignType,
     targetCategories: campaign.seed.targetCategories,
+    targetAudience: campaign.seed.targetAudience ?? [],
     promoDetails: campaign.seed.promoDetails ?? "",
     mainMessage: campaign.seed.mainMessage,
     secondaryMessage: campaign.seed.secondaryMessage ?? "",

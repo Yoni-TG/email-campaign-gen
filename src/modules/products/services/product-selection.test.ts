@@ -200,4 +200,160 @@ describe("selectProducts", () => {
     const result = await freshSelection.selectProducts(seed, "editorial", 2);
     expect(result).toHaveLength(2);
   });
+
+  describe("validation + retry", () => {
+    async function withFeed(
+      feed: DigestedProduct[],
+    ): Promise<typeof productSelection> {
+      vi.doMock("@/modules/products/services/product-feed", () => ({
+        getCachedProducts: vi.fn(() => feed),
+        ensureFeedLoaded: vi.fn(async () => undefined),
+        getProductBySku: vi.fn((sku: string) =>
+          feed.find((p) => p.sku === sku),
+        ),
+      }));
+      vi.resetModules();
+      return import("@/modules/products/services/product-selection");
+    }
+
+    it("retries once when the LLM returns SKUs not in the candidate list", async () => {
+      const feed = [
+        HEART,
+        CHARM,
+        makeProduct({
+          sku: "SKU-VALID",
+          name: "Valid",
+          productType: ["Necklace"],
+        }),
+      ];
+      // First call: hallucinated SKU. Second call: valid.
+      messagesCreate
+        .mockResolvedValueOnce({
+          content: [
+            {
+              type: "tool_use",
+              name: "rank_products",
+              input: { skus: ["SKU-HALLUCINATED-001", "SKU-VALID"] },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          content: [
+            {
+              type: "tool_use",
+              name: "rank_products",
+              input: { skus: ["SKU-VALID", "SKU-001"] },
+            },
+          ],
+        });
+
+      const fresh = await withFeed(feed);
+      const seed = makeSeed({ mainMessage: "valid" });
+      const result = await fresh.selectProducts(seed, "editorial", 2);
+
+      expect(messagesCreate).toHaveBeenCalledTimes(2);
+      expect(result.map((p) => p.sku).sort()).toEqual(["SKU-001", "SKU-VALID"]);
+
+      // The retry payload must include the previous (bad) tool_use + a
+      // tool_result error citing the invalid SKUs, so the model has the
+      // context it needs to correct.
+      const retryCall = messagesCreate.mock.calls[1][0];
+      const retryMessages = retryCall.messages as Array<{
+        role: string;
+        content: unknown;
+      }>;
+      expect(retryMessages).toHaveLength(3);
+      expect(retryMessages[1].role).toBe("assistant");
+      expect(retryMessages[2].role).toBe("user");
+      const lastContent = retryMessages[2].content as Array<{
+        type: string;
+        is_error?: boolean;
+        content?: string;
+      }>;
+      expect(lastContent[0].is_error).toBe(true);
+      expect(lastContent[0].content).toContain("SKU-HALLUCINATED-001");
+    });
+
+    it("does not retry when all SKUs are valid", async () => {
+      const fresh = await withFeed([HEART, CHARM]);
+      const seed = makeSeed({ mainMessage: "Valentine's" });
+      // 2 candidates, ask for 1 → forces rerank path
+      messagesCreate.mockResolvedValueOnce({
+        content: [
+          {
+            type: "tool_use",
+            name: "rank_products",
+            input: { skus: ["SKU-001"] },
+          },
+        ],
+      });
+      await fresh.selectProducts(seed, "editorial", 1);
+      expect(messagesCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not silently fall back to the full feed for hallucinated SKUs", async () => {
+      // Catalog has a product not in the candidate pool (different category).
+      // Even after retry, the LLM keeps hallucinating it. The strict filter
+      // must drop it rather than re-fetching it via getProductBySku.
+      const feed = [
+        HEART,
+        CHARM,
+        makeProduct({
+          sku: "RING-001",
+          name: "Ring",
+          productType: ["Ring"],
+        }),
+      ];
+      messagesCreate.mockResolvedValue({
+        content: [
+          {
+            type: "tool_use",
+            name: "rank_products",
+            input: { skus: ["RING-001"] },
+          },
+        ],
+      });
+
+      const fresh = await withFeed(feed);
+      const seed = makeSeed({
+        targetCategories: ["Necklace"],
+        mainMessage: "Necklaces",
+      });
+      const result = await fresh.selectProducts(seed, "editorial", 1);
+
+      // RING-001 is not a Necklace candidate; it must NOT appear in result.
+      expect(result.map((p) => p.sku)).not.toContain("RING-001");
+    });
+
+    it("backfills from deterministic order when retry still comes up short", async () => {
+      const feed = [
+        HEART,
+        CHARM,
+        makeProduct({
+          sku: "SKU-FILL-A",
+          name: "Filler A",
+          productType: ["Necklace"],
+        }),
+      ];
+      // First + retry: both return only one valid SKU. Service should
+      // backfill from candidate order to honor count=3.
+      messagesCreate.mockResolvedValue({
+        content: [
+          {
+            type: "tool_use",
+            name: "rank_products",
+            input: { skus: ["SKU-001"] },
+          },
+        ],
+      });
+
+      const fresh = await withFeed(feed);
+      const seed = makeSeed({ mainMessage: "anything" });
+      const result = await fresh.selectProducts(seed, "editorial", 3);
+
+      expect(result).toHaveLength(3);
+      // SKU-001 is the LLM pick; the rest come from candidate order.
+      expect(result[0].sku).toBe("SKU-001");
+    });
+  });
 });

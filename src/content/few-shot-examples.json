@@ -57,89 +57,79 @@
     "sms": "New year. New chapter. New sparkle \nSave up to 50% off Theo Grace best sellers.\nShop now {{link}}"
   },
   {
-    "month": "January",
-    "campaign_name": "Valentines Day Sale UP TO 40% + 20% Coupon",
+    "month": "April",
+    "campaign_name": "Spring in Full Bloom + UGC Mother's Day gifting",
     "free_top_text": null,
     "body_blocks": [
       {
-        "title": "From Us, To You",
-        "description": "UP TO 40% OFF SITEWIDE | + EXTRA 20% (Code: Valentines20)",
-        "cta": "Shop Valentine’s Gifts"
+        "title": "SPRING IN FULL BLOOM",
+        "description": "Spring is here, and it’s the perfect moment to refresh your look. We’ve handpicked pieces that feel light, effortless, and full of meaning, designed to shine with you every day.",
+        "cta": "Shop Now"
       },
       {
-        "title": "MAKE HEARTS FLUTTER",
-        "description": "Explore beautifully crafted personalized jewelry, designed with meaning and guaranteed to arrive on time for Valentine’s Day.",
-        "cta": "Shop Now"
+        "title": "Gift’s That Make Mom Smile",
+        "description": "<ugc content>",
+        "cta": "Explore Now"
       }
     ],
     "subject_variants": [
       {
-        "subject": "From Your Secret Admirer 💌",
-        "preheader": "Something personal. Something meant just for you."
+        "subject": "Spring Is In Full Bloom 🌸",
+        "preheader": "Step into spring with fresh, personalized pieces"
       }
     ],
-    "sms": "From your secret admirer…\nPersonalized jewelry now 40% off PLUS an extra 20% with code XXXX\nShop now: {link}"
+    "sms": "Spring is calling! Find your perfect piece (or Moms) today 👉 [link]"
   },
   {
     "month": "February",
-    "campaign_name": "Galetines Day - Gifts for the Girls",
+    "campaign_name": "To You From You (spoil yourself)",
     "free_top_text": "Gifts for the Gals",
     "body_blocks": [
       {
-        "title": "Galentine’s Day\n\nGIF with the text changing on a card/letter \n\nTo my best friend.\nTo my sister. \nTo my ride-or-die.",
-        "description": "40% OFF SITEWIDE | + EXTRA 20%",
-        "cta": null
-      },
-      {
-        "title": null,
-        "description": "This is your reminder that love doesn’t have to be romantic to be meaningful.\n\nPersonalized jewelry makes the perfect Galentine’s gift - names, initials, dates, or quiet reminders only the two of you understand.",
-        "cta": "Shop Galentine’s Gifts"
-      }
-    ],
-    "subject_variants": [
-      {
-        "subject": "Galentine’s Gifts for the Girls 🎀",
-        "preheader": "Personalized pieces made for best friends, sisters, and soulmates"
-      },
-      {
-        "subject": "Galentine's Gifts for the Women You Love",
-        "preheader": "Personalized pieces made for best friends, sisters, and soulmates"
-      }
-    ],
-    "sms": "Galentine’s is for the girls.\n Shop personalized jewelry 40% off + AN EXTRA 20% with code GALENTINES20 \nShop now: {link}"
-  },
-  {
-    "month": "February",
-    "campaign_name": "Love Story Collection Spotlight #7 The Big Diamond Necklace",
-    "free_top_text": "The Most Loved Piece of the Love Story Collection",
-    "body_blocks": [
-      {
-        "title": "Eternal Heart Diamond Necklace",
-        "description": "A forever kind of love.",
-        "cta": null
-      },
-      {
-        "title": "A timeless expression of love.",
-        "description": "A classic heart, reimagined. Designed to reflect the people, places, and moments that stay with us forever.",
+        "title": "SPOIL YOURSELF",
+        "description": "Valentine’s Day is the perfect time to show yourself extra love. So... what will it be?",
         "cta": "Shop Now"
       },
       {
-        "title": "Love Story Collection",
-        "description": "Every story begins with a heart.",
-        "cta": "Explore the Full Collection"
+        "title": "Make It Personal",
+        "description": "Initials, birthstones, or an engraving only you know the meaning of. Explore pieces designed to reflect your unique story.",
+        "cta": "Shop Now"
+      }
+    ],
+   "subject_variants": [
+      {
+        "subject": "To You, From You 💫",
+        "preheader": "Your deserve some jewelry "
+      },
+      { 
+        "subject": "Spoil Yourself This Valentine’s Day 💘",
+        "preheader": "A moment to celebrate yourself, with meaning"
+      }
+    ],
+    "sms": "Spoil yourself this Valentine's Day. Discover personal pieces made to wear every day. [link]"
+  },
+  {
+    "month": "March",
+    "campaign_name": "March Refresh 20% (UK)",
+    "free_top_text": "Something to Refresh For: 20% Off Sitewide",
+    "body_blocks": [
+      {
+        "title": "Hello March",
+        "description": "Mother’s Day is just around the corner. Create something she’ll treasure long after the flowers fade.",
+        "cta": null
       }
     ],
     "subject_variants": [
       {
-        "subject": "Some symbols say it all 💙",
-        "preheader": "Discover the Eternal Heart Diamond Necklace"
+        "subject": "Hello March! 20% OFF SITEWIDE",
+        "preheader": "A little seasonal refresh"
       },
       {
-        "subject": "The most loved piece of the Love Story Collection 💙",
-        "preheader": "Discover the Eternal Heart Diamond Necklace"
+        "subject": "A Fresh Start (And a Gift for Mum)",
+        "preheader": "A little seasonal refresh! 20% OFF SITWIDE"
       }
     ],
-    "sms": "The most loved piece of the Love Story Collection.\nMeet the Eternal Heart Diamond Necklace.\nShop now: {link}"
+    "sms": "Hello March Mother’s Day is nearly here. Shop with 20% off sitewide! [link]"
   },
   {
     "month": "February",
@@ -223,55 +213,50 @@
   },
   {
     "month": "March",
-    "campaign_name": "March Birthstone - Aquamarine",
-    "free_top_text": "March Birthstone: Aquamarine",
-    "body_blocks": [
-      {
-        "title": "A New Season in Blue",
-        "description": "A new season begins with Aquamarine. A symbol of calm, clarity, and fresh beginnings.\nYour chance to snag the perfect gift before the rush.",
-        "cta": "Shop Aquamarine Birthstones"
-      },
-      {
-        "title": "Calm & Clarity",
-        "description": "With its ocean-blue glow, Aquamarine is all about balance, courage, and moving forward with intention.\n\nThe perfect gift for March birthdays, or your own fresh start.",
-        "cta": "Discover Now"
-      }
-    ],
-    "subject_variants": [
-      {
-        "subject": "March’s Moment to Shine 💙",
-        "preheader": "Aquamarine: the serene blue stone of fresh beginnings."
-      },
-      {
-        "subject": "A Fresh Start in Aquamarine 💙",
-        "preheader": "The perfect gift for March birthdays (or your own new chapter)"
-      }
-    ],
-    "sms": "A new season. A new stone.\n Aquamarine is here. Celebrate March with meaning [link]"
-  },
-  {
-    "month": "April",
-    "campaign_name": "Mother's Day Last Call! Free Expedited Shipping",
+    "campaign_name": "Empowerment + Diamonds 30% off Women’s Day ",
     "free_top_text": null,
     "body_blocks": [
       {
-        "title": "Free EXPEDITED Shipping IS ON!",
-        "description": null,
-        "cta": "Shop Mother's Day Gifts"
+        "title": "For The Women Who Do It All",
+        "description": "30% off all diamond pieces, designed to shine as brightly as you do.",
+        "cta": "Celebrate Now"
       },
       {
-        "title": null,
-        "description": "Give Mom a gift she can wear everyday and get it in time for Mother's Day when you order today.",
-        "cta": "Explore Now"
+        "title": "This Women’s month, we’re honoring strength, resilience, and the quiet brilliance women carry every day.",
+        "description": "Explore our brightest styles",
+        "cta": "See All"
       }
     ],
     "subject_variants": [
       {
-        "subject": "FREE EXPEDITED SHIPPING IS ON! ⌛",
-        "preheader": "Get it in time for Mother's Day!"
+        "subject": "For The Women Who Sparkle ✨",
+        "preheader": "Celebrate Women’s month with 30% off diamonds"
+      },
+      {
+        "subject": "Shine With Meaning ✨ 30% Off Diamonds",
+        "preheader": "Women’s Month celebration begins now! "
       }
     ],
-    "sms": "FREE EXPEDITED SHIPPING IS ON! Order today and get it in time for Mother’s Day. [link]"
+    "sms": "Celebrate Women’s Month with 30% off ALL Diamonds. Limited time only. Shop NOW: [link]"
+  },
+  {
+    "month": "March",
+    "campaign_name": "Spring Refresh + Free Gift (2025)",
+    "free_top_text": "It's the last day of spring — time for a jewelry refresh.",
+    "body_blocks": [
+      {
+        "title": "Spring layering pieces",
+        "description": null,
+        "cta": "See more"
+      }
+    ],
+    "subject_variants": [
+      {
+        "subject": "Refresh your spring wardrobe with a free gift 🎁",
+        "preheader": "Only a few left!"
+      }
+    ],
+    "sms": null
   },
   {
     "month": "April",
@@ -364,22 +349,32 @@
     "sms": "LAST CHANCE!\n 20% off Mother’s Day gifts ends TONIGHT.\nShop now [link]"
   },
   {
-    "month": "May",
-    "campaign_name": "Still need a gift for mom?",
-    "free_top_text": "MOTHER’S DAY IS ALMOST HERE",
+    "month": "June",
+    "campaign_name": "The Charmed Collection — Nicky Hilton Launch (2025)",
+    "free_top_text": null,
     "body_blocks": [
       {
-        "title": "Still need a gift for Mom?",
-        "description": "It’s not too late.\nLet mom pick the piece that feels just right.\n\nFinal call to save 20% on a Theo Grace Gift Card, and give her the gift of choice.",
-        "cta": "Shop Gift Cards"
+        "title": "The Charmed Collection",
+        "description": "Our debut collection curated by Nicky Hilton has arrived — with 10 stunning new pieces we think you'll adore.",
+        "cta": "Shop Now"
+      },
+      {
+        "title": "Each piece is designed to become your personal signature",
+        "description": "We make jewelry like little love notes you can wear — dates, names, secret messages... it's your story.",
+        "cta": "Treat yourself + 20% off launch special"
+      },
+      {
+        "title": "Get ready to be charmed",
+        "description": "Say hello to the Bee Loved Locket — our signature piece.",
+        "cta": "Discover more"
       }
     ],
     "subject_variants": [
       {
-        "subject": "Mother’s Day is tomorrow ⏰",
-        "preheader": "Last chance to save 20% on gift cards! Shop now"
+        "subject": "Get ready to be charmed",
+        "preheader": "Nicky Hilton's New Collection + VIP Launch Special!"
       }
     ],
-    "sms": "Still need a gift for Mom? Let her choose her perfect piece. Save 20% on Theo Grace Gift Cards: [link]"
+    "sms": null
   }
 ]
