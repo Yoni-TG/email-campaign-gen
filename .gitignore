@@ -46,9 +46,10 @@ yarn-error.log*
 /data/*.fixture.json
 !/data/product-feed.fixture.sample.json
 
-# product-selection eval run artefacts (briefs.ts is the contract,
-# results-*.json are timestamped per run)
+# product-selection + template-selection eval run artefacts (briefs.ts /
+# template-briefs.ts are the contract; results JSONs are timestamped per run)
 /eval/results-*.json
+/eval/template-results-*.json
 
 # vercel
 .vercel
