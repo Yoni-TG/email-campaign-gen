@@ -42,6 +42,7 @@ export async function renderCandidates(
       bodyBlockCount: campaign.approvedCopy.body_blocks.length,
       hasNickyQuote: campaign.approvedCopy.nicky_quote !== null,
       mainMessage: campaign.seed.mainMessage,
+      targetAudience: campaign.seed.targetAudience,
     });
 
     const candidateVariants: CandidateVariant[] = await Promise.all(

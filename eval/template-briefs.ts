@@ -53,6 +53,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       hasNickyQuote: false,
       mainMessage:
         "Mother's Day — 20% off + free expedited shipping. Hero photo over offer.",
+      targetAudience: ["Mother", "Grandmother"],
     },
   },
   {
@@ -65,6 +66,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       bodyBlockCount: 1,
       hasNickyQuote: false,
       mainMessage: "Men's bracelets, 30% off this week.",
+      targetAudience: ["Men"],
     },
   },
 
@@ -118,6 +120,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       hasNickyQuote: false,
       mainMessage:
         "Arabic name necklaces — narrative-led story about family heritage.",
+      targetAudience: ["Mother", "Grandmother", "Women"],
     },
   },
 
@@ -169,6 +172,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       bodyBlockCount: 2,
       hasNickyQuote: false,
       mainMessage: "Grandma's love, on a chain — stack the names she made.",
+      targetAudience: ["Grandmother"],
     },
   },
 
@@ -236,6 +240,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       hasNickyQuote: false,
       mainMessage:
         "Mother's Day gift guide — pieces she'll treasure long after the flowers fade.",
+      targetAudience: ["Mother", "Grandmother"],
     },
   },
   {
@@ -249,6 +254,7 @@ export const EVAL_TEMPLATE_BRIEFS: TemplateEvalBrief[] = [
       hasNickyQuote: false,
       mainMessage:
         "Father's Day — names, dates, little reminders he matters.",
+      targetAudience: ["Father", "Men"],
     },
   },
   {

@@ -1,15 +1,36 @@
 {
   "id": "product-launch/editorial-led",
   "name": "Editorial · Split · Grid",
-  "campaignTypes": ["product_launch"],
-  "tags": ["editorial", "image-led", "story-forward"],
+  "campaignTypes": [
+    "product_launch",
+    "editorial",
+    "collection_spotlight"
+  ],
+  "tags": [
+    "editorial",
+    "image-led",
+    "story-forward"
+  ],
   "description": "Editorial-split body anchors the launch — image-paired body blocks alternate with the product grid for a magazine-feel reveal. Best when the launch has a clear narrative arc.",
   "requiredAssets": [
-    { "key": "hero", "label": "Hero lifestyle image", "required": true },
-    { "key": "secondary", "label": "Editorial split image", "required": true }
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image",
+      "required": true
+    },
+    {
+      "key": "secondary",
+      "label": "Editorial split image",
+      "required": true
+    }
   ],
   "blocks": [
-    { "type": "logo_header", "bind": { "background": "white" } },
+    {
+      "type": "logo_header",
+      "bind": {
+        "background": "white"
+      }
+    },
     {
       "type": "hero_lifestyle",
       "bind": {
@@ -33,7 +54,15 @@
         "ctaHref": "body_blocks[1].cta_href"
       }
     },
-    { "type": "product_grid_2x2", "bind": { "products": "products" } },
-    { "type": "footer", "bind": {} }
+    {
+      "type": "product_grid_2x2",
+      "bind": {
+        "products": "products"
+      }
+    },
+    {
+      "type": "footer",
+      "bind": {}
+    }
   ]
 }

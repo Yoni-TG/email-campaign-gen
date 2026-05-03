@@ -70,6 +70,9 @@ function buildUserPrompt(
 
   const briefLines = [
     `<campaign_type>${input.campaignType}</campaign_type>`,
+    input.targetAudience?.length
+      ? `<target_audience>${input.targetAudience.join(", ")}</target_audience>`
+      : null,
     input.leadValue ? `<lead_value>${input.leadValue}</lead_value>` : null,
     input.leadPersonalities?.length
       ? `<lead_personalities>${input.leadPersonalities.join(", ")}</lead_personalities>`
@@ -93,11 +96,12 @@ function buildUserPrompt(
     "",
     "## How to rank",
     "",
-    "- `<campaign_type>` is a STRONG soft signal. In a normal pick, 2 or 3 of your 3 chosen skeletons should have the brief's campaign_type in their `campaign_types` list.",
+    "- `<campaign_type>` is a STRONG soft signal. In a normal pick, 2 or 3 of your 3 chosen skeletons should have the brief's campaign_type in their `campaign_types` list. Skeletons may legitimately list multiple campaign_types — those count as in-type for any of them.",
     "- An off-type skeleton may win a slot when its description / tags / structure clearly fit the brief better than any in-type alternative — for example, an editorial-led skeleton on a product launch with a quiet, story-led main message, or a quote-led skeleton on a brief that flags `has_nicky_quote: yes`.",
-    "- Beyond type, weigh: lead_value (emotional anchor), lead_personalities (voice), product_count (does the layout's grid fit?), body_block_count (does the layout have enough sections?), main_message (does the structure match the angle?).",
+    "- `<target_audience>` (when present) shapes layout fit beyond type. Masculine briefs (`Men`, `Father`) tend to prefer typography-led / single-hero / grid-led skeletons over warm-hero family-coded ones; family briefs (`Mother`, `Grandmother`, `Couple`) lean into warm hero + gift-guide energy; audience-agnostic briefs leave this open.",
+    "- Beyond type and audience, weigh: lead_value (emotional anchor), lead_personalities (voice), product_count (does the layout's grid fit?), body_block_count (does the layout have enough sections?), main_message (does the structure match the angle?).",
     "- Your three picks should feel meaningfully different from each other — give the operator structural variety to choose between, not three near-duplicates.",
-    "- Each rationale should reference at least one concrete brief attribute (e.g. \"warm-hearted voice\", \"single-product launch\", \"has Nicky quote\") rather than generic phrasing.",
+    "- Each rationale should reference at least one concrete brief attribute (e.g. \"warm-hearted voice\", \"single-product launch\", \"has Nicky quote\", \"masculine audience\") rather than generic phrasing.",
     "",
     "## Brief",
     "",

@@ -40,7 +40,11 @@ function sampleBlueprint(): RendererBlueprint {
 describe("skeleton library", () => {
   const skeletons = loadAllSkeletons();
 
-  it("ships exactly 3 skeletons per campaign type (15 total)", () => {
+  it("ships 15 manifests total with at least 5 candidates per campaign type", () => {
+    // Library is 15 manifests; multi-type membership (added 2026-05-03) means
+    // most skeletons fit 2-3 campaign types, so per-type *eligible* counts
+    // vary. The hard floor is 5 per type — anything lower starves the LLM
+    // ranker for that campaign type and the operator sees too little variety.
     expect(skeletons).toHaveLength(15);
     const counts = skeletons.reduce<Record<string, number>>((acc, s) => {
       for (const t of s.campaignTypes) acc[t] = (acc[t] ?? 0) + 1;
@@ -54,7 +58,7 @@ describe("skeleton library", () => {
       "holiday_seasonal",
     ];
     for (const type of types) {
-      expect(counts[type]).toBe(3);
+      expect(counts[type]).toBeGreaterThanOrEqual(5);
     }
   });
 
