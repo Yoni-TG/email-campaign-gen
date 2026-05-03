@@ -172,10 +172,6 @@ async function rerankWithLLM(
   // Single self-correction pass — mirrors the SMS-overshoot retry pattern in
   // copy-generation.ts. Hands the violations back as a tool_result error so
   // the model can correct without re-priming context.
-  console.warn(
-    `[product-selection] rerank returned ${validation.invalid.length} ` +
-      `unknown SKU(s) / ${Math.max(0, count - validation.valid.length)} short; retrying once`,
-  );
   const retryMessages: Anthropic.MessageParam[] = [
     ...messages,
     {

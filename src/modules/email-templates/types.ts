@@ -90,7 +90,7 @@ export interface SkeletonManifest {
   name: string;
   /** Campaign types this skeleton is valid for (rules-narrowing). */
   campaignTypes: CampaignType[];
-  /** Tags consumed by the LLM ranker (dormant in v1). */
+  /** Tags consumed by the LLM ranker. */
   tags: string[];
   /** Description fed to the LLM ranker as rationale source. */
   description: string;

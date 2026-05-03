@@ -30,8 +30,8 @@
       "type": "offer_panel",
       "bind": {
         "background": "literal:dusty_rose",
-        "topline": "body_blocks[1].title",
-        "headline": "body_blocks[1].description",
+        "topline": "body_blocks[1].description",
+        "headline": "body_blocks[1].title",
         "subhead": "literal:everything",
         "code": "promo_details",
         "ctaLabel": "body_blocks[1].cta",

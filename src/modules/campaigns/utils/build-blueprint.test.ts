@@ -108,4 +108,22 @@ describe("buildBlueprint", () => {
     });
     expect(out.assets).toEqual({});
   });
+
+  it("threads seed.promoDetails through to blueprint.promo_details (null when unset)", () => {
+    const withPromo = buildBlueprint({
+      campaignId: "cmp_1",
+      seed: { ...seed, promoDetails: "MOM30 — 30% OFF" },
+      approvedCopy,
+      approvedProducts: [],
+    });
+    expect(withPromo.promo_details).toBe("MOM30 — 30% OFF");
+
+    const withoutPromo = buildBlueprint({
+      campaignId: "cmp_1",
+      seed,
+      approvedCopy,
+      approvedProducts: [],
+    });
+    expect(withoutPromo.promo_details).toBeNull();
+  });
 });

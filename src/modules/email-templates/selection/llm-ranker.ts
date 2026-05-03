@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { withRetry } from "@/lib/retry";
 import type { SkeletonManifest, SkeletonRanked } from "../types";
 import type { SelectionInput } from "./types";
 
@@ -113,14 +114,11 @@ function buildUserPrompt(
   ].join("\n");
 }
 
-/**
- * Calls Claude to pick the top 3 skeletons from a pool of >3 candidates.
- * Dormant in v1 (each campaign type ships with exactly 3 skeletons), but
- * exists, is tested, and activates the moment any pool grows past 3.
- */
+/** Calls Claude to pick the top 3 skeletons from a pool of >3 candidates. */
 export async function rankWithLLM(
   input: SelectionInput,
   candidates: SkeletonManifest[],
+  options?: { signal?: AbortSignal },
 ): Promise<SkeletonRanked[]> {
   if (candidates.length <= 3) {
     // Defensive: callers should already guard. Returning all-as-is keeps
@@ -130,13 +128,22 @@ export async function rankWithLLM(
 
   const client = getAnthropic();
 
-  const response = await client.messages.create({
-    model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
-    max_tokens: MAX_TOKENS,
-    tools: [RANK_TOOL],
-    tool_choice: { type: "tool", name: RANK_TOOL.name },
-    messages: [{ role: "user", content: buildUserPrompt(input, candidates) }],
-  });
+  const response = await withRetry(
+    () =>
+      client.messages.create(
+        {
+          model: process.env.CLAUDE_MODEL || DEFAULT_MODEL,
+          max_tokens: MAX_TOKENS,
+          tools: [RANK_TOOL],
+          tool_choice: { type: "tool", name: RANK_TOOL.name },
+          messages: [
+            { role: "user", content: buildUserPrompt(input, candidates) },
+          ],
+        },
+        { signal: options?.signal },
+      ),
+    { signal: options?.signal },
+  );
 
   const toolUse = response.content.find((block) => block.type === "tool_use");
   if (!toolUse || toolUse.type !== "tool_use") {
@@ -161,13 +168,20 @@ export async function rankWithLLM(
 
   // Pad with unranked candidates if Claude returned fewer than 3 valid ids
   // (defensive — keeps the operator UI from breaking on a malformed call).
+  // In-type candidates fill before off-type so a partially-malformed pick
+  // never silently surfaces a wholly off-type variant onto the operator.
   if (result.length < 3) {
     const used = new Set(result.map((r) => r.skeleton.id));
-    for (const c of candidates) {
+    const isInType = (c: SkeletonManifest) =>
+      c.campaignTypes.includes(input.campaignType);
+    const unused = candidates.filter((c) => !used.has(c.id));
+    const padOrder = [
+      ...unused.filter(isInType),
+      ...unused.filter((c) => !isInType(c)),
+    ];
+    for (const c of padOrder) {
       if (result.length >= 3) break;
-      if (!used.has(c.id)) {
-        result.push({ skeleton: c, rationale: null });
-      }
+      result.push({ skeleton: c, rationale: null });
     }
   }
 

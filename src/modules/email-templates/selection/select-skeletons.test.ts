@@ -67,7 +67,9 @@ describe("selectSkeletons", () => {
 
     expect(rankSpy).toHaveBeenCalledTimes(1);
     // Critical: the ranker received the WHOLE pool, not a filtered subset.
-    expect(rankSpy).toHaveBeenCalledWith(input, pool);
+    const [arg0, arg1] = rankSpy.mock.calls[0] ?? [];
+    expect(arg0).toEqual(input);
+    expect(arg1).toBe(pool);
     expect(result.map((r) => r.skeleton.id)).toEqual(["a", "b", "c"]);
   });
 
@@ -137,7 +139,7 @@ describe("selectSkeletons", () => {
       await selectModule.selectSkeletons({ campaignType: type });
     }
     expect(rankSpy).toHaveBeenCalledTimes(5);
-    // Every call received the same full pool.
+    // Every call received the same full pool as the second positional arg.
     for (const call of rankSpy.mock.calls) {
       expect(call[1]).toBe(all);
     }

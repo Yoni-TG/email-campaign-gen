@@ -21,6 +21,7 @@ import type { SelectionInput } from "./types";
  */
 export async function selectSkeletons(
   input: SelectionInput,
+  options?: { signal?: AbortSignal },
 ): Promise<SkeletonRanked[]> {
   const all = loadAllSkeletons();
 
@@ -28,5 +29,5 @@ export async function selectSkeletons(
     return all.map((skeleton) => ({ skeleton, rationale: null }));
   }
 
-  return rankWithLLM(input, all);
+  return rankWithLLM(input, all, options);
 }
