@@ -118,6 +118,44 @@ describe("rankWithLLM", () => {
     expect(result.slice(1).every((r) => r.rationale === null)).toBe(true);
   });
 
+  it("prefers in-type candidates when padding malformed picks", async () => {
+    // Off-type registered first to prove padding ignores registry order in
+    // favour of campaignType match.
+    const candidates: SkeletonManifest[] = [
+      { ...makeSkeleton("off-1"), campaignTypes: ["editorial"] },
+      { ...makeSkeleton("off-2"), campaignTypes: ["sale_promo"] },
+      { ...makeSkeleton("in-1"), campaignTypes: ["product_launch"] },
+      { ...makeSkeleton("in-2"), campaignTypes: ["product_launch"] },
+    ];
+    messagesCreate.mockResolvedValue({
+      content: [
+        {
+          type: "tool_use",
+          name: "rank_skeletons",
+          input: {
+            ranked: [
+              { skeleton_id: "totally-bogus-id", rationale: "ignored" },
+              { skeleton_id: "also-bogus", rationale: "ignored" },
+              { skeleton_id: "still-bogus", rationale: "ignored" },
+            ],
+          },
+        },
+      ],
+    });
+
+    const result = await rankerModule.rankWithLLM(
+      { campaignType: "product_launch" },
+      candidates,
+    );
+
+    expect(result).toHaveLength(3);
+    // First two slots fill from the in-type pool; the off-type wildcard only
+    // shows up after in-type options run out.
+    expect(result[0]?.skeleton.id).toBe("in-1");
+    expect(result[1]?.skeleton.id).toBe("in-2");
+    expect(result[2]?.skeleton.id).toBe("off-1");
+  });
+
   it("throws when Claude returns no tool_use block", async () => {
     messagesCreate.mockResolvedValue({
       content: [{ type: "text", text: "no tool used" }],

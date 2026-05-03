@@ -1,0 +1,62 @@
+{
+  "id": "holiday-seasonal/last-call-offer",
+  "name": "Last Call · Offer Panel",
+  "campaignTypes": ["holiday_seasonal", "sale_promo"],
+  "tags": ["last-call", "offer-panel", "rose-palette", "warm", "gift-led"],
+  "description": "Pink-palette last-call layout. A coloured panel stages the headline above a lifestyle hero, a discrete offer panel below the image carries the discount + promo code + CTA, and a labelled 2x2 grid closes the message. Best for Mother's Day / Valentine's-style sale-deadline sends where the message is gift-coded and the offer needs its own visual anchor.",
+  "requiredAssets": [
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image (mother + daughter or similar gift-recipient framing)",
+      "required": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo_header",
+      "bind": {
+        "background": "literal:rose_pink"
+      }
+    },
+    {
+      "type": "hero_titled_image",
+      "bind": {
+        "background": "literal:rose_pink",
+        "headline": "body_blocks[0].title",
+        "imageUrl": "assets.hero"
+      }
+    },
+    {
+      "type": "offer_panel",
+      "bind": {
+        "background": "literal:dusty_rose",
+        "topline": "body_blocks[1].description",
+        "headline": "body_blocks[1].title",
+        "subhead": "literal:everything",
+        "code": "promo_details",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "body_blocks[1].cta_href"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "background": "literal:rose_pink",
+        "headline": "body_blocks[2].title",
+        "body": "body_blocks[2].description",
+        "ctaLabel": "body_blocks[2].cta",
+        "ctaHref": "body_blocks[2].cta_href"
+      }
+    },
+    {
+      "type": "product_grid_2x2",
+      "bind": {
+        "products": "products"
+      }
+    },
+    {
+      "type": "footer",
+      "bind": {}
+    }
+  ]
+}

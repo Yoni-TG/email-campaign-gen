@@ -5,6 +5,7 @@ import {
   LEAD_PERSONALITIES,
   LEAD_VALUES,
   MARKETS,
+  SHOP_FOR_AUDIENCES,
 } from "@/lib/types";
 import { ValidationError, handleRouteError } from "@/lib/errors";
 import {
@@ -34,6 +35,7 @@ const seedSchema = z.object({
   leadValue: z.enum(LEAD_VALUES),
   leadPersonalities: z.array(z.enum(LEAD_PERSONALITIES)).min(1),
   market: z.enum(MARKETS).optional(),
+  targetAudience: z.array(z.enum(SHOP_FOR_AUDIENCES)).optional(),
 });
 
 const createCampaignSchema = z.object({

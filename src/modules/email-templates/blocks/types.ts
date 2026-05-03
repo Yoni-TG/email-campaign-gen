@@ -85,6 +85,57 @@ export interface HeroTileGraphicProps {
   editTargets?: EditTargets;
 }
 
+export interface HeroTitledImageProps {
+  imageUrl: string;
+  subLabel?: string;
+  headline: string;
+  background?: BlockBackground;
+  /**
+   * Where the headline sits relative to the image. Default `above` places
+   * the headline in a coloured panel directly above the image (the
+   * Mother's-Day-Last-Call build). `overlay-bottom` absolute-positions
+   * the headline over the lower-center of the image in white serif —
+   * Outlook desktop ignores absolute positioning, so the headline falls
+   * back to a panel below the image (graceful degradation).
+   */
+  titlePosition?: "above" | "overlay-bottom";
+  editTargets?: EditTargets;
+}
+
+export interface HeroOfferOverlayProps {
+  imageUrl: string;
+  /** Top-region title (italic serif). e.g. "Last Call!" */
+  topline?: string;
+  /** Optional second line of the top title. e.g. "Free Mother's Day Shipping!" */
+  subline?: string;
+  /** Italic intro above the offer numerals. e.g. "Final Hours!" */
+  offerTopline?: string;
+  /** Huge offer numerals — the visual anchor. e.g. "25% OFF" */
+  offerHeadline: string;
+  /** Italic descriptor below the numerals. e.g. "sitewide" */
+  offerSubhead?: string;
+  /** Promo code rendered as a white pill chip. e.g. "Use code: MOM25" */
+  code?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  editTargets?: EditTargets;
+}
+
+export interface OfferPanelProps {
+  /** Small italic intro line. e.g. "Last Chance to shop the Perfect Gift for Mom". */
+  topline?: string;
+  /** Huge offer numerals — the visual anchor. e.g. "$30 OFF". */
+  headline: string;
+  /** Italic descriptor below the offer. e.g. "everything". */
+  subhead?: string;
+  /** Promo code rendered as a darker pill chip. e.g. "Use code: MOM30". */
+  code?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  background?: BlockBackground;
+  editTargets?: EditTargets;
+}
+
 export interface TextBlockCenteredProps {
   subLabel?: string;
   headline?: string;
@@ -111,6 +162,9 @@ export interface EditorialSplitProps {
 
 export interface ProductGridProps {
   products: BlueprintProduct[];
+  /** Slice start; defaults to 0. Used by skeletons that stack multiple
+   *  grids over one products array (e.g. three labelled tiers of 3). */
+  offset?: number;
   editTargets?: EditTargets;
 }
 
@@ -189,10 +243,14 @@ export interface BlockPropsMap {
   hero_product: HeroProductProps;
   hero_typography: HeroTypographyProps;
   hero_tile_graphic: HeroTileGraphicProps;
+  hero_titled_image: HeroTitledImageProps;
+  hero_offer_overlay: HeroOfferOverlayProps;
+  offer_panel: OfferPanelProps;
   text_block_centered: TextBlockCenteredProps;
   editorial_split: EditorialSplitProps;
   product_grid_2x2: ProductGridProps;
   product_grid_3x2: ProductGridProps;
+  product_grid_3x1: ProductGridProps;
   product_grid_4x1: ProductGridProps;
   product_grid_magazine: ProductGridProps;
   product_grid_split: ProductGridProps;

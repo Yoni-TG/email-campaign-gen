@@ -18,10 +18,14 @@ export const BLOCK_TYPES = [
   "hero_product",
   "hero_typography",
   "hero_tile_graphic",
+  "hero_titled_image",
+  "hero_offer_overlay",
+  "offer_panel",
   "text_block_centered",
   "editorial_split",
   "product_grid_2x2",
   "product_grid_3x2",
+  "product_grid_3x1",
   "product_grid_4x1",
   "product_grid_magazine",
   "product_grid_split",
@@ -86,7 +90,7 @@ export interface SkeletonManifest {
   name: string;
   /** Campaign types this skeleton is valid for (rules-narrowing). */
   campaignTypes: CampaignType[];
-  /** Tags consumed by the LLM ranker (dormant in v1). */
+  /** Tags consumed by the LLM ranker. */
   tags: string[];
   /** Description fed to the LLM ranker as rationale source. */
   description: string;

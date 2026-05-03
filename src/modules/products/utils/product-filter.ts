@@ -1,9 +1,21 @@
-import type { CampaignType, DigestedProduct } from "@/lib/types";
+import type {
+  CampaignType,
+  DigestedProduct,
+  ShopForAudience,
+} from "@/lib/types";
 
 export interface ProductFilterOptions {
   categories: string[];
   campaignType: CampaignType;
   pinnedSkus?: string[];
+  /**
+   * Operator-selected audience values. When set + non-empty, candidates must
+   * have at least one overlap with `audience` in their `shopFor`. Products
+   * with empty `shopFor` are dropped (no signal to validate against). When
+   * empty / undefined the filter is skipped — audience-agnostic editorials
+   * keep the full pool.
+   */
+  audience?: ShopForAudience[];
   /** Upper bound on returned candidates; defaults to 50 so LLM re-rank stays cheap. */
   maxCandidates?: number;
 }
@@ -48,17 +60,25 @@ export function filterProducts(
     categories,
     campaignType,
     pinnedSkus = [],
+    audience,
     maxCandidates = DEFAULT_MAX_CANDIDATES,
   } = options;
 
   const pinnedSet = new Set(pinnedSkus);
   const categorySet = new Set(categories.map((c) => c.toLowerCase()));
+  const audienceSet =
+    audience && audience.length > 0 ? new Set<string>(audience) : null;
 
   const filtered = products.filter((p) => {
     if (pinnedSet.has(p.sku)) return false;
 
     const types = p.productType.map((t) => t.toLowerCase());
     if (!types.some((t) => categorySet.has(t))) return false;
+
+    if (audienceSet) {
+      if (p.shopFor.length === 0) return false;
+      if (!p.shopFor.some((s) => audienceSet.has(s))) return false;
+    }
 
     if (campaignType === "sale_promo" && !p.isOnSale) return false;
 

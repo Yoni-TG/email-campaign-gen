@@ -2,14 +2,19 @@
 // this module can be reused (e.g. by a future preview-only flow that doesn't
 // touch the DB).
 
-import type { CampaignType, LeadPersonality, LeadValue } from "@/lib/types";
+import type {
+  CampaignType,
+  LeadPersonality,
+  LeadValue,
+  ShopForAudience,
+} from "@/lib/types";
 
 export interface SelectionInput {
-  /** Required — narrows the candidate pool. */
+  /** Strong soft signal for skeleton fit — most picks should be in-type. */
   campaignType: CampaignType;
   /**
-   * Optional context for the LLM ranker. Ignored when the pool size is
-   * ≤ 3 (v1 path — ranker doesn't run).
+   * Optional context for the LLM ranker. Used when the bundled library has
+   * > 3 manifests; ignored on the defensive ≤ 3 short-circuit path.
    */
   leadValue?: LeadValue;
   leadPersonalities?: LeadPersonality[];
@@ -18,4 +23,12 @@ export interface SelectionInput {
   bodyBlockCount?: number;
   /** Optional — short summary of the campaign's main message, for ranker prompts. */
   mainMessage?: string;
+  /**
+   * Operator-selected audience values from the brief (Men / Women / Mother
+   * / Father / Grandmother / Kids & Teens / Couple / Friends). Threaded
+   * into the ranker so audience-coded layouts win for matching briefs —
+   * e.g. typography / single-hero / grid-led for masculine briefs over
+   * warm-hero family-coded layouts.
+   */
+  targetAudience?: ShopForAudience[];
 }

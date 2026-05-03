@@ -1,14 +1,29 @@
 {
   "id": "editorial/gallery-edit",
   "name": "Gallery Edit",
-  "campaignTypes": ["editorial"],
-  "tags": ["gallery", "wide-grid", "typography-led"],
+  "campaignTypes": [
+    "editorial",
+    "collection_spotlight",
+    "product_launch"
+  ],
+  "tags": [
+    "gallery",
+    "wide-grid",
+    "typography-led"
+  ],
   "description": "Typography-led headline opens the edit, a 3×2 grid shows the full curated set, and an editorial split closes with a styling note. Best when the edit is broad (10+ pieces) and product-imagery does the storytelling.",
   "requiredAssets": [
-    { "key": "secondary", "label": "Editorial split image", "required": true }
+    {
+      "key": "secondary",
+      "label": "Editorial split image",
+      "required": true
+    }
   ],
   "blocks": [
-    { "type": "logo_header", "bind": {} },
+    {
+      "type": "logo_header",
+      "bind": {}
+    },
     {
       "type": "hero_typography",
       "bind": {
@@ -18,8 +33,18 @@
         "background": "literal:white"
       }
     },
-    { "type": "section_label", "bind": { "text": "literal:THE PIECES" } },
-    { "type": "product_grid_magazine", "bind": { "products": "products" } },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:THE PIECES"
+      }
+    },
+    {
+      "type": "product_grid_magazine",
+      "bind": {
+        "products": "products"
+      }
+    },
     {
       "type": "editorial_split",
       "bind": {
@@ -32,6 +57,9 @@
         "ctaHref": "body_blocks[1].cta_href"
       }
     },
-    { "type": "footer", "bind": {} }
+    {
+      "type": "footer",
+      "bind": {}
+    }
   ]
 }

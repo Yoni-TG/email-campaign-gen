@@ -1,16 +1,40 @@
 {
   "id": "holiday-seasonal/gift-guide",
   "name": "Gift Guide",
-  "campaignTypes": ["holiday_seasonal"],
-  "tags": ["gift-guide", "section-labels", "warm"],
+  "campaignTypes": [
+    "holiday_seasonal",
+    "collection_spotlight",
+    "sale_promo"
+  ],
+  "tags": [
+    "gift-guide",
+    "section-labels",
+    "warm"
+  ],
   "description": "Warm lifestyle hero opens the gift guide, a labelled 2×2 surfaces top picks, and a closing block points to the full guide. Best for Mother's Day, Valentine's, and similar gift-led calendar moments.",
   "requiredAssets": [
-    { "key": "hero", "label": "Hero lifestyle image", "required": true },
-    { "key": "closing", "label": "Closing image", "required": false }
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image",
+      "required": true
+    },
+    {
+      "key": "closing",
+      "label": "Closing image",
+      "required": false
+    }
   ],
   "blocks": [
-    { "type": "logo_header", "bind": {} },
-    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "logo_header",
+      "bind": {}
+    },
+    {
+      "type": "announcement_bar",
+      "bind": {
+        "text": "free_top_text"
+      }
+    },
     {
       "type": "hero_lifestyle",
       "bind": {
@@ -22,8 +46,18 @@
         "ctaHref": "body_blocks[0].cta_href"
       }
     },
-    { "type": "section_label", "bind": { "text": "literal:MADE TO TREASURE" } },
-    { "type": "product_grid_2x2", "bind": { "products": "products" } },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:MADE TO TREASURE"
+      }
+    },
+    {
+      "type": "product_grid_2x2",
+      "bind": {
+        "products": "products"
+      }
+    },
     {
       "type": "closing_block",
       "bind": {
@@ -34,6 +68,9 @@
         "ctaHref": "body_blocks[1].cta_href"
       }
     },
-    { "type": "footer", "bind": {} }
+    {
+      "type": "footer",
+      "bind": {}
+    }
   ]
 }

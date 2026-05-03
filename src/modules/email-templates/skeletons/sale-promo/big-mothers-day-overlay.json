@@ -1,0 +1,96 @@
+{
+  "id": "sale-promo/big-mothers-day-overlay",
+  "name": "Big Sale · Hero Overlay · Tiered Grids",
+  "campaignTypes": ["sale_promo", "holiday_seasonal"],
+  "tags": ["last-call", "hero-overlay", "rose-palette", "tiered-grids", "big-graphic", "shop-by-tier"],
+  "description": "All-in-one sale layout. A single image carries the full pitch — italic title at top, italic intro + huge offer numerals + italic descriptor in the lower half, code chip + CTA below, and an optional dark band carrying a tier label. Below the hero, a short editorial-style paragraph + three tiered 3x1 product rows ('Jewellery for family time / her story / every day') let the operator surface 9 picks across mood-curated sections without competing with the hero. Best for big-deadline holiday-sale moments where the photo is emotional and the offer needs to live on top of it.",
+  "requiredAssets": [
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image (carries the full pitch — choose a tall photo with central subject and breathing room top + bottom)",
+      "required": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo_header",
+      "bind": {
+        "background": "literal:rose_pink"
+      }
+    },
+    {
+      "type": "announcement_bar",
+      "bind": {
+        "text": "free_top_text",
+        "background": "literal:rose_pink"
+      }
+    },
+    {
+      "type": "hero_offer_overlay",
+      "bind": {
+        "imageUrl": "assets.hero",
+        "topline": "body_blocks[0].title",
+        "subline": "body_blocks[0].description",
+        "offerTopline": "body_blocks[1].title",
+        "offerHeadline": "body_blocks[1].description",
+        "offerSubhead": "literal:sitewide",
+        "code": "promo_details",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "body_blocks[1].cta_href",
+        "bottomBand": "literal:Jewellery for family time"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "background": "literal:white",
+        "body": "body_blocks[2].description",
+        "headline": "body_blocks[2].title"
+      }
+    },
+    {
+      "type": "product_grid_3x1",
+      "bind": {
+        "products": "products",
+        "offset": 0
+      }
+    },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:Jewellery for her story"
+      }
+    },
+    {
+      "type": "product_grid_3x1",
+      "bind": {
+        "products": "products",
+        "offset": 3
+      }
+    },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:Jewellery for every day"
+      }
+    },
+    {
+      "type": "product_grid_3x1",
+      "bind": {
+        "products": "products",
+        "offset": 6
+      }
+    },
+    {
+      "type": "cta_button",
+      "bind": {
+        "label": "body_blocks[2].cta",
+        "href": "body_blocks[2].cta_href"
+      }
+    },
+    {
+      "type": "footer",
+      "bind": {}
+    }
+  ]
+}

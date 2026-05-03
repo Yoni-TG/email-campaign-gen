@@ -4,25 +4,30 @@ import { rankWithLLM } from "./llm-ranker";
 import type { SelectionInput } from "./types";
 
 /**
- * Picks 3 skeleton candidates for a campaign:
+ * Picks 3 skeleton candidates for a campaign.
  *
- * 1. Narrow the pool to skeletons whose `campaignTypes` includes the brief's
- *    type (rules-narrows step — deterministic, cheap).
- * 2. If ≤ 3 candidates, return all of them (v1 path; ranker doesn't run).
- * 3. Otherwise, hand the candidates to the LLM ranker, which returns the
- *    top 3 with one-sentence rationales.
+ * Phase-1 (2026-05-03): the LLM ranker is the primary picker. The full
+ * library is handed to the ranker on every call; `campaignType` is a
+ * strong soft signal in the prompt rather than a hard pre-filter. This
+ * fixes the v1 problem where every campaign of a given type saw the same
+ * 3 skeletons because the type filter pre-empted the ranker.
+ *
+ * The pool is still capped to 15 manifests (the bundled library), so the
+ * ranker call is cheap (single LLM tool call).
+ *
+ * Defensive: if the library somehow ships with ≤ 3 manifests (only
+ * possible during local development with a stripped-down skeleton set),
+ * skip the ranker — there's nothing to rank.
  */
 export async function selectSkeletons(
   input: SelectionInput,
+  options?: { signal?: AbortSignal },
 ): Promise<SkeletonRanked[]> {
   const all = loadAllSkeletons();
-  const candidates = all.filter((s) =>
-    s.campaignTypes.includes(input.campaignType),
-  );
 
-  if (candidates.length <= 3) {
-    return candidates.map((skeleton) => ({ skeleton, rationale: null }));
+  if (all.length <= 3) {
+    return all.map((skeleton) => ({ skeleton, rationale: null }));
   }
 
-  return rankWithLLM(input, candidates);
+  return rankWithLLM(input, all, options);
 }

@@ -16,12 +16,16 @@ import {
   Footer,
   HeroFramed,
   HeroLifestyle,
+  HeroOfferOverlay,
   HeroProduct,
   HeroTileGraphic,
+  HeroTitledImage,
   HeroTypography,
   LogoHeader,
   NickyQuoteModule,
+  OfferPanel,
   ProductGrid2x2,
+  ProductGrid3x1,
   ProductGrid3x2,
   ProductGrid4x1,
   ProductGridMagazine,
@@ -224,6 +228,96 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     ),
   },
   {
+    id: "hero-titled-image-rose",
+    label: "hero_titled_image",
+    variant: "background: rose_pink",
+    height: 460,
+    jsx: (
+      <HeroTitledImage
+        background="rose_pink"
+        headline="For the woman who does it all"
+        imageUrl={SAMPLE_HERO_URL}
+      />
+    ),
+  },
+  {
+    id: "hero-titled-image-white",
+    label: "hero_titled_image",
+    variant: "background: white",
+    height: 460,
+    jsx: (
+      <HeroTitledImage
+        background="white"
+        subLabel="MOTHER'S DAY"
+        headline="A gift as timeless as her love"
+        imageUrl={SAMPLE_HERO_URL}
+      />
+    ),
+  },
+  {
+    id: "hero-titled-image-overlay-bottom",
+    label: "hero_titled_image",
+    variant: "titlePosition: overlay-bottom",
+    height: 420,
+    jsx: (
+      <HeroTitledImage
+        background="rose_pink"
+        titlePosition="overlay-bottom"
+        headline="For Mom, With Love"
+        imageUrl={SAMPLE_HERO_URL}
+      />
+    ),
+  },
+  {
+    id: "hero-offer-overlay-default",
+    label: "hero_offer_overlay",
+    variant: "title + offer + chip + CTA + bottom band",
+    height: 540,
+    jsx: (
+      <HeroOfferOverlay
+        imageUrl={SAMPLE_HERO_URL}
+        topline="Last Call!"
+        subline="Free Mother's Day Shipping!"
+        offerTopline="Final Hours!"
+        offerHeadline="25% OFF"
+        offerSubhead="sitewide"
+        code="Use code: MOM25"
+        ctaLabel="Shop now"
+        ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "offer-panel-dusty-rose",
+    label: "offer_panel",
+    variant: "background: dusty_rose (default)",
+    height: 480,
+    jsx: (
+      <OfferPanel
+        topline="Final 24 hours"
+        headline="20% OFF"
+        subhead="everything"
+        code="Use code: MOM30"
+        ctaLabel="Shop now"
+        ctaHref="#"
+      />
+    ),
+  },
+  {
+    id: "offer-panel-no-code",
+    label: "offer_panel",
+    variant: "no code chip, no subhead",
+    height: 380,
+    jsx: (
+      <OfferPanel
+        topline="One day only"
+        headline="50% OFF"
+        ctaLabel="Shop the sale"
+        ctaHref="#"
+      />
+    ),
+  },
+  {
     id: "text-block-centered-white",
     label: "text_block_centered",
     variant: "background: white (default)",
@@ -299,6 +393,20 @@ export const BLOCK_PREVIEWS: BlockPreview[] = [
     label: "product_grid_3x2",
     height: 540,
     jsx: <ProductGrid3x2 products={SAMPLE_PRODUCTS} />,
+  },
+  {
+    id: "product-grid-3x1",
+    label: "product_grid_3x1",
+    variant: "offset: 0 (first 3)",
+    height: 280,
+    jsx: <ProductGrid3x1 products={SAMPLE_PRODUCTS} />,
+  },
+  {
+    id: "product-grid-3x1-offset-3",
+    label: "product_grid_3x1",
+    variant: "offset: 3 (next 3)",
+    height: 280,
+    jsx: <ProductGrid3x1 products={SAMPLE_PRODUCTS} offset={3} />,
   },
   {
     id: "product-grid-4x1",

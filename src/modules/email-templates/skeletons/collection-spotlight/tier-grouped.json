@@ -1,15 +1,34 @@
 {
   "id": "collection-spotlight/tier-grouped",
   "name": "Tiered Sections",
-  "campaignTypes": ["collection_spotlight"],
-  "tags": ["multi-tier", "shop-by", "section-labels"],
+  "campaignTypes": [
+    "collection_spotlight",
+    "holiday_seasonal"
+  ],
+  "tags": [
+    "multi-tier",
+    "shop-by",
+    "section-labels"
+  ],
   "description": "Lifestyle hero followed by two labelled mini-grids — e.g. \"FOR HER\" + \"FOR HIM\" or \"UNDER $100\" + \"GIFT-WORTHY\". Best when the spotlight has natural sub-groups the operator wants to surface.",
   "requiredAssets": [
-    { "key": "hero", "label": "Hero lifestyle image", "required": true }
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image",
+      "required": true
+    }
   ],
   "blocks": [
-    { "type": "logo_header", "bind": {} },
-    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "logo_header",
+      "bind": {}
+    },
+    {
+      "type": "announcement_bar",
+      "bind": {
+        "text": "free_top_text"
+      }
+    },
     {
       "type": "hero_lifestyle",
       "bind": {
@@ -19,10 +38,30 @@
         "body": "body_blocks[0].description"
       }
     },
-    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR FAMILY TIME" } },
-    { "type": "product_grid_4x1", "bind": { "products": "products" } },
-    { "type": "section_label", "bind": { "text": "literal:JEWELLERY FOR HER STORY" } },
-    { "type": "product_grid_4x1", "bind": { "products": "products" } },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:JEWELLERY FOR FAMILY TIME"
+      }
+    },
+    {
+      "type": "product_grid_4x1",
+      "bind": {
+        "products": "products"
+      }
+    },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:JEWELLERY FOR HER STORY"
+      }
+    },
+    {
+      "type": "product_grid_4x1",
+      "bind": {
+        "products": "products"
+      }
+    },
     {
       "type": "closing_block",
       "bind": {
@@ -32,6 +71,9 @@
         "ctaHref": "body_blocks[1].cta_href"
       }
     },
-    { "type": "footer", "bind": {} }
+    {
+      "type": "footer",
+      "bind": {}
+    }
   ]
 }

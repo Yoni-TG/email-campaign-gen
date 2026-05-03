@@ -12,6 +12,10 @@ interface ProductGridInternalProps {
   /** When true, hide the product name and price under each cell — used by
    *  asymmetric / magazine-style layouts where the cells are visual only. */
   imageOnly?: boolean;
+  /** Slice start. Skeletons that render multiple grids over the same
+   *  products array (e.g. three labelled rows of 3) pass offset 0 / 3 / 6
+   *  so each instance shows a distinct slice. Defaults to 0. */
+  offset?: number;
   /** Set when the grid is rendered in editable mode — each product image
    *  gets a per-sku data-edit-target so the click-to-edit popover knows
    *  which approvedProducts row to update. */
@@ -31,9 +35,11 @@ export function ProductGridInternal({
   columns,
   rows: rowCount,
   imageOnly = false,
+  offset = 0,
   editable = false,
 }: ProductGridInternalProps) {
-  const visible = products.slice(0, columns * rowCount);
+  const cap = columns * rowCount;
+  const visible = products.slice(offset, offset + cap);
   const rows = chunk(visible, columns);
   const cellWidthPct = 100 / columns;
   const labelFontSize = columns >= 4 ? "12px" : "13px";

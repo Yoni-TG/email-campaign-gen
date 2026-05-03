@@ -1,16 +1,40 @@
 {
   "id": "holiday-seasonal/warm-wish",
   "name": "Warm Holiday Wish",
-  "campaignTypes": ["holiday_seasonal"],
-  "tags": ["warm-hearted", "nicky-fronted", "wide-grid", "gift-worthy"],
+  "campaignTypes": [
+    "holiday_seasonal",
+    "editorial"
+  ],
+  "tags": [
+    "warm-hearted",
+    "nicky-fronted",
+    "wide-grid",
+    "gift-worthy"
+  ],
   "description": "Warm lifestyle hero, a Nicky pull-quote that anchors the seasonal sentiment, and a 3×2 grid of giftable pieces. Best when the message is \"from us, with love\" rather than urgency-driven.",
   "requiredAssets": [
-    { "key": "hero", "label": "Hero lifestyle image", "required": true },
-    { "key": "portrait", "label": "Nicky portrait", "required": false }
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image",
+      "required": true
+    },
+    {
+      "key": "portrait",
+      "label": "Nicky portrait",
+      "required": false
+    }
   ],
   "blocks": [
-    { "type": "logo_header", "bind": {} },
-    { "type": "announcement_bar", "bind": { "text": "free_top_text" } },
+    {
+      "type": "logo_header",
+      "bind": {}
+    },
+    {
+      "type": "announcement_bar",
+      "bind": {
+        "text": "free_top_text"
+      }
+    },
     {
       "type": "hero_lifestyle",
       "bind": {
@@ -28,8 +52,18 @@
         "portraitUrl": "assets.portrait"
       }
     },
-    { "type": "section_label", "bind": { "text": "literal:GIFT-WORTHY" } },
-    { "type": "product_grid_3x2", "bind": { "products": "products" } },
+    {
+      "type": "section_label",
+      "bind": {
+        "text": "literal:GIFT-WORTHY"
+      }
+    },
+    {
+      "type": "product_grid_3x2",
+      "bind": {
+        "products": "products"
+      }
+    },
     {
       "type": "closing_block",
       "bind": {
@@ -39,6 +73,9 @@
         "ctaHref": "body_blocks[1].cta_href"
       }
     },
-    { "type": "footer", "bind": {} }
+    {
+      "type": "footer",
+      "bind": {}
+    }
   ]
 }

@@ -15,39 +15,40 @@ import {
 const MAX_DESCRIPTION_CHARS = 200;
 
 const SYSTEM_PROMPT =
-  `You are a product merchandiser for Theo Grace, a personalized jewelry brand ` +
-  `launched on top of MYKA's expertise. You rank products for marketing ` +
-  `campaigns — email blasts, SMS flows, site promos — using the data already ` +
-  `derived from the product feed.\n\n` +
-  `Theo Grace voice is joyfully characterful and warm-hearted; selections ` +
-  `should reflect that (strong personalization stories, modern family moments, ` +
-  `everyday meaning). Avoid items that feel generic or off-brand for the ` +
-  `active campaign theme.\n\n` +
-  `Ranking criteria — in priority order:\n` +
-  `1. Campaign-theme fit. Does the product match the mainMessage, secondaryMessage, ` +
-  `   and promoDetails? Use name, productType, collection, and occasion to judge.\n` +
-  `2. Lead-value + personality fit. The campaign brief names one lead_value (the ` +
-  `   emotional anchor) and 1+ lead_personalities (the voice). Prefer products ` +
-  `   that carry the same emotional weight — e.g. family_first → name / initial / ` +
-  `   birthstone pieces and family-occasion items; joy → bright, playful, gifting.\n` +
-  `3. Audience fit. Use shopFor + occasion to gauge whether the product resonates ` +
-  `   with the implied recipient of the campaign.\n` +
-  `4. Social proof. Prefer reviewTier = "highly_reviewed", then "well_reviewed", ` +
-  `   and break ties in favor of reviewTier over an equally-fitting but unrated ` +
-  `   product.\n` +
-  `5. Price mix. Among the N selected, ensure at least 2 price tiers are ` +
-  `   represented so readers see a mix of entry-point and hero pieces. Exception: ` +
-  `   stay within one tier when the brief explicitly calls for budget or luxury.\n` +
-  `6. Personalization relevance. When the campaign leans on customization, gifting, ` +
-  `   or meaning, promote products with a non-null personalizationSummary.\n\n` +
-  `Filter rules:\n` +
-  `- Skip anything that feels thematically wrong, even if reviews are strong.\n` +
-  `- SKUs must be distinct. Note: the feed may contain variants of the same ` +
-  `  physical design (e.g. different metals or inscription counts). Prefer one ` +
-  `  representative per design family when you can tell from name + productType.\n` +
-  `- Return exactly the requested count, ordered most relevant first.\n\n` +
-  `Call the rank_products tool with the chosen SKU list. Do not write prose — ` +
-  `only the tool call.`;
+  `You are a product merchandiser for Theo Grace, a personalized jewelry ` +
+  `brand. You rank products for marketing campaigns from the supplied ` +
+  `<candidates> list — an upstream filter has already enforced category and ` +
+  `audience constraints, so every candidate is fair game.\n\n` +
+  `## Hard constraints (MUST satisfy)\n\n` +
+  `- Every returned SKU MUST appear in the supplied <candidates> list. Do ` +
+  `  not invent SKUs or pull from memory.\n` +
+  `- Return EXACTLY the requested count, ordered most relevant first.\n` +
+  `- All SKUs distinct. The feed contains variants of the same physical ` +
+  `  design (different metals, inscription counts). Prefer one ` +
+  `  representative per design family — judge from name + productType.\n\n` +
+  `## Soft preferences (rank order)\n\n` +
+  `1. Theme fit. Does the product match the brief's <main_message>, ` +
+  `   <secondary_message>, and <promo_details>? Use name, productType, ` +
+  `   collection, and occasion to judge.\n` +
+  `2. Lead-value + personality fit. <lead_value> is the emotional anchor; ` +
+  `   <lead_personalities> are the voice. Prefer products that carry the ` +
+  `   same emotional weight — family_first → name / initial / birthstone ` +
+  `   pieces and family-occasion items; joy → bright, playful, gifting.\n` +
+  `3. Social proof. highly_reviewed > well_reviewed > unrated, all else ` +
+  `   equal — break ties on reviewTier.\n` +
+  `4. Price spread. Among the N selected, mix at least 2 price tiers so ` +
+  `   readers see entry-point and hero pieces. Exception: stay within one ` +
+  `   tier when the brief explicitly calls for budget or luxury.\n` +
+  `5. Personalization relevance. When the campaign leans on customization ` +
+  `   or gifting, prefer products with a non-null personalizationSummary.\n\n` +
+  `## Brand voice\n\n` +
+  `Theo Grace voice is joyfully characterful and warm-hearted (modern ` +
+  `family moments, everyday meaning, personalization stories). Selections ` +
+  `should reflect that. Skip items that feel generic or off-brand even if ` +
+  `they otherwise match — voice undermines product fit.\n\n` +
+  `## Output\n\n` +
+  `Call the rank_products tool with the chosen SKU list. Do not write ` +
+  `prose — only the tool call.`;
 
 export function buildRerankSystemPrompt(): string {
   return SYSTEM_PROMPT;
@@ -100,30 +101,49 @@ export function buildRerankUserPrompt(
     )
     .join("; ");
 
-  const lines: string[] = [
-    `Campaign brief`,
-    `- Campaign type: ${CAMPAIGN_TYPE_LABELS[campaignType]}`,
-    `- Lead value: ${LEAD_VALUE_LABELS[seed.leadValue]} — ${LEAD_VALUE_DESCRIPTIONS[seed.leadValue]}`,
-    `- Lead personalities: ${personalityLine}`,
-    `- Main message: ${seed.mainMessage}`,
+  // XML-tagged structure: hard constraints (audience, categories) lead, then
+  // theme fields, then voice. The Anthropic models we use weight earlier
+  // and clearly delimited content more heavily; the SMS-overshoot retry
+  // pattern in copy-generation.ts proved this layout is robust under
+  // tool-use forcing.
+  const briefLines: string[] = [
+    `<campaign_type>${CAMPAIGN_TYPE_LABELS[campaignType]}</campaign_type>`,
+    `<categories>${seed.targetCategories.join(", ")}</categories>`,
   ];
+
+  if (seed.targetAudience && seed.targetAudience.length > 0) {
+    briefLines.push(`<audience>${seed.targetAudience.join(", ")}</audience>`);
+  }
+
+  briefLines.push(
+    `<lead_value>${LEAD_VALUE_LABELS[seed.leadValue]} — ${LEAD_VALUE_DESCRIPTIONS[seed.leadValue]}</lead_value>`,
+    `<lead_personalities>${personalityLine}</lead_personalities>`,
+    `<main_message>${seed.mainMessage}</main_message>`,
+  );
+
   if (seed.secondaryMessage) {
-    lines.push(`- Secondary message: ${seed.secondaryMessage}`);
+    briefLines.push(
+      `<secondary_message>${seed.secondaryMessage}</secondary_message>`,
+    );
   }
   if (seed.promoDetails) {
-    lines.push(`- Promo details: ${seed.promoDetails}`);
+    briefLines.push(`<promo_details>${seed.promoDetails}</promo_details>`);
   }
-  lines.push(`- Target categories: ${seed.targetCategories.join(", ")}`);
   if (seed.additionalNotes) {
-    lines.push(`- Notes: ${seed.additionalNotes}`);
+    briefLines.push(`<notes>${seed.additionalNotes}</notes>`);
   }
 
   const summaries = candidates.map(toProductSummary);
 
   return [
-    lines.join("\n"),
+    `<brief>`,
+    ...briefLines.map((l) => `  ${l}`),
+    `</brief>`,
     ``,
-    `Return the ${count} most relevant products, ordered by relevance. Candidates:`,
+    `<task>Pick the ${count} best products from <candidates> for this brief, ordered most relevant first.</task>`,
+    ``,
+    `<candidates>`,
     JSON.stringify(summaries, null, 2),
+    `</candidates>`,
   ].join("\n");
 }

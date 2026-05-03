@@ -98,6 +98,41 @@ export const LEAD_VALUE_DESCRIPTIONS: Record<LeadValue, string> = {
   joy: "Playful, celebratory energy. Gifting delight.",
 };
 
+// ─── Audience (drawn from the feed's `shop_for` taxonomy) ───
+//
+// The eight values surfaced as audience chips on Step 1 of the wizard. We
+// curated this list against the real fixture distribution: the 8 values
+// here cover ≥99% of products that have any `shop_for` tag. Long-tail
+// values ("Myself", "Girlfriend", "Everyday", …) had <10 products each
+// and would only add noise to the chip UI.
+//
+// The filter at `product-filter.ts` does an OR-match across the chosen
+// audience set against `product.shop_for`. Multi-select handles related
+// pools (e.g. "Mother + Women" for a Mom's Day campaign that wants the
+// broader women's pool too).
+export const SHOP_FOR_AUDIENCES = [
+  "Women",
+  "Men",
+  "Mother",
+  "Father",
+  "Grandmother",
+  "Kids & Teens",
+  "Couple",
+  "Friends",
+] as const;
+export type ShopForAudience = (typeof SHOP_FOR_AUDIENCES)[number];
+
+export const SHOP_FOR_AUDIENCE_DESCRIPTIONS: Record<ShopForAudience, string> = {
+  Women: "Worn-by-her — broad women's pool.",
+  Men: "Strict men's pool. Combine for Father's-Day-style picks.",
+  Mother: "Mom-coded gifts. Add 'Women' for a deeper pool.",
+  Father: "Dad-coded gifts. Add 'Men' for a deeper pool.",
+  Grandmother: "Grandma gifts. Add 'Women' for a deeper pool.",
+  "Kids & Teens": "Kids and teens. Includes Baby-tagged items.",
+  Couple: "Pieces for two — anniversaries, his + hers.",
+  Friends: "Friendship gifts.",
+};
+
 // Which personalities the campaign emphasizes (brand-guide §4).
 // A single brief can mix more than one — the wireframe agent uses them to
 // modulate layout mood (see wireframe-guide §3).
@@ -146,6 +181,11 @@ export interface CreativeSeed {
   // brand-guide §8.6. Optional for backward compat with campaigns created
   // before this field existed; undefined is treated as "us".
   market?: Market;
+  // Operator-selected audience values that the product picker filters
+  // against (OR-match against `shop_for`). Empty / undefined = no audience
+  // filter (audience-agnostic editorials, top-sellers, etc.). Optional for
+  // backward compat with campaigns created before this field existed.
+  targetAudience?: ShopForAudience[];
 }
 
 // ─── Generated Copy ───
@@ -330,6 +370,14 @@ export interface CampaignBlueprint {
   body_blocks: BodyBlock[];
   sms: string | null;
   nicky_quote: NickyQuote | null;
+  /**
+   * Operator-supplied promo line carried verbatim from the brief
+   * (`seed.promoDetails`). Skeletons that render a code chip / promo
+   * pill bind to `promo_details` directly so the chip text mirrors what
+   * the operator typed (e.g. "Use code: MOM30") without a round-trip
+   * through generated copy.
+   */
+  promo_details: string | null;
   products: Array<{
     sku: string;
     title: string;

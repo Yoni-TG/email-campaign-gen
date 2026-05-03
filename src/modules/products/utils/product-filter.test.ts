@@ -141,4 +141,81 @@ describe("filterProducts", () => {
     });
     expect(result).toEqual([]);
   });
+
+  describe("audience filter", () => {
+    const MENS = makeProduct({
+      sku: "NEC-MEN",
+      productType: ["Necklace"],
+      shopFor: ["Men"],
+    });
+    const WOMENS = makeProduct({
+      sku: "NEC-WOMEN",
+      productType: ["Necklace"],
+      shopFor: ["Women", "Mother"],
+    });
+    const UNISEX = makeProduct({
+      sku: "NEC-UNI",
+      productType: ["Necklace"],
+      shopFor: ["Men", "Women"],
+    });
+    const UNTAGGED = makeProduct({
+      sku: "NEC-UNTAGGED",
+      productType: ["Necklace"],
+      shopFor: [],
+    });
+
+    it("keeps products with any audience overlap", () => {
+      const result = filterProducts([MENS, WOMENS, UNISEX], {
+        categories: ["Necklace"],
+        campaignType: "editorial",
+        audience: ["Men"],
+      });
+      expect(result.map((p) => p.sku).sort()).toEqual([
+        "NEC-MEN",
+        "NEC-UNI",
+      ]);
+    });
+
+    it("OR-matches across multiple audience values", () => {
+      const result = filterProducts([MENS, WOMENS, UNISEX], {
+        categories: ["Necklace"],
+        campaignType: "editorial",
+        audience: ["Men", "Mother"],
+      });
+      expect(result.map((p) => p.sku).sort()).toEqual([
+        "NEC-MEN",
+        "NEC-UNI",
+        "NEC-WOMEN",
+      ]);
+    });
+
+    it("drops products with empty shop_for when audience is set", () => {
+      const result = filterProducts([MENS, UNTAGGED], {
+        categories: ["Necklace"],
+        campaignType: "editorial",
+        audience: ["Men"],
+      });
+      expect(result.map((p) => p.sku)).toEqual(["NEC-MEN"]);
+    });
+
+    it("keeps products with empty shop_for when audience is unset", () => {
+      const result = filterProducts([MENS, UNTAGGED], {
+        categories: ["Necklace"],
+        campaignType: "editorial",
+      });
+      expect(result.map((p) => p.sku).sort()).toEqual([
+        "NEC-MEN",
+        "NEC-UNTAGGED",
+      ]);
+    });
+
+    it("treats empty audience array as no filter", () => {
+      const result = filterProducts([MENS, WOMENS, UNTAGGED], {
+        categories: ["Necklace"],
+        campaignType: "editorial",
+        audience: [],
+      });
+      expect(result).toHaveLength(3);
+    });
+  });
 });
