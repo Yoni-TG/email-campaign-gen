@@ -28,7 +28,7 @@ export function HeroFramed({
       data-edit-target={editTargets?.background}
       style={{
         backgroundColor: bgColor(background),
-        padding: "32px 36px 48px 36px",
+        padding: "24px 24px 36px 24px",
         textAlign: "center",
       }}
     >
@@ -40,9 +40,10 @@ export function HeroFramed({
         style={{
           display: "block",
           width: "100%",
-          maxWidth: "568px",
+          maxWidth: "600px",
           height: "auto",
-          margin: "0 auto 24px auto",
+          margin: "0 auto",
+          marginBottom: "36px",
           backgroundColor: COLORS.paleBlue,
         }}
       />

@@ -37,6 +37,7 @@ export function buildBlueprint({
     body_blocks: approvedCopy.body_blocks,
     sms: approvedCopy.sms,
     nicky_quote: approvedCopy.nicky_quote,
+    promo_details: seed.promoDetails ?? null,
     products: approvedProducts.map((p) => ({
       sku: p.sku,
       title: p.name,

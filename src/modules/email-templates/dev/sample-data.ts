@@ -23,6 +23,9 @@ export const SAMPLE_PRODUCTS: BlueprintProduct[] = [
   { sku: "TG-INIT-01", title: "Initial Necklace", price: "$84", image_url: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=300", link: "#" },
   { sku: "TG-PEARL-01", title: "Pearl Studs", price: "$68", image_url: "https://images.unsplash.com/photo-1535632066274-36ee5b30b859?w=300", link: "#" },
   { sku: "TG-CHARM-01", title: "Charm Anklet", price: "$58", image_url: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300", link: "#" },
+  { sku: "TG-LETTER-01", title: "Letter Necklace", price: "$92", image_url: "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?w=300", link: "#" },
+  { sku: "TG-CROSS-01", title: "Cross Pendant", price: "$72", image_url: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=300", link: "#" },
+  { sku: "TG-INFINITY-01", title: "Infinity Ring", price: "$64", image_url: "https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?w=300", link: "#" },
 ];
 
 export function sampleBlueprint(withAssets: boolean): CampaignBlueprint {
@@ -32,6 +35,7 @@ export function sampleBlueprint(withAssets: boolean): CampaignBlueprint {
     lead_personalities: ["fun", "warm_hearted"],
     market: "us",
     free_top_text: "FREE DELIVERY",
+    promo_details: "Use code: MOM30",
     subject_variant: {
       subject: "Say it with meaning",
       preheader: "From Theo Grace, with love.",
@@ -44,10 +48,15 @@ export function sampleBlueprint(withAssets: boolean): CampaignBlueprint {
         cta: "Shop the edit",
       },
       {
-        title: "Every piece, a story",
-        description:
-          "Layered for the school run, dressed up for the occasion. Made to be worn, made to be loved.",
-        cta: "Find your piece",
+        // body_blocks[1] now reads as offer-panel-shaped: short italic
+        // intro (rendered at 36px in offer_panel) + huge offer numerals
+        // (118px) + brief CTA. Other skeletons that bind body_blocks[1]
+        // as paragraph copy will render briefly in the demo — that's a
+        // sample-data tradeoff, not a runtime issue. Production copy
+        // generation produces body_block shapes per the chosen skeleton.
+        title: "Final 24 hours",
+        description: "20% OFF",
+        cta: "Shop now",
       },
       {
         title: "Almost gone",

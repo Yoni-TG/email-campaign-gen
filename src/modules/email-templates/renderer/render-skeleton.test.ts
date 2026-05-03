@@ -11,6 +11,7 @@ function makeBlueprint(overrides: Partial<RendererBlueprint> = {}): RendererBlue
     lead_personalities: ["fun"],
     market: "us",
     free_top_text: "FREE DELIVERY",
+    promo_details: "Use code: TEST20",
     subject_variant: {
       subject: "Say it with meaning",
       preheader: "Pieces that mark a memory",
@@ -105,6 +106,25 @@ const KITCHEN_SINK: SkeletonManifest = {
         subLabel: "literal:YOUR MOMENT TO SHINE",
         headline: "body_blocks[0].title",
         tiles: [{ label: "$" }, { label: "?" }, { label: "%" }],
+      },
+    },
+    {
+      type: "hero_titled_image",
+      bind: {
+        background: "literal:rose_pink",
+        headline: "body_blocks[0].title",
+        imageUrl: "assets.hero",
+      },
+    },
+    {
+      type: "offer_panel",
+      bind: {
+        background: "literal:dusty_rose",
+        topline: "literal:Last Chance",
+        headline: "body_blocks[1].title",
+        subhead: "literal:everything",
+        code: "promo_details",
+        ctaLabel: "literal:Shop now",
       },
     },
     {

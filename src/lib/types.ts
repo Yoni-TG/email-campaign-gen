@@ -370,6 +370,14 @@ export interface CampaignBlueprint {
   body_blocks: BodyBlock[];
   sms: string | null;
   nicky_quote: NickyQuote | null;
+  /**
+   * Operator-supplied promo line carried verbatim from the brief
+   * (`seed.promoDetails`). Skeletons that render a code chip / promo
+   * pill bind to `promo_details` directly so the chip text mirrors what
+   * the operator typed (e.g. "Use code: MOM30") without a round-trip
+   * through generated copy.
+   */
+  promo_details: string | null;
   products: Array<{
     sku: string;
     title: string;

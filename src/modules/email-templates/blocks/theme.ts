@@ -6,6 +6,13 @@ export const COLORS = {
   babyBlue: "#BEDFF7",
   paleBlue: "#E6F0F8",
   midBlue: "#76A4C4",
+  // Mother's-Day rose family. rosePink is the soft chrome/header tone;
+  // dustyRose is the deeper "offer panel" tone. Added 2026-05-03 from a
+  // real Mother's-Day-Last-Call campaign — both surface as background
+  // tokens so any block (and the fine-tune editor's colour picker) can
+  // use them without per-block code changes.
+  rosePink: "#EDD9D5",
+  dustyRose: "#DAB4AB",
   black: "#1E1E1E",
   white: "#FFFFFF",
   // Brand-aligned button accents — match the app's plum brand and the
@@ -29,6 +36,8 @@ export const BLOCK_BACKGROUNDS = [
   "baby_blue",
   "pale_blue",
   "mid_blue",
+  "rose_pink",
+  "dusty_rose",
 ] as const;
 
 export type BlockBackground = (typeof BLOCK_BACKGROUNDS)[number];
@@ -43,6 +52,10 @@ export function bgColor(background: BlockBackground): string {
       return COLORS.paleBlue;
     case "mid_blue":
       return COLORS.midBlue;
+    case "rose_pink":
+      return COLORS.rosePink;
+    case "dusty_rose":
+      return COLORS.dustyRose;
   }
 }
 

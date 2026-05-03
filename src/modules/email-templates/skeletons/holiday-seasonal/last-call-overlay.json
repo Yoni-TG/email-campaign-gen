@@ -1,0 +1,70 @@
+{
+  "id": "holiday-seasonal/last-call-overlay",
+  "name": "Last Call · Title Overlay",
+  "campaignTypes": ["holiday_seasonal", "sale_promo"],
+  "tags": ["last-call", "offer-panel", "rose-palette", "title-overlay", "shipping-deadline", "warm", "gift-led"],
+  "description": "Sister of last-call-offer with the headline OVERLAID on the lifestyle hero (lower-center, white serif) instead of stacked above it. Baby-blue logo bar, an announcement strip carries the shipping/deadline urgency, and the offer panel sits flat on the same rose_pink as the surround for a single-tone lower half. Best when the photo can carry an emotional headline directly (mother + child portraits, intimate gift moments) without competing with a separate text panel.",
+  "requiredAssets": [
+    {
+      "key": "hero",
+      "label": "Hero lifestyle image (face/torso framed; headline overlays the lower third)",
+      "required": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo_header",
+      "bind": {
+        "background": "literal:baby_blue"
+      }
+    },
+    {
+      "type": "announcement_bar",
+      "bind": {
+        "text": "free_top_text",
+        "background": "literal:baby_blue"
+      }
+    },
+    {
+      "type": "hero_titled_image",
+      "bind": {
+        "background": "literal:rose_pink",
+        "titlePosition": "literal:overlay-bottom",
+        "headline": "body_blocks[0].title",
+        "imageUrl": "assets.hero"
+      }
+    },
+    {
+      "type": "offer_panel",
+      "bind": {
+        "background": "literal:rose_pink",
+        "topline": "body_blocks[1].title",
+        "headline": "body_blocks[1].description",
+        "subhead": "literal:everything",
+        "code": "promo_details",
+        "ctaLabel": "body_blocks[1].cta",
+        "ctaHref": "body_blocks[1].cta_href"
+      }
+    },
+    {
+      "type": "text_block_centered",
+      "bind": {
+        "background": "literal:rose_pink",
+        "headline": "body_blocks[2].title",
+        "body": "body_blocks[2].description",
+        "ctaLabel": "body_blocks[2].cta",
+        "ctaHref": "body_blocks[2].cta_href"
+      }
+    },
+    {
+      "type": "product_grid_2x2",
+      "bind": {
+        "products": "products"
+      }
+    },
+    {
+      "type": "footer",
+      "bind": {}
+    }
+  ]
+}

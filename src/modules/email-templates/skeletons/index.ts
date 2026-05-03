@@ -12,6 +12,7 @@ import productLaunchGridForward from "./product-launch/grid-forward.json";
 import salePromoMysteryTiles from "./sale-promo/mystery-tiles.json";
 import salePromoTypographyBanner from "./sale-promo/typography-banner.json";
 import salePromoPhotoOverlay from "./sale-promo/photo-overlay-offer.json";
+import salePromoBigMothersDayOverlay from "./sale-promo/big-mothers-day-overlay.json";
 
 import editorialNarrativeLed from "./editorial/narrative-led.json";
 import editorialNickyLed from "./editorial/nicky-led.json";
@@ -24,6 +25,8 @@ import collectionQuoteLed from "./collection-spotlight/quote-led.json";
 import holidayGiftGuide from "./holiday-seasonal/gift-guide.json";
 import holidayUrgencyBanner from "./holiday-seasonal/urgency-banner.json";
 import holidayWarmWish from "./holiday-seasonal/warm-wish.json";
+import holidayLastCallOffer from "./holiday-seasonal/last-call-offer.json";
+import holidayLastCallOverlay from "./holiday-seasonal/last-call-overlay.json";
 
 const ALL_SKELETONS: readonly SkeletonManifest[] = [
   productLaunchHeroStoryGrid,
@@ -32,6 +35,7 @@ const ALL_SKELETONS: readonly SkeletonManifest[] = [
   salePromoMysteryTiles,
   salePromoTypographyBanner,
   salePromoPhotoOverlay,
+  salePromoBigMothersDayOverlay,
   editorialNarrativeLed,
   editorialNickyLed,
   editorialGalleryEdit,
@@ -41,6 +45,8 @@ const ALL_SKELETONS: readonly SkeletonManifest[] = [
   holidayGiftGuide,
   holidayUrgencyBanner,
   holidayWarmWish,
+  holidayLastCallOffer,
+  holidayLastCallOverlay,
 ] as SkeletonManifest[];
 
 export function loadAllSkeletons(): SkeletonManifest[] {

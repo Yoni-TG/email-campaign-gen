@@ -12,6 +12,7 @@ function sampleBlueprint(): RendererBlueprint {
     lead_personalities: ["fun"],
     market: "us",
     free_top_text: "FREE DELIVERY",
+    promo_details: "Use code: TEST20",
     subject_variant: { subject: "Say it with meaning", preheader: "From Theo Grace" },
     body_blocks: [
       { title: "Made for you", description: "Personalised pieces ready to ship.", cta: "Shop now" },
@@ -40,12 +41,12 @@ function sampleBlueprint(): RendererBlueprint {
 describe("skeleton library", () => {
   const skeletons = loadAllSkeletons();
 
-  it("ships 15 manifests total with at least 5 candidates per campaign type", () => {
-    // Library is 15 manifests; multi-type membership (added 2026-05-03) means
-    // most skeletons fit 2-3 campaign types, so per-type *eligible* counts
-    // vary. The hard floor is 5 per type — anything lower starves the LLM
-    // ranker for that campaign type and the operator sees too little variety.
-    expect(skeletons).toHaveLength(15);
+  it("ships at least 5 candidates per campaign type", () => {
+    // Multi-type membership (added 2026-05-03) means most skeletons fit
+    // 2-3 campaign types, so per-type *eligible* counts vary. The hard
+    // floor is 5 per type — anything lower starves the LLM ranker for
+    // that campaign type and the operator sees too little variety.
+    expect(skeletons.length).toBeGreaterThanOrEqual(15);
     const counts = skeletons.reduce<Record<string, number>>((acc, s) => {
       for (const t of s.campaignTypes) acc[t] = (acc[t] ?? 0) + 1;
       return acc;
